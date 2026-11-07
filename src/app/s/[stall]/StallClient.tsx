@@ -95,9 +95,14 @@ export function StallClient({ stall, initial = null }: { stall: string; initial?
     setAnnounce(`Copy ${lowTime.serial}: under 30 seconds left to pay.`);
   }
 
-  // The buyer's own PAID: a short buzz on phones that support it.
+  // The buyer's own PAID: the copy comes to the middle of the screen, where the stamp lands (they are
+  // usually coming back from PayPal's window, and the copy may sit under the comment bar), and a short
+  // buzz on phones that support it.
   useEffect(() => {
-    if (celebrate !== null && typeof navigator !== "undefined" && "vibrate" in navigator) navigator.vibrate([24, 60, 48]);
+    if (celebrate === null) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    document.querySelector(".copy[data-celebrate]")?.scrollIntoView({ block: "center", behavior: reduce ? "auto" : "smooth" });
+    if ("vibrate" in navigator) navigator.vibrate([24, 60, 48]);
   }, [celebrate]);
 
   async function send(text: string, via: "typed" | "tap", what: string): Promise<boolean> {
