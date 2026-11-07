@@ -12,7 +12,8 @@
     "eval": "tsx eval/run.ts",
     "sandbox:invoice": "tsx scripts/sandbox-invoice.ts",
     "db:migrate": "tsx scripts/migrate.ts",
-    "db:seed": "tsx scripts/seed.ts"
+    "db:seed": "tsx scripts/seed.ts",
+    "e2e:service": "tsx scripts/e2e-service.ts"
   },
   "dependencies": {
     "next": "16.4.5",
