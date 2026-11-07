@@ -94,3 +94,20 @@ The rules require a public repo with an open-source license at submission. Pendi
 ## D-010 · Solo scope cuts accepted · 2026-11-07 · accepted · supersedes D-006
 **Decision:** D-006 as written. Chat ingest is Twitch plus a labelled real-time replay. Not built: TikTok, Facebook Live and Instagram ingest; label OCR; multi-seller accounts; Venmo payouts. YouTube Live remains deferred.
 **Evidence:** the user chose "Accept the cuts" on 2026-11-07.
+
+## D-011 · Render free plan, kept warm; database outside Render · 2026-11-07 · accepted · supersedes D-008
+**Context:** creating the Blueprint with a paid plan showed "Payment Information Required". Render needs a card on file for paid instances even with the $50 credit. The user doesn't want to add a card. Render's free-tier docs (render.com/docs/free, read 2026-11-07) say:
+- a free web service sleeps after 15 min without inbound HTTP or WebSocket traffic and takes ~1 min to wake;
+- each workspace gets 750 free instance hours a month (one service running all month fits);
+- Render may restart a free service at any time;
+- the filesystem is ephemeral;
+- free Render Postgres expires 30 days after creation.
+**Decision:**
+- `plan: free` for the web service.
+- From M1, the app keeps itself awake with a periodic request to its own public URL (`RENDER_EXTERNAL_URL`), and the open seller board sends a heartbeat.
+- The database is an external free Postgres with no expiry, chosen at the start of M1. Render Postgres is not used.
+- Hold timers are stored as deadlines in the database and swept on every start, so a restart or wake-up passes overdue holds immediately rather than losing them.
+**Alternatives:** a paid instance (adding a card; the credit would cover about two months), declined by the user.
+**Consequences:**
+- A judge visiting a sleeping service waits ~1 min; the keep-warm loop exists to prevent that through 2026-12-21.
+- If Render suspends free services (bandwidth exhausted, or "uncommonly high volume" of outbound traffic), the demo is down until the next month or a paid plan. Bandwidth use is to be watched on the billing page.

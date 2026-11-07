@@ -5,9 +5,10 @@ services:
   - type: web
     name: hawker
     runtime: node
-    # Paid plan, funded by the PayPal AI Hackathon credit. `free` sleeps when idle,
-    # which would drop the chat socket and the hold timers.
-    plan: 0.5c-512mb
+    # Free plan (D-011): a paid plan needs a card on file, even with the hackathon credit.
+    # Free web services sleep after 15 min without inbound HTTP traffic (render.com/docs/free),
+    # so the app keeps itself warm from M1, and all state lives in an external database.
+    plan: free
     buildCommand: npm ci && npm run build
     startCommand: npm start
     healthCheckPath: /api/health
