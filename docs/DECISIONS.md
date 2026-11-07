@@ -111,3 +111,37 @@ The rules require a public repo with an open-source license at submission. Pendi
 **Consequences:**
 - A judge visiting a sleeping service waits ~1 min; the keep-warm loop exists to prevent that through 2026-12-21.
 - If Render suspends free services (bandwidth exhausted, or "uncommonly high volume" of outbound traffic), the demo is down until the next month or a paid plan. Bandwidth use is to be watched on the billing page.
+
+## D-012 · Visual world: Invoice Pad, with the stamp as the signature move · 2026-11-07 · accepted
+**Context:** `impeccable shape` direction round. The roll assigned Pools Coupon; the hand also held Invoice Pad (Impeccable's pick), Gate Board (competitive challenger), five declined challengers and the category standard. Quality bar: the user's Warrant (live site) and Enoch208's live sites (Clasp, Morrow, Rectify, Selo, Vow, Lens), each with a hero that *is* the mechanism, a refusal section with real codes, and live proof.
+**Decision:**
+- Invoice Pad: Lagos market sales-invoice booklets (numbered duplicate copies, carbon-blue print, red serials, rubber stamps).
+- Every hold is a numbered copy. PAID and PASSED → @next are stamps; a PASSED copy tears off to reveal the next buyer's copy.
+- Surfaces:
+  - landing `/` (Persuade) with a live invoice-pad instrument and an "Every way out, refused" section;
+  - desk `/desk` (Operate);
+  - stall page (Operate, phone-first).
+- Imagery is code-drawn. Higgsfield plates only if truly needed, sparingly: the user has limited free credits.
+**Alternatives:**
+- Pools Coupon: betting connotation next to PayPal's gambling restrictions.
+- Gate Board: generic airport look, not Lagos.
+- Category standard: doesn't stand out.
+**Consequences:** anti-goals are binding: no cream/parchment ground, no handwriting fonts, no ruled-ledger tables, no decorative paper texture. The brief is in internal/design/BRIEF-shape.md; the direction contract is in the surface brief.
+**Evidence:** user choice 2026-11-07; seed reference seed:a46554d5d343f377.
+
+## D-013 · Buyers claim on a Hawker stall page; Twitch becomes optional · 2026-11-07 · accepted · supersedes the ingest part of D-010
+**Context:**
+- The user has no Twitch account.
+- The persona's seller streams on Instagram or TikTok, which can't be read without platform approval.
+- A Twitch reply bot needs two accounts and a token setup.
+- Judges couldn't take part in a Twitch flow.
+**Decision:**
+- The seller pins one stall link on any live stream.
+- On the stall page (phone-first) the buyer sees the on-screen item and live stock, types a comment as they normally would, and their numbered copy appears immediately with the countdown and Pay with PayPal (shareable invoice link).
+- The stall chat is the primary, authoritative chat source.
+- Twitch anonymous read (E-006) stays an optional second source if time allows, and the scripted replay is dropped. Judges can create real holds themselves.
+**Alternatives:** Twitch chat + reply bot, rejected for the reasons above.
+**Consequences:**
+- M1's exit becomes "one real comment typed on the stall".
+- Buyer identity is a per-device session plus a chosen handle.
+- D-010's other cuts stand: no TikTok/FB/IG ingest, no OCR, no multi-seller, no Venmo payouts.

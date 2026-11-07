@@ -6,7 +6,7 @@ Deadline source: https://paypalaihackathon.devpost.com/rules §1 ("Thursday Nov 
 | # | Milestone | When | Exit criteria (a stranger could check these) | Due | Status |
 |---|---|---|---|---|---|
 | M0 | Rigged | 10% | D-001 recorded; riskiest dependencies spiked with evidence; hello-world deployed to production on Render, `/api/health` reachable from a phone on cellular | 2026-11-07 22:06 UTC | **done** 2026-11-07 09:47 UTC (E-008, E-009) |
-| M1 | Walking skeleton | 40% | On the deployed app, one real Twitch chat comment travels every layer: parsed (fast path or a real model call) → hold persisted in the database → shareable PayPal sandbox invoice created → hold shown on the board, live | 2026-11-09 13:24 UTC | |
+| M1 | Walking skeleton | 40% | On the deployed app, one real comment typed on the stall page travels every layer: parsed (fast path or a real model call) → hold persisted in the database → shareable PayPal sandbox invoice created → the buyer's copy on the stall and the hold on the desk, both live | 2026-11-09 13:24 UTC | |
 | M2 | Core claim | 65% | The thesis end to end with real data: one hold ends `Paid` (buyer pays, status re-read from PayPal) and one ends `Passed` (timer expires → invoice cancelled → next buyer holds with a new invoice), both visible in the hold ledger; seller board in AG Studio | 2026-11-10 22:09 UTC | |
 | M3 | Proof surface | freeze | README proof section; parsing eval committed and re-runnable; every claim has a verified row; demo video recorded; `benchmark` run | 2026-11-11 17:48 UTC | |
 | M4 | Submitted | deadline − buffer | Devpost form submitted with the verbatim thesis; YouTube video public, < 3 min; repo public with license in About; preflight passed from a phone on cellular | 2026-11-12 06:54 UTC | |
@@ -20,7 +20,8 @@ Deadline source: https://paypalaihackathon.devpost.com/rules §1 ("Thursday Nov 
 - [x] Hello-world on Render (E-008, E-009), done when `curl https://hawker-8q2t.onrender.com/api/health` returns `ok: true` with the deployed commit SHA and it loads from a phone on cellular
 
 ### M1 · Walking skeleton
-- [ ] Placeholder: break down at the start of M1. First item: run `impeccable shape` for the seller board before writing UI.
+- [x] Design direction set: Invoice Pad (D-012); stall page as the buyer surface (D-013)
+- [ ] Placeholder: remaining M1 items are broken down once the database is chosen
 
 ### M2 · Core claim
 - [ ] Placeholder
@@ -31,6 +32,7 @@ Deadline source: https://paypalaihackathon.devpost.com/rules §1 ("Thursday Nov 
 ## Cut list
 Things deliberately not being built. Each entry links the DECISIONS entry that cut it.
 - TikTok / Facebook Live / Instagram comment ingest. These need platform approval; stated as a README limit. D-010
+- Scripted chat replay. Not needed now that judges can type on the stall. D-013
 - Photo-of-shipping-label OCR. D-010
 - Multi-seller accounts. D-010
 - Venmo payouts. Not supported in the sandbox (E-004). D-010

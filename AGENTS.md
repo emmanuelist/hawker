@@ -55,9 +55,9 @@ npm view <pkg> version ; npm view <pkg> peerDependencies
 ## Rules
 
 1. **No mocks, no fake data, no demo mode.** Every rendered value comes from a real source.
-   Authoritative stores: PayPal is authoritative for payment state; the chat feed (Twitch, or a
-   recorded session replayed in real time and labelled as a replay) is authoritative for what
-   buyers said and in what order; the database is authoritative for holds and the waitlist.
+   Authoritative stores: PayPal is authoritative for payment state; the stall chat (D-013), and
+   Twitch only if added, is authoritative for what buyers said and in what order; the database is
+   authoritative for holds and the waitlist.
 2. **Verify every SDK and API call before writing it**: installed types for packages
    (`node_modules/<pkg>/**/*.d.ts`), the provider's current API reference for HTTP APIs, and
    `docs/CONTEXT.md` for calls already verified. If a call cannot be verified, stop and say so.
@@ -87,8 +87,10 @@ npm view <pkg> version ; npm view <pkg> peerDependencies
 
 ## Frontend conventions
 
-- Design direction is **not yet set**. Run `impeccable shape` before building the first real UI
-  (the seller board, M1). Until then the hello-world page carries no design system and no product claims.
+- Design direction is **Invoice Pad** (D-012). The direction contract lives in the surface brief
+  (`impeccable surface-brief read src/app/desk/page.tsx`); PRODUCT.md holds product truth. Anti-goals
+  are binding: no cream/parchment ground, no handwriting fonts, no ruled-ledger tables, no decorative
+  paper texture, no generic SaaS cards. Signature move: the stamp (PAID / PASSED → @next).
 - Headless behaviour (Radix, React Aria, Base UI) is fine; styled kits (MUI, Chakra, Ant, daisyUI) are not.
 - Fonts through `next/font` only. Never add `<link>` tags to font CDNs.
 - Every animation checks `prefers-reduced-motion`; timelines are killed on cleanup.
