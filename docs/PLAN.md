@@ -33,8 +33,11 @@ Deadline source: https://paypalaihackathon.devpost.com/rules §1 ("Thursday Nov 
 ### M2 · Core claim
 - [x] Done early in the design pass (D-016, E-022, E-023): landing `/` with the live pad; the PASSED tear-off on the desk; Passed → next buyer with a new invoice verified on the deployed app
 - [x] Independent review + fix pass (D-017, E-024, E-025): earlier-on-this-live claims, release / leave the line, passed notice with Claim again, labelled landing replay, server-rendered first views, measured fixes (320 px, targets, h1, focus, LCP 6.4 → 2.8 s)
-- [ ] The remaining M2 items wait for the user's confirmation (proposed at the M1 close): hold ledger in AG Studio, last-second payment through the UI, the refusals panel
-- [ ] Before the film (M3): several real sandbox payments so Paid isn't 1 against 12+ Passed (D-017)
+- [ ] **Hold ledger in AG Studio** (`/ledger`, confirmed 2026-11-07): an AG Studio dashboard over the stall's real holds, in the Invoice Pad theme, with custom widgets (the copy and its stamp; Paid vs Passed; who still owes now) and a Studio agent wired to Hawker's own model client (Groq → Gemini). Done when the deployed `/ledger` shows every ended hold as Paid with its PayPal transaction or Passed → next, the custom widgets and theme render, and the agent answers "who still owes right now?" from live data. Evidence: screenshots + the agent's transcript.
+- [ ] **Last-second payment through the UI (B1 in the browser)**: a buyer pays in the final seconds of a hold. Done when a deployed run ends PAID (not Passed) with the B1 path visible, or, if payment lands after the cancel, PayPal refuses it and the copy ends Passed; never both. Evidence: timings, invoice reads, desk capture.
+- [ ] **Every way out, refused** (refusals panel): a judge can try each forbidden ending against the real system and see the real refusal: PayPal won't cancel a paid invoice (`CANNOT_CANCEL_PAID_INVOICE`) or cancel twice (`INVOICE_CANCELED_ALREADY`); the database won't end a hold twice, move Paid → Passed, or hold without an invoice (trigger and constraint names); a passed invoice can't be paid. Probes run in rolled-back transactions and are rate-limited. Done when each probe runs on click on the deployed app and shows its live code and time. Evidence: captures.
+- [ ] Several real sandbox payments, so Paid isn't 1 against 12+ Passed before the film (D-017)
+- [ ] M2 close: independent re-review by two isolated agents (D-017) for an after-score; `benchmark`
 
 ### M3 · Proof surface
 - [ ] Placeholder

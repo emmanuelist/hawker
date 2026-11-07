@@ -200,3 +200,15 @@ The rules require a public repo with an open-source license at submission. Pendi
 **Consequences:**
 - A review costs ~15–25 min of agent time per run.
 - Before recording the film, run several real sandbox payments so the Paid count isn't 1 against 12+ Passed (real data, not a mock).
+
+## D-018 · The ledger's agent: code-backed tools first, Studio's agents for the rest; large turns to Gemini · 2026-11-07 · accepted
+**Context:** The hold ledger runs on AG Studio 3.1.0 with its agent framework, through Hawker's own adapter and model client (Groq → Gemini, rule 11). Measured on the local build: AG Studio's built-in agents send 5k–30k-token turns; Groq's free tier refuses turns over its per-minute window (413, T-25); a long delegation chain can exhaust Gemini's free per-minute quota; and the built-in agents on `gemini-3.5-flash-lite` once reported a chart they never added (T-26).
+**Decision:**
+- Hawker's agent fronts the chat with small, code-backed tools: `who_owes_now` (re-reads each open invoice from PayPal), `ledger_totals` (counts and sums computed in integer cents from the ledger rows) and `add_breakdown_chart` (the model picks a field and a measure from enums; code builds the widget with `api.setState`, undoable). Anything else goes to Studio's lead agent via `delegate_to`, and the agent may only claim a change the lead reports.
+- The model client keeps Groq first for every turn that fits Groq's per-minute window; a turn estimated over 4,000 tokens goes straight to Gemini; Groq 403/413 and empty answers fail over; a Gemini 429 waits 6 s before its retry.
+**Alternatives:**
+- Let the model write queries and widget configs through Studio's own tools for everything: 30k-token turns, quota exhaustion, and a false "added" in testing.
+- A paid model: ruled out (free tiers only).
+**Consequences:**
+- The common questions answer in ~2 Groq turns of ~1k tokens each (measured: who owes, paid vs passed, add a chart).
+- Open-ended dashboard edits depend on Gemini's free quota and can be slow (~45 s, ~12 calls).

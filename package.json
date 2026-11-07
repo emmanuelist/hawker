@@ -17,6 +17,8 @@
     "e2e:service": "tsx scripts/e2e-service.ts"
   },
   "dependencies": {
+    "ag-studio": "3.1.0",
+    "ag-studio-react": "3.1.0",
     "next": "16.4.5",
     "postgres": "4.1.0",
     "react": "19.3.1",
