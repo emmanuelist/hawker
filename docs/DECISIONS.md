@@ -229,7 +229,7 @@ The rules require a public repo with an open-source license at submission. Pendi
 - Studio class names come from 3.1.0's rendered DOM; an upgrade that renames one falls back to Studio's own look for that piece.
 - AG Grid auto-sizes columns by the plain text, so custom cells are kept no wider than their text (the ending stub is stacked).
 
-## D-020 · An ended hold is final in the database; the refusals panel on the landing · 2026-11-07 · accepted (migration 003 awaiting the user's go-ahead to apply)
+## D-020 · An ended hold is final in the database; the refusals panel on the landing · 2026-11-07 · accepted (migration 003 applied by the user 2026-11-07 19:07 UTC; E-029)
 **Context:** Building "Every way out, refused" showed that claim C-5 ("the database … refuses any change to a hold that has ended") was broader than the guard: `holds_transition_guard` (001) refused only a change of ending. Ending a Passed copy again (a new `ended_at`/`end_reason`) was **accepted**, and erasing a Paid copy was refused only incidentally, by the `events_hold_id_fkey` foreign key.
 **Decision:**
 - Migration `003_ended_is_final.sql`: an ended hold can't change its ending, be ended again, have any part of its record rewritten, or be deleted (`hold_ended: …`). The one write the app makes after an ending stays allowed: a Passed hold's hand-off link, set once from empty. Dry-run against Neon inside a rolled-back transaction: 9 forbidden writes refused, the app's 3 writes (leave the line, set the hand-off link, a no-op write) allowed.
