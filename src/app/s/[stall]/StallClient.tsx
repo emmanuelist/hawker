@@ -31,6 +31,9 @@ export function StallClient({ stall, initial = null }: { stall: string; initial?
   const [busy, setBusy] = useState<string | null>(null); // what is in flight: "join", "send" or a tile label
   const [note, setNote] = useState<Note>(null);
   const [pending, setPending] = useState<Pending>(null);
+  // Set when a join succeeds: the server knows the buyer from its cookie before the live snapshot
+  // names them, and a tap in that gap must claim, not wait for a name form that is about to close.
+  const [justJoined, setJustJoined] = useState(false);
   const [openEarlier, setOpenEarlier] = useState<string | null>(null);
   const [passedNotice, setPassedNotice] = useState<SnapshotHold | null>(null);
   const [released, setReleased] = useState<ReadonlySet<number>>(new Set());
@@ -137,6 +140,7 @@ export function StallClient({ stall, initial = null }: { stall: string; initial?
         return;
       }
       setNonce((n) => n + 1);
+      setJustJoined(true);
       const p = pending;
       setPending(null);
       setBusy(null);
@@ -160,7 +164,7 @@ export function StallClient({ stall, initial = null }: { stall: string; initial?
   }
 
   function claim(text: string, key: string, label: string) {
-    if (!me) {
+    if (!me && !justJoined) {
       setPending({ text, key, label });
       setNote(null);
       nameRef.current?.focus();

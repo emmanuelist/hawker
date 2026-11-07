@@ -134,6 +134,8 @@
 }
 .hawker-ledger .lg-open {
   display: inline-block;
+  vertical-align: middle;
+  line-height: 1.2;
   padding: 0.25em 0.55em 0.2em;
   border: 1px solid color-mix(in oklab, var(--ink) 18%, transparent);
   font-family: var(--font-franklin), sans-serif;
