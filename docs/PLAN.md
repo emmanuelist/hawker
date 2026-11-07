@@ -32,7 +32,9 @@ Deadline source: https://paypalaihackathon.devpost.com/rules §1 ("Thursday Nov 
 
 ### M2 · Core claim
 - [x] Done early in the design pass (D-016, E-022, E-023): landing `/` with the live pad; the PASSED tear-off on the desk; Passed → next buyer with a new invoice verified on the deployed app
+- [x] Independent review + fix pass (D-017, E-024, E-025): earlier-on-this-live claims, release / leave the line, passed notice with Claim again, labelled landing replay, server-rendered first views, measured fixes (320 px, targets, h1, focus, LCP 6.4 → 2.8 s)
 - [ ] The remaining M2 items wait for the user's confirmation (proposed at the M1 close): hold ledger in AG Studio, last-second payment through the UI, the refusals panel
+- [ ] Before the film (M3): several real sandbox payments so Paid isn't 1 against 12+ Passed (D-017)
 
 ### M3 · Proof surface
 - [ ] Placeholder

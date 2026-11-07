@@ -185,3 +185,18 @@ The rules require a public repo with an open-source license at submission. Pendi
 **Consequences:**
 - M2's remaining scope is the hold ledger in AG Studio, the last-second payment test, and the refusals panel (to be confirmed).
 - Tapped claims always go through the regex fast path; the model path is exercised by typed comments (E-020, E-023).
+
+## D-017 · Independent reviews at milestone closes; "→ next buyer" when no one waits; a labelled replay on the landing · 2026-11-07 · accepted
+**Context:** The user asked whether sub-agents would have been better for the critique, and approved two isolated reviewers on the live build (E-024). The design reviewer found the landing contradicting the thesis ("went back to stock" under "Two endings. No third.") and a hero that was usually stale.
+**Decision:**
+- UI critiques run as two isolated sub-agents (design review; detector + measurements), at milestone closes and before submission, with the user's reference sites as the bar.
+- A pass with nobody waiting is stamped and described as "PASSED → next buyer" everywhere (stamp, desk, chat, landing): the copy is open to the next buyer who claims, which is what the thesis says. "Back to stock" is not used.
+- When nothing is live, the landing replays the latest real ending, labelled "replay · sped up" with the copy number and how long ago it ended (PRODUCT.md principle 5). Live copies always take precedence.
+- First views of the stall and the landing render on the server; the stall's controls stay disabled until hydration so an early tap can't submit a form natively.
+**Alternatives:**
+- A third ending label ("returned"): contradicts the thesis.
+- Showing the static latest copy: a judge rarely sees a stamp land.
+- An unlabelled loop: would present old data as live; refused by principle 5.
+**Consequences:**
+- A review costs ~15–25 min of agent time per run.
+- Before recording the film, run several real sandbox payments so the Paid count isn't 1 against 12+ Passed (real data, not a mock).
