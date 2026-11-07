@@ -18,3 +18,22 @@ export function Countdown({ ms, tone = "ink", size = "md" }: { ms: number; tone?
     </span>
   );
 }
+
+/** A count on a numbering machine's wheels: each digit is a column of 0–9 that rolls to its value
+ *  when the count changes (reduced motion: it simply shows the value). */
+export function NumberWheels({ value, digits = 2, tone = "ink", label }: { value: number; digits?: number; tone?: "ink" | "paid" | "passed"; label?: string }) {
+  const text = String(Math.max(0, Math.floor(value))).padStart(digits, "0");
+  return (
+    <span className="numwheels" data-tone={tone} role="img" aria-label={label ?? String(value)}>
+      {[...text].map((d, i) => (
+        <span key={i} className="numwheel" aria-hidden="true">
+          <span className="numwheel-strip" style={{ transform: `translateY(-${Number(d) * 10}%)` }}>
+            {"0123456789".split("").map((n) => (
+              <span key={n}>{n}</span>
+            ))}
+          </span>
+        </span>
+      ))}
+    </span>
+  );
+}

@@ -212,3 +212,19 @@ The rules require a public repo with an open-source license at submission. Pendi
 **Consequences:**
 - The common questions answer in ~2 Groq turns of ~1k tokens each (measured: who owes, paid vs passed, add a chart).
 - Open-ended dashboard edits depend on Gemini's free quota and can be slow (~45 s, ~12 calls).
+
+## D-019 · The ledger as a sales booklet, with motion · 2026-11-07 · accepted
+**Context:** The user asked for the AG Studio ledger to be as decorative as it can be and never below standard, and chose "Booklet + full motion" from three directions. The ledger had Studio's default look: grey pill filter, plain grid cells, tool calls as bare rows in the chat.
+**Decision:**
+- Every widget is a sheet on the board with a gutter between sheets; its title prints on a carbon-blue binding band with a perforated tear line (Studio theme params first, `ledger.css` scoped to `.hawker-ledger` for the rest).
+- A custom stamp-filter widget replaces the button filter: Waiting and Holding as printed labels on their copy tints, Paid and Passed as real stamps, each count on numbering wheels; one tap cross-filters the page; its own counts ignore the filter it sets.
+- Grid cells render as stubs through the grid widget's `createCellRenderer`: red serials, a small PAID / PASSED stamp over the hand-off line, quoted comments, the reader as a printed tag.
+- The agent's tool calls print as receipt slips (`aiToolDisplay`) from the same structured result the model reads: the PayPal read with its time, the ledger count, the chart added.
+- Motion only for changes seen live: the shell diffs each read of the rows (`live.ts`); a new copy slides in as a stub, an ending lands its stamp, the endings sheet re-stamps, an optional stamp sound plays; a ticker runs along the binding with a pause control. Reduced motion stills all of it.
+- The agent's charts always stack both endings, because Studio has no per-widget series colour and a passed-only chart would draw in the Paid colour.
+**Alternatives:**
+- "Booklet" without motion: calmer, but the user chose the motion layer.
+- A fully custom dashboard instead of Studio: loses the AG Studio prize integration.
+**Consequences:**
+- Studio class names come from 3.1.0's rendered DOM; an upgrade that renames one falls back to Studio's own look for that piece.
+- AG Grid auto-sizes columns by the plain text, so custom cells are kept no wider than their text (the ending stub is stacked).

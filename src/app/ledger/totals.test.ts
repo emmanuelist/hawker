@@ -5,7 +5,7 @@ import { ledgerTotals } from "./totals";
 const row = (serial: number, state: LedgerRow["state"], code: string, buyer: string, amountUsd: number, paypalTxn: string | null = null): LedgerRow => ({
   copy: `No. ${String(serial).padStart(4, "0")}`, serial, state, ending: state, buyer, item: code, code, variant: "M", qty: 1, amountUsd, paidUsd: state === "Paid" ? amountUsd : 0, passedUsd: state === "Passed" ? amountUsd : 0,
   paid: state === "Paid" ? 1 : 0, passed: state === "Passed" ? 1 : 0, open: state === "Holding" || state === "Waiting" ? 1 : 0,
-  passedTo: null, endReason: null, invoiceId: null, invoiceStatus: null, paypalTxn, said: "mine", via: "typed", readBy: "fast", claimedAt: "2026-11-07T12:00:00Z", endedAt: null,
+  passedTo: null, endReason: null, invoiceId: null, invoiceStatus: null, paypalTxn, said: "mine", via: "typed", readBy: "fast", claimedAt: "2026-11-07T12:00:00Z", endedAt: null, deadlineAt: null,
 });
 
 describe("ledger_totals", () => {

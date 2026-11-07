@@ -473,6 +473,48 @@ h3 {
   font-size: 0.875rem;
 }
 
+/* ——— a count on numbering-machine wheels: each digit a 0–9 strip that rolls ——— */
+.numwheels {
+  display: inline-flex;
+  gap: 0.12em;
+  font-family: var(--font-courier), monospace;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.numwheel {
+  display: inline-block;
+  height: 1.2em;
+  overflow: hidden;
+  padding: 0 0.16em;
+  background: color-mix(in oklab, var(--ink) 8%, transparent);
+  box-shadow: inset 0 0.18em 0.2em -0.12em rgb(23 23 23 / 0.35), inset 0 -0.18em 0.2em -0.12em rgb(23 23 23 / 0.35);
+}
+.numwheels[data-tone="paid"] .numwheel {
+  background: color-mix(in oklab, var(--stamp-paid) 12%, transparent);
+  color: var(--stamp-paid);
+}
+.numwheels[data-tone="passed"] .numwheel {
+  background: color-mix(in oklab, var(--stamp-passed) 10%, transparent);
+  color: var(--stamp-passed);
+}
+.numwheel-strip {
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.9s cubic-bezier(0.2, 0.9, 0.25, 1.15);
+}
+.numwheel-strip > span {
+  display: block;
+  height: 1.2em;
+  line-height: 1.2em;
+  text-align: center;
+}
+@media (prefers-reduced-motion: reduce) {
+  .numwheel-strip {
+    transition: none;
+  }
+}
+
 /* ——— landing: the live pad instrument. Under the top copy, the pad's next blank forms. ——— */
 .pad-stack {
   position: relative;

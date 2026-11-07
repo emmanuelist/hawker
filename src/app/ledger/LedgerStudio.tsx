@@ -17,9 +17,12 @@ import {
 import { AgStudio, AgStudioProvider, createWidgets } from "ag-studio-react";
 import { useEffect, useMemo, useRef } from "react";
 import { hawkerAdapter } from "./adapter";
+import { createCellRenderer } from "./cells";
+import { revealWidget, toolDisplay } from "./receipts";
 import type { LedgerRow } from "@/lib/service/ledger";
 import { ledgerTotals } from "./totals";
-import { endingsWidget, owesWidget } from "./widgets";
+import { endingsWidget, owesWidget, stampFilterWidget } from "./widgets";
+import "./ledger.css";
 
 const MODULES = [AgStudioAiModule];
 
@@ -32,13 +35,29 @@ const theme = studioTheme.withParams({
   borderColor: "#b9c0d6",
   studioCanvasBackgroundColor: "#e6eaf2",
   studioCanvasFontFamily: "var(--font-public), system-ui, sans-serif",
+  studioCanvasPadding: 20,
   studioWidgetBackgroundColor: "#fbfcfd",
   studioWidgetBorder: { width: 1, color: "#b9c0d6", style: "solid" },
   studioWidgetBorderRadius: 0,
+  studioWidgetPadding: 0,
+  // Each widget is a printed sheet on the pad's board: a hairline and a soft drop, never a card glow.
+  studioWidgetShadow: "0 1px 1px rgb(23 23 23 / 0.06), 0 12px 20px -14px rgb(23 23 23 / 0.38)",
+  // The title sits on the sheet's binding band (ledger.css), so it prints white.
   studioWidgetTitleFontFamily: "var(--font-franklin), sans-serif",
   studioWidgetTitleFontWeight: 800,
-  studioWidgetTitleFontSize: 17,
-  studioWidgetTitleTextColor: "#2a3a8f",
+  studioWidgetTitleFontSize: 12,
+  studioWidgetTitleTextColor: "#ffffff",
+  // The grid reads like the booklet's stubs: printed column heads, a stub per row.
+  gridHeaderBackgroundColor: "#eef1f7",
+  gridHeaderTextColor: "#2a3a8f",
+  gridHeaderFontFamily: "var(--font-franklin), sans-serif",
+  gridHeaderFontWeight: 800,
+  gridHeaderFontSize: 11,
+  gridRowHeight: 44,
+  gridRowHoverColor: "#f6f0c9",
+  gridOddRowBackgroundColor: "#fbfcfd",
+  gridCellTextColor: "#171717",
+  gridFontSize: 13,
   studioToggleButtonActiveBackgroundColor: "#2a3a8f",
   studioToggleButtonActiveBorderColor: "#2a3a8f",
   studioToggleButtonActiveColor: "#ffffff",
@@ -83,6 +102,7 @@ const FIELDS: AgFieldDefinition[] = [
   { id: "readBy", name: "Read by", format: "textFormat", blankValue: "—", description: "fast (regex), groq or gemini." },
   { id: "claimedAt", name: "Claimed at", format: "dateTimeFormat" },
   { id: "endedAt", name: "Ended at", format: "dateTimeFormat" },
+  { id: "deadlineAt", name: "Time runs out", format: "dateTimeFormat", description: "When a Holding copy's time runs out; blank otherwise." },
 ];
 
 const initialState = {
@@ -91,7 +111,11 @@ const initialState = {
       id: "tonight",
       name: "Tonight's ledger",
       widgets: {
-        filter: { type: "button-filter", dataMapping: { value: [ledgerField("state")] } },
+        filter: {
+          type: "hawker-stamps",
+          format: { triggerCrossFilter: true },
+          dataMapping: { state: [ledgerField("state")], copies: [ledgerField("serial", "count")] },
+        },
         endings: {
           type: "hawker-endings",
           ...title("Two endings"),
@@ -106,16 +130,17 @@ const initialState = {
             item: [ledgerField("item")],
             amount: [ledgerField("amountUsd")],
             state: [ledgerField("state")],
+            deadline: [ledgerField("deadlineAt")],
           },
         },
         byItem: {
           type: "column-chart-stacked",
-          ...title("Paid and passed, by item"),
+          ...title("Endings by item"),
           dataMapping: { categoryKey: [ledgerField("code")], valueKey: [ledgerField("paid", "sum"), ledgerField("passed", "sum")] },
         },
         ledger: {
           type: "grid",
-          ...title("Every copy"),
+          format: { title: { enabled: true, text: "Every copy" }, style: { columnAutoSize: true, animateValueChanges: true } },
           dataMapping: {
             cols: [
               ledgerField("copy"),
@@ -133,10 +158,10 @@ const initialState = {
       },
       widgetLayout: {
         filter: { xTrack: 0, yTrack: 0, xSpan: 24, ySpan: 6 },
-        endings: { xTrack: 0, yTrack: 6, xSpan: 8, ySpan: 17 },
-        owes: { xTrack: 8, yTrack: 6, xSpan: 8, ySpan: 17 },
-        byItem: { xTrack: 16, yTrack: 6, xSpan: 8, ySpan: 17 },
-        ledger: { xTrack: 0, yTrack: 23, xSpan: 24, ySpan: 26 },
+        endings: { xTrack: 0, yTrack: 6, xSpan: 8, ySpan: 19 },
+        owes: { xTrack: 8, yTrack: 6, xSpan: 8, ySpan: 19 },
+        byItem: { xTrack: 16, yTrack: 6, xSpan: 8, ySpan: 19 },
+        ledger: { xTrack: 0, yTrack: 25, xSpan: 24, ySpan: 28 },
       },
     },
   ],
@@ -148,7 +173,7 @@ const HAWKER_INSTRUCTIONS = `You are Hawker's ledger assistant for a live-sale s
 Hawker's rule: every hold ends one of two ways, paid through PayPal, or passed to the next buyer. Use the words Waiting, Holding, Paid and Passed, and quote copies as "No. 0014".
 - Who owes, what is unpaid, or whether a copy is paid right now: call who_owes_now. It re-reads each open invoice from PayPal, the authority on payment.
 - Counts and totals (by state, by item, by buyer, the latest paid copy): call ledger_totals. Its numbers are computed by code from the ledger rows.
-- To add a chart breaking the ledger down by buyer, item, variant, reader or entry method: call add_breakdown_chart. Code builds it from the real fields.
+- To add a chart breaking the ledger down by buyer, item, variant, reader or entry method: call add_breakdown_chart. Code builds it from the real fields. It always shows both endings stacked; if the user asked for one ending, say the chart shows both, with that one in its colour.
 - For any other dashboard change, or an analysis your tools can't answer: delegate to the lead agent with a clear, specific task. Only say a change was made if the lead's report shows it was; otherwise say it may not have applied.
 If who_owes_now returns no copies, say there are no open holds right now; never say invoices were paid or cleared unless the tool shows it.
 Never invent numbers or names. If a tool fails, say so plainly. Keep answers short.`;
@@ -159,13 +184,13 @@ const GROUP_BY = { buyer: "Buyer", code: "Item", variant: "Variant", readBy: "Wh
 function breakdownTool(getApi: () => AgStudioApi | null): AgAiTool {
   const schema = {
     name: "add_breakdown_chart",
-    description: "Adds a stacked bar chart to the bottom of the current dashboard page, breaking the ledger down by a field. Undoable.",
+    description:
+      "Adds a stacked bar chart to the bottom of the current dashboard page, breaking the ledger down by a field. It always stacks both endings, Paid (blue) and Passed (red), so the colours keep their meaning. Undoable.",
     parameters: {
       type: "object",
       properties: {
         groupBy: { type: "string", enum: Object.keys(GROUP_BY), description: "buyer, code (item), variant, readBy (fast/groq/gemini) or via (typed/tap)." },
         measure: { type: "string", enum: ["copies", "amount"], description: "Count copies, or sum their USD amounts." },
-        only: { type: "string", enum: ["both", "paid", "passed"], description: "Which endings to show. Default both." },
       },
       required: ["groupBy", "measure"],
       additionalProperties: false,
@@ -181,11 +206,10 @@ function breakdownTool(getApi: () => AgStudioApi | null): AgAiTool {
       if (!api) return ctx.error("The dashboard isn't ready yet.");
       const groupBy = String(call.args.groupBy) as keyof typeof GROUP_BY;
       const measure = call.args.measure === "amount" ? "amount" : "copies";
-      const only = call.args.only === "paid" || call.args.only === "passed" ? call.args.only : "both";
       if (!(groupBy in GROUP_BY)) return ctx.error(`groupBy must be one of ${Object.keys(GROUP_BY).join(", ")}.`);
-      const series = (["paid", "passed"] as const).filter((e) => only === "both" || only === e);
-      const valueKey = series.map((e) => ledgerField(measure === "amount" ? `${e}Usd` : e, "sum"));
-      const what = `${only === "both" ? "Paid and passed" : only === "paid" ? "Paid" : "Passed"} ${measure === "amount" ? "amounts" : "copies"} by ${GROUP_BY[groupBy].toLowerCase()}`;
+      // Both endings, always in this order: the palette gives series 1 carbon blue (Paid) and series 2 stamp red (Passed).
+      const valueKey = (["paid", "passed"] as const).map((e) => ledgerField(measure === "amount" ? `${e}Usd` : e, "sum"));
+      const what = `Paid and passed ${measure === "amount" ? "amounts" : "copies"} by ${GROUP_BY[groupBy].toLowerCase()}`;
       const state = api.getState();
       const pageId = state.selectedPageId ?? state.pages[0]?.id;
       const page = state.pages.find((p) => p.id === pageId);
@@ -207,7 +231,8 @@ function breakdownTool(getApi: () => AgStudioApi | null): AgAiTool {
         ),
       } as unknown as AgReportState;
       api.setState(next);
-      return ctx.success(`Added the chart "${what}" at the bottom of the page. It can be undone.`, { widgetId: id, title: what });
+      revealWidget(what);
+      return ctx.success(`Added the chart "${what}" at the bottom of the page, Paid in blue and Passed in red. It can be undone.`, { widgetId: id, title: what });
     },
   };
 }
@@ -254,7 +279,7 @@ function owesTool(stall: string): AgAiTool {
   };
 }
 
-export default function LedgerStudio({ stall, rows }: { stall: string; rows: LedgerRow[] }) {
+export default function LedgerStudio({ stall, rows, skewMs = 0 }: { stall: string; rows: LedgerRow[]; skewMs?: number }) {
   // The agent's tool reads the latest rows, not the ones from when the harness was built.
   const rowsRef = useRef(rows);
   const apiRef = useRef<AgStudioApi | null>(null);
@@ -269,7 +294,12 @@ export default function LedgerStudio({ stall, rows }: { stall: string; rows: Led
           name: "Ledger",
           primaryKeyField: "copy",
           // Times arrive as ISO strings over JSON; Studio's date-time format wants Dates.
-          data: rows.map((r) => ({ ...r, claimedAt: new Date(r.claimedAt), endedAt: r.endedAt ? new Date(r.endedAt) : null })),
+          data: rows.map((r) => ({
+            ...r,
+            claimedAt: new Date(r.claimedAt),
+            endedAt: r.endedAt ? new Date(r.endedAt) : null,
+            deadlineAt: r.deadlineAt ? new Date(r.deadlineAt) : null,
+          })),
           fields: FIELDS,
         },
       ],
@@ -279,11 +309,14 @@ export default function LedgerStudio({ stall, rows }: { stall: string; rows: Led
     [rows],
   );
 
+  const context = useMemo(() => ({ stall, skewMs }), [stall, skewMs]);
   const widgets = useMemo(
     () => (defaults: { menu: unknown[] }) =>
       createWidgets({
-        additionalTypes: [endingsWidget, owesWidget],
-        menu: [...(defaults.menu as never[]), { label: "Hawker", widgetIds: ["hawker-endings", "hawker-owes"] }],
+        additionalTypes: [stampFilterWidget, endingsWidget, owesWidget],
+        menu: [...(defaults.menu as never[]), { label: "Hawker", widgetIds: ["hawker-stamps", "hawker-endings", "hawker-owes"] }],
+        // The grid's cells print as stubs: serials, stamps, quoted comments (cells.tsx).
+        overrides: [{ id: "grid", options: { createCellRenderer } }],
       } as never),
     [],
   );
@@ -310,7 +343,7 @@ export default function LedgerStudio({ stall, rows }: { stall: string; rows: Led
         promptStarters: [
           { label: "Who still owes right now?", prompt: "Who still owes right now? Check PayPal." },
           { label: "Paid vs passed", prompt: "How many copies ended Paid and how many Passed, and for how much in total?" },
-          { label: "Add a chart", prompt: "Add a chart of passed copies by buyer to this page." },
+          { label: "Add a chart", prompt: "Add a chart of paid and passed copies by buyer to this page." },
         ],
       }));
     };
@@ -326,8 +359,9 @@ export default function LedgerStudio({ stall, rows }: { stall: string; rows: Led
         widgets={widgets as never}
         theme={theme}
         ai={ai}
+        aiToolDisplay={toolDisplay}
         mode="edit"
-        context={{ stall }}
+        context={context}
       />
     </AgStudioProvider>
   );

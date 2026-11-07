@@ -32,6 +32,8 @@ export interface LedgerRow {
   readBy: string | null;
   claimedAt: string;
   endedAt: string | null;
+  /** When a Holding copy's time runs out; null once it has ended or while it waits. */
+  deadlineAt: string | null;
 }
 
 const copyNo = (n: number) => `No. ${String(n).padStart(4, "0")}`;
@@ -41,11 +43,12 @@ export async function getLedger(stallId: string): Promise<LedgerRow[]> {
     serial: number; state: HoldState; handle: string; code: string; item_name: string; label: string; variants: number; qty: number;
     price_cents: number; passed_to: string | null; end_reason: string | null; invoice_id: string | null; inv_status: string | null;
     transaction_id: string | null; said: string; via: string; parse_source: string | null; claimed_at: Date; ended_at: Date | null;
+    deadline_at: Date | null;
   }[]>`
     select h.serial, h.state, b.handle, i.code, i.name item_name, v.label,
       (select count(*) from variants v2 where v2.item_id = i.id)::int variants,
       h.qty, i.price_cents, nb.handle passed_to, h.end_reason, h.invoice_id, inv.status inv_status, inv.transaction_id,
-      c.text said, c.via, c.parse_source, c.received_at claimed_at, h.ended_at
+      c.text said, c.via, c.parse_source, c.received_at claimed_at, h.ended_at, h.deadline_at
     from holds h
     join buyers b on b.id = h.buyer_id
     join variants v on v.id = h.variant_id
@@ -86,6 +89,7 @@ export async function getLedger(stallId: string): Promise<LedgerRow[]> {
       readBy: r.parse_source,
       claimedAt: r.claimed_at.toISOString(),
       endedAt: r.ended_at?.toISOString() ?? null,
+      deadlineAt: r.state === "Holding" ? (r.deadline_at?.toISOString() ?? null) : null,
     };
   });
 }

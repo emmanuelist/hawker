@@ -1,0 +1,764 @@
+/* The hold ledger as a sales booklet (D-012 Invoice Pad, pushed for the ledger in D-019).
+   Studio's own theme params carry the colours and type (LedgerStudio.tsx); this file adds what the
+   params can't: the binding band on each sheet, the perforations, the stubs in the grid, the receipt
+   slips in the agent's chat, and the motion layer. Everything is scoped to .hawker-ledger, and every
+   animation stands down under prefers-reduced-motion. Studio class names were read from the rendered
+   DOM of ag-studio 3.1.0; if an upgrade renames one, that piece falls back to Studio's own look. */
+
+.hawker-ledger {
+  --perf-hole: var(--board);
+  --sheet-bg: #fbfcfd;
+}
+
+/* ——— each widget is a sheet laid on the board, with a gutter of board between sheets ——— */
+.hawker-ledger .ag-studio-layout-widget {
+  padding: 6px;
+}
+/* its title prints on a carbon-blue binding band, edge to edge */
+.hawker-ledger .ag-studio-layout-widget-header {
+  position: relative;
+  margin: 0;
+  background: var(--rail);
+  box-shadow: inset 0 -3px 0 var(--rail-deep);
+  padding: 8px 14px 10px;
+}
+.hawker-ledger .ag-studio-layout-widget-title {
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  line-height: 1.2;
+}
+/* the tear line under the band: the sheet was torn along a row of holes */
+.hawker-ledger .ag-studio-layout-widget-body {
+  position: relative;
+}
+.hawker-ledger .ag-studio-layout-widget-header + .ag-studio-layout-widget-body::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  z-index: 1;
+  height: 6px;
+  background: radial-gradient(circle at 5px 0, var(--perf-hole) 2.5px, transparent 3px) 0 0 / 10px 6px repeat-x;
+  pointer-events: none;
+}
+
+/* a widget the agent just added: the sheet is laid on the pad, then settles */
+.hawker-ledger .ag-studio-layout-widget[data-hawker-new] {
+  animation: lg-sheet-laid 0.9s var(--out-expo) both;
+}
+@keyframes lg-sheet-laid {
+  0% {
+    translate: 0 -14px;
+    opacity: 0;
+    outline: 3px solid var(--copy-holding);
+  }
+  60% {
+    outline: 3px solid var(--copy-holding);
+  }
+  100% {
+    outline: 3px solid transparent;
+  }
+}
+
+/* ——— the grid's cells: stubs ——— */
+.hawker-ledger .lg-copy {
+  font-family: var(--font-courier), monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--serial);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.hawker-ledger .lg-buyer {
+  font-weight: 600;
+}
+.hawker-ledger .lg-amount {
+  font-family: var(--font-courier), monospace;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+/* the transaction ID is long; give its cell the last few pixels of padding back */
+.hawker-ledger .ag-cell[col-id="ledger.paypalTxn"] {
+  padding-right: 4px;
+  text-overflow: clip;
+}
+.hawker-ledger .lg-txn {
+  font-family: var(--font-courier), monospace;
+  font-size: 0.65625rem;
+}
+.hawker-ledger .lg-blank {
+  color: var(--ink-muted);
+}
+.hawker-ledger .lg-said {
+  quotes: "“" "”";
+}
+.hawker-ledger .lg-said::before,
+.hawker-ledger .lg-said::after {
+  color: var(--print);
+  font-weight: 800;
+}
+.hawker-ledger .lg-reader {
+  display: inline-block;
+  padding: 0.18em 0.45em 0.12em;
+  border: 1px solid color-mix(in oklab, var(--print) 55%, transparent);
+  font-family: var(--font-franklin), sans-serif;
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  color: var(--print);
+}
+.hawker-ledger .lg-reader[data-reader="fast"] {
+  border-style: dashed;
+}
+/* a stub: the stamp, and under it where the copy went (as on the desk). Stacked, so the cell is never
+   wider than the plain text AG Grid sizes the column by. */
+.hawker-ledger .lg-ending {
+  display: inline-grid;
+  justify-items: start;
+  gap: 0.2rem;
+  vertical-align: middle;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+.hawker-ledger .lg-stamp {
+  font-size: 0.625rem;
+  rotate: -4deg;
+  padding: 0.2em 0.45em 0.14em;
+}
+.hawker-ledger .lg-ending-to {
+  font-size: 0.71875rem;
+  color: var(--ink-muted);
+}
+.hawker-ledger .lg-open {
+  display: inline-block;
+  padding: 0.25em 0.55em 0.2em;
+  border: 1px solid color-mix(in oklab, var(--ink) 18%, transparent);
+  font-family: var(--font-franklin), sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--print);
+  background: var(--copy-waiting);
+}
+.hawker-ledger .lg-open[data-state="Holding"] {
+  background: var(--copy-holding);
+  color: var(--copy-holding-ink);
+}
+
+/* a copy that arrived while the page was open slides in as a fresh stub (AG Grid positions rows with
+   transform, so the motion uses the separate translate property and the two compose) */
+.hawker-ledger .ag-row:has(.lg-copy[data-fresh="new"]) {
+  animation: lg-row-in 1.6s var(--out-expo) both;
+}
+.hawker-ledger .ag-row:has(.lg-copy[data-fresh="Paid"]),
+.hawker-ledger .ag-row:has(.lg-copy[data-fresh="Passed"]) {
+  animation: lg-row-ended 1.6s linear both;
+}
+@keyframes lg-row-in {
+  0% {
+    translate: -18px 0;
+    opacity: 0;
+    background-color: var(--copy-holding);
+  }
+  30% {
+    translate: 0 0;
+    opacity: 1;
+    background-color: var(--copy-holding);
+  }
+}
+@keyframes lg-row-ended {
+  0%,
+  35% {
+    background-color: color-mix(in oklab, var(--copy-holding) 60%, transparent);
+  }
+}
+
+/* ——— the stamp filter: printed state labels on their copy tints, real stamps for the two endings ——— */
+.hawker-ledger .lg-stampbar {
+  container-type: inline-size;
+  display: flex;
+  height: 100%;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0 1rem;
+  overflow-x: auto;
+}
+.hawker-ledger .lg-stampbar-label {
+  margin-right: 0.25rem;
+}
+.hawker-ledger .lg-stampbtn {
+  --tint: var(--copy-waiting);
+  display: inline-flex;
+  min-height: 3rem;
+  flex: none;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.4rem 0.75rem 0.4rem 0.85rem;
+  background: var(--tint);
+  border: 1px solid color-mix(in oklab, var(--ink) 16%, transparent);
+  box-shadow: 0 1px 0 color-mix(in oklab, var(--ink) 10%, transparent);
+  font-size: 1rem;
+  transition:
+    translate 0.12s var(--out-expo),
+    box-shadow 0.12s var(--out-expo);
+}
+.hawker-ledger .lg-stampbtn[data-state="Holding"] {
+  --tint: var(--copy-holding);
+}
+.hawker-ledger .lg-stampbtn[data-state="Paid"] {
+  --tint: var(--copy-paid);
+}
+.hawker-ledger .lg-stampbtn[data-state="Passed"] {
+  --tint: var(--copy-passed);
+}
+.hawker-ledger .lg-stampbtn:hover {
+  box-shadow: 0 6px 14px -10px rgb(23 23 23 / 0.45);
+}
+.hawker-ledger .lg-stampbtn[aria-pressed="true"] {
+  translate: 0 1px;
+  box-shadow:
+    inset 0 0 0 2px var(--rail),
+    inset 0 2px 4px rgb(23 23 23 / 0.18);
+}
+.hawker-ledger .lg-stampbtn-word {
+  font-family: var(--font-franklin), sans-serif;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--print);
+}
+.hawker-ledger .lg-stampbtn[data-state="Holding"] .lg-stampbtn-word {
+  color: var(--copy-holding-ink);
+}
+/* the two endings carry the stamp itself, inked unevenly like every stamp on the pad */
+.hawker-ledger .lg-stampbtn:is([data-state="Paid"], [data-state="Passed"]) .lg-stampbtn-word {
+  padding: 0.2em 0.5em 0.14em;
+  border: 3px double currentColor;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  rotate: -6deg;
+  mix-blend-mode: multiply;
+  -webkit-mask-image: var(--ink-wear);
+  -webkit-mask-size: 180px;
+  mask-image: var(--ink-wear);
+  mask-size: 180px;
+}
+.hawker-ledger .lg-stampbtn[data-state="Paid"] .lg-stampbtn-word {
+  color: var(--stamp-paid);
+}
+.hawker-ledger .lg-stampbtn[data-state="Passed"] .lg-stampbtn-word {
+  color: var(--stamp-passed);
+}
+.hawker-ledger .lg-stampbar-all {
+  margin-left: auto;
+  min-height: 2.75rem;
+  flex: none;
+  padding: 0 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--print);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+/* a narrower page: the stamps close up and the printed "Show" label steps aside */
+@container (max-width: 760px) {
+  .hawker-ledger .lg-stampbar {
+    gap: 0.4rem;
+    padding: 0 0.6rem;
+  }
+  .hawker-ledger .lg-stampbar-label {
+    display: none;
+  }
+  .hawker-ledger .lg-stampbtn {
+    gap: 0.5rem;
+    padding: 0.35rem 0.55rem;
+  }
+}
+.hawker-ledger .lg-stampbar-all:disabled {
+  color: var(--ink-muted);
+  text-decoration: none;
+  cursor: default;
+}
+
+/* ——— two endings: a white sheet stamped PAID, a grey sheet stamped PASSED, and nothing else ——— */
+.hawker-ledger .lg-endings {
+  container-type: inline-size;
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.1rem 1rem 0.9rem;
+  color: var(--ink);
+}
+.hawker-ledger .lg-endings-sheets {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+.hawker-ledger .lg-sheet {
+  position: relative;
+  display: grid;
+  justify-items: start;
+  gap: 0.6rem;
+  padding: 0.9rem 0.8rem 0.7rem;
+  background: var(--copy-paid);
+  border: 1px solid color-mix(in oklab, var(--ink) 16%, transparent);
+  box-shadow:
+    0 1px 1px rgb(23 23 23 / 0.06),
+    0 10px 16px -12px rgb(23 23 23 / 0.32);
+}
+.hawker-ledger .lg-sheet[data-state="Passed"] {
+  background: var(--copy-passed);
+  color: var(--copy-passed-ink);
+}
+.hawker-ledger .lg-sheet::before {
+  content: "";
+  position: absolute;
+  inset: -1px 0 auto 0;
+  height: 6px;
+  background: radial-gradient(circle at 5px -1px, var(--sheet-bg) 3px, transparent 3.5px) 0 0 / 10px 6px repeat-x;
+  pointer-events: none;
+}
+.hawker-ledger .lg-sheet-stamp {
+  font-size: 0.95rem;
+  rotate: -7deg;
+}
+.hawker-ledger .lg-sheet .numwheels {
+  font-size: 2rem;
+}
+.hawker-ledger .lg-sheet-sub {
+  display: grid;
+  gap: 0.1rem;
+  font-size: 0.75rem;
+  line-height: 1.3;
+  color: var(--ink-muted);
+}
+.hawker-ledger .lg-sheet[data-state="Passed"] .lg-sheet-sub {
+  color: var(--copy-passed-ink);
+}
+.hawker-ledger .lg-sheet-sub .lg-amount {
+  font-size: 0.875rem;
+  color: var(--ink);
+}
+/* a stamp that lands while the page is open: two frames, and the sheet takes the impression */
+.hawker-ledger .lg-sheet[data-landed] {
+  animation: impress 0.2s steps(2, jump-end) both;
+}
+.hawker-ledger .lg-sheet[data-landed] .lg-sheet-stamp {
+  animation: stamp-land 0.2s steps(2, jump-end) both;
+}
+@container (max-width: 250px) {
+  .hawker-ledger .lg-sheet {
+    padding-inline: 0.6rem;
+  }
+  .hawker-ledger .lg-sheet-stamp {
+    font-size: 0.75rem;
+  }
+  .hawker-ledger .lg-sheet .numwheels {
+    font-size: 1.6rem;
+  }
+}
+.hawker-ledger .lg-split {
+  display: flex;
+  height: 6px;
+  gap: 2px;
+}
+.hawker-ledger .lg-split > i {
+  display: block;
+  min-width: 2px;
+  transition: flex-grow 0.9s var(--out-expo);
+}
+.hawker-ledger .lg-split > i[data-kind="paid"] {
+  background: var(--stamp-paid);
+}
+.hawker-ledger .lg-split > i[data-kind="passed"] {
+  background: var(--stamp-passed);
+}
+.hawker-ledger .lg-endings-note {
+  margin-top: auto;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--ink-muted);
+}
+.hawker-ledger .lg-endings-note b {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+/* ——— who still owes: small yellow copies, each with its time running ——— */
+.hawker-ledger .lg-owes {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 1rem 1rem 0.9rem;
+  color: var(--ink);
+}
+.hawker-ledger .lg-owes-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.hawker-ledger .lg-owes-read {
+  min-height: 2rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--print);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.hawker-ledger .lg-owes-read:disabled {
+  color: var(--ink-muted);
+  cursor: progress;
+}
+.hawker-ledger .lg-owes-list {
+  display: grid;
+  min-height: 0;
+  gap: 0.6rem;
+  overflow: auto;
+  padding: 2px 2px 8px;
+}
+.hawker-ledger .lg-owe {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 0.2rem 0.6rem;
+  padding: 0.7rem 0.7rem 0.6rem;
+  background: var(--copy-holding);
+  border: 1px solid color-mix(in oklab, var(--ink) 16%, transparent);
+  box-shadow: 0 6px 12px -10px rgb(23 23 23 / 0.4);
+  font-size: 0.8125rem;
+  animation: copy-in 0.42s var(--out-expo) both;
+}
+.hawker-ledger .lg-owe::before {
+  content: "";
+  position: absolute;
+  inset: -1px 0 auto 0;
+  height: 6px;
+  background: radial-gradient(circle at 5px -1px, var(--sheet-bg) 3px, transparent 3.5px) 0 0 / 10px 6px repeat-x;
+  pointer-events: none;
+}
+.hawker-ledger .lg-owe[data-expiring] {
+  box-shadow:
+    inset 0 0 0 2px var(--expiring),
+    0 6px 12px -10px rgb(23 23 23 / 0.4);
+}
+.hawker-ledger .lg-owe-who {
+  display: grid;
+  min-width: 0;
+  color: var(--copy-holding-ink);
+}
+.hawker-ledger .lg-owe-who b {
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+.hawker-ledger .lg-owe-right {
+  display: grid;
+  justify-items: end;
+  gap: 0.25rem;
+}
+.hawker-ledger .lg-owe-read {
+  grid-column: 1 / -1;
+  font-size: 0.6875rem;
+  color: var(--copy-holding-ink);
+}
+.hawker-ledger .lg-blankform {
+  position: relative;
+  display: grid;
+  gap: 0.6rem;
+  margin-top: 0.15rem;
+  padding: 0.75rem 0.8rem 0.7rem;
+  border: 1px dashed color-mix(in oklab, var(--print) 45%, transparent);
+}
+.hawker-ledger .lg-blankform-fields {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  align-items: end;
+  gap: 0.5rem 0.6rem;
+}
+.hawker-ledger .lg-blankform-fields i {
+  height: 0.9rem;
+  border-bottom: 1px solid color-mix(in oklab, var(--print) 35%, transparent);
+}
+.hawker-ledger .lg-blankform-msg {
+  font-size: 0.78125rem;
+  line-height: 1.45;
+  color: var(--ink-muted);
+}
+
+/* ——— the agent's chat: comment slips in, printed receipts out ——— */
+.hawker-ledger .ag-studio-panel-title {
+  font-family: var(--font-franklin), sans-serif;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  color: var(--print);
+}
+/* the helper's question: a plain white slip on the board, not a chat bubble */
+.hawker-ledger .ag-studio-ai-input-message-user {
+  border-radius: 0;
+  background: var(--copy-paid);
+  border: 1px solid color-mix(in oklab, var(--ink) 14%, transparent);
+  box-shadow: 0 6px 12px -10px rgb(23 23 23 / 0.4);
+}
+.hawker-ledger .ag-studio-ai-output-message-content {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--ink);
+}
+.hawker-ledger .ag-studio-ai-step-pill {
+  border-radius: 0;
+  font-family: var(--font-courier), monospace;
+  font-weight: 700;
+}
+.hawker-ledger .ag-studio-ai-prompt-starter {
+  border-radius: 0;
+  border: 1px solid color-mix(in oklab, var(--ink) 18%, transparent);
+  background: var(--copy-paid);
+  box-shadow: 0 1px 0 color-mix(in oklab, var(--ink) 10%, transparent);
+  transition:
+    translate 0.12s var(--out-expo),
+    box-shadow 0.12s var(--out-expo);
+}
+.hawker-ledger .ag-studio-ai-prompt-starter:hover {
+  background: #ffffff;
+  box-shadow: 0 6px 14px -10px rgb(23 23 23 / 0.45);
+}
+.hawker-ledger .ag-studio-ai-assistant-input {
+  border-radius: 0;
+}
+
+/* a receipt slip, torn from the till along its perforated top */
+.hawker-ledger .lg-slip {
+  position: relative;
+  display: grid;
+  gap: 0.5rem;
+  margin: 0.4rem 0 0.25rem;
+  padding: 0.85rem 0.8rem 0.7rem;
+  background: #ffffff;
+  border: 1px solid color-mix(in oklab, var(--ink) 14%, transparent);
+  box-shadow: 0 8px 14px -12px rgb(23 23 23 / 0.45);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  color: var(--ink);
+  animation: copy-in 0.42s var(--out-expo) both;
+}
+.hawker-ledger .lg-slip::before {
+  content: "";
+  position: absolute;
+  inset: -1px 0 auto 0;
+  height: 6px;
+  background: radial-gradient(circle at 5px -1px, var(--board) 3px, transparent 3.5px) 0 0 / 10px 6px repeat-x;
+  pointer-events: none;
+}
+.hawker-ledger .lg-slip-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.hawker-ledger .lg-slip-at {
+  font-family: var(--font-courier), monospace;
+  font-size: 0.75rem;
+  color: var(--ink-muted);
+}
+.hawker-ledger .lg-slip-rows {
+  display: grid;
+}
+.hawker-ledger .lg-slip-rows > li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 0.15rem 0.5rem;
+  padding: 0.4rem 0;
+  border-top: 1px dashed color-mix(in oklab, var(--ink) 22%, transparent);
+}
+.hawker-ledger .lg-slip-who {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: var(--ink-muted);
+}
+.hawker-ledger .lg-slip-who b {
+  color: var(--ink);
+}
+.hawker-ledger .lg-slip-status {
+  grid-column: 2 / -1;
+  font-family: var(--font-courier), monospace;
+  font-size: 0.75rem;
+  color: var(--copy-holding-ink);
+}
+.hawker-ledger .lg-slip-code {
+  font-family: var(--font-courier), monospace;
+  font-weight: 700;
+}
+.hawker-ledger .lg-slip-tally {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+.hawker-ledger .lg-slip-tally > div {
+  display: grid;
+  justify-items: start;
+  gap: 0.3rem;
+}
+.hawker-ledger .lg-slip-big {
+  font-family: var(--font-courier), monospace;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1;
+}
+.hawker-ledger .lg-slip-line {
+  overflow-wrap: anywhere;
+}
+.hawker-ledger .lg-slip-foot {
+  padding-top: 0.4rem;
+  border-top: 1px dashed color-mix(in oklab, var(--ink) 22%, transparent);
+  font-size: 0.6875rem;
+  color: var(--ink-muted);
+}
+.hawker-ledger .lg-slip-wait {
+  color: var(--ink-muted);
+}
+.hawker-ledger .lg-slip-error {
+  color: var(--serial);
+}
+.hawker-ledger .lg-slip-btn {
+  justify-self: start;
+  min-height: 2rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--print);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ——— the binding's ticker: the latest copies run along the strip the booklet is glued into ——— */
+.lg-ticker {
+  position: relative;
+  display: flex;
+  min-height: 2.25rem;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0 0.75rem 0 1.25rem;
+  background: var(--rail-deep);
+  color: var(--rail-ink);
+  font-size: 0.8125rem;
+}
+.lg-ticker::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 -6px 0;
+  z-index: 2;
+  height: 6px;
+  background: radial-gradient(circle at 5px 6px, var(--board) 2.5px, transparent 3px) 0 0 / 10px 6px repeat-x;
+  pointer-events: none;
+}
+.lg-ticker-label {
+  flex: none;
+  color: var(--rail-muted);
+}
+.lg-ticker-window {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 2rem, #000 calc(100% - 2rem), transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 2rem, #000 calc(100% - 2rem), transparent);
+}
+.lg-ticker-track {
+  display: flex;
+  width: max-content;
+  animation: lg-tick var(--tick-dur, 60s) linear infinite;
+}
+.lg-ticker[data-paused="true"] .lg-ticker-track,
+.lg-ticker:hover .lg-ticker-track,
+.lg-ticker:focus-within .lg-ticker-track {
+  animation-play-state: paused;
+}
+.lg-ticker-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 1.5rem;
+  white-space: nowrap;
+  border-right: 1px solid color-mix(in oklab, var(--rail-ink) 22%, transparent);
+}
+.lg-ticker-item .lg-copy {
+  font-family: var(--font-courier), monospace;
+  font-weight: 700;
+  color: #ffd0d0;
+}
+.lg-ticker-item .lg-amount {
+  font-family: var(--font-courier), monospace;
+  font-weight: 700;
+}
+.lg-ticker-item .stamp {
+  font-size: 0.625rem;
+  rotate: -5deg;
+  mix-blend-mode: normal;
+}
+.lg-ticker-item .stamp[data-kind="paid"] {
+  color: var(--rail-muted);
+}
+.lg-ticker-item .stamp[data-kind="passed"] {
+  color: #ffb4b4;
+}
+.lg-ticker-item .lg-ticker-holding {
+  padding: 0.15em 0.45em;
+  background: var(--copy-holding);
+  color: var(--copy-holding-ink);
+  font-family: var(--font-franklin), sans-serif;
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.lg-ticker-muted {
+  color: var(--rail-muted);
+}
+.lg-ticker-pause {
+  display: inline-grid;
+  flex: none;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  color: var(--rail-ink);
+}
+@keyframes lg-tick {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hawker-ledger .ag-studio-layout-widget[data-hawker-new],
+  .hawker-ledger .ag-row:has(.lg-copy[data-fresh]),
+  .hawker-ledger .lg-sheet[data-landed],
+  .hawker-ledger .lg-sheet[data-landed] .lg-sheet-stamp,
+  .hawker-ledger .lg-owe,
+  .hawker-ledger .lg-slip {
+    animation: none;
+  }
+  .hawker-ledger .lg-split > i,
+  .hawker-ledger .lg-stampbtn {
+    transition: none;
+  }
+  /* the ticker stands still: the latest copies, as many as fit */
+  .lg-ticker-track {
+    animation: none;
+  }
+  .lg-ticker-track > [data-dup] {
+    display: none;
+  }
+  .lg-ticker-pause {
+    display: none;
+  }
+}
