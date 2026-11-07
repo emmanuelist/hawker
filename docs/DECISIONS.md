@@ -171,3 +171,17 @@ The rules require a public repo with an open-source license at submission. Pendi
 - Every query crosses Oregon → Virginia, about 60–70 ms (T-16). Measured on Render: a fast-path claim including the PayPal invoice answered in 3.4 s (E-016), a model-path claim in 4.5 s (E-020); PayPal calls dominate.
 - The Vercel-managed project's compute allowance is shared with whatever else uses it.
 - Moving to a West project later is a connection-string change plus `npm run db:migrate` and `npm run db:seed`.
+
+## D-016 · Design pass before M2: one-tap claims, the copy as a printed form, the landing now · 2026-11-07 · accepted
+**Context:** At the M1 close the user asked whether the UI/UX could be "extremely better… in every way" and to push it without limits. An impeccable critique scored the stall and desk 25/40: `/` was still the M0 placeholder, the stall's variant tiles looked tappable but did nothing, claiming needed typed syntax, and the signature moment stopped at the stamp.
+**Decision:**
+- Stay in the Invoice Pad world (D-012) and push its execution: the copy becomes a printed sales-invoice form (carbon-blue letterhead and labels, filled-in values), waiting buyers are drawn as sheets under a Holding copy, and stamps land only when they land live.
+- One-tap claims on the stall. A tap posts a canonical comment ("mine gold") through the same pipeline, recorded with `comments.via = 'tap'` (migration 002), and every surface shows it as "tapped", so the chat is never presented as typed when it wasn't. Typing works as before.
+- Build the landing `/` now (planned for M2/M3): the claim beside a live pad fed by the demo stall, a real trace, the latest real Paid and Passed copies, and one-click checks. Every factual sentence on it has a verified claims row (C-1 … C-8).
+- The desk's tear-off ships now (planned as M2's "full fidelity" item).
+**Alternatives:**
+- Polish the M1 screens only: leaves `/` as a placeholder judges would land on.
+- Replace the world: no evidence the world was the problem; the critique found the execution thin, not the direction.
+**Consequences:**
+- M2's remaining scope is the hold ledger in AG Studio, the last-second payment test, and the refusals panel (to be confirmed).
+- Tapped claims always go through the regex fast path; the model path is exercised by typed comments (E-020, E-023).

@@ -31,7 +31,8 @@ Deadline source: https://paypalaihackathon.devpost.com/rules §1 ("Thursday Nov 
 - [x] Deployed (E-016, E-020, E-021): the M1 round trip works on hawker-8q2t.onrender.com, with keep-warm that never touches the database. Fast-path claim → hold + invoice → stall and desk live → paid on PayPal → PAID stamp 8.1 s later (E-016); Pidgin claim read by the model path (Gemini after a Groq failover; Groq on the next comment) (E-020); idle 20 min, uptime 19 → 1220 s (E-021)
 
 ### M2 · Core claim
-- [ ] Placeholder
+- [x] Done early in the design pass (D-016, E-022, E-023): landing `/` with the live pad; the PASSED tear-off on the desk; Passed → next buyer with a new invoice verified on the deployed app
+- [ ] The remaining M2 items wait for the user's confirmation (proposed at the M1 close): hold ledger in AG Studio, last-second payment through the UI, the refusals panel
 
 ### M3 · Proof surface
 - [ ] Placeholder
