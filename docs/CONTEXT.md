@@ -73,3 +73,4 @@ touching an integration.
 | `GEMINI_API_KEY` | Failover model | aistudio.google.com → Get API key |
 | `RENDER_GIT_COMMIT` | Commit shown by `/api/health` | Set by Render at runtime (verified 2026-11-07, E-008) |
 | `HAWKER_SCHEDULER` | `off` disables the hold scheduler, for a local preview against the shared database while Render runs | Local only; never set on Render (T-22) |
+| `ELEVENLABS_API_KEY` | Video narration only (M3), never used by the app. Narrator: “Eric – Smooth, Trustworthy”, ElevenLabs stock voice ID `cjVigY5qzO86Huf0OWal`, model `eleven_multilingual_v2` (as the user recorded them in `.env`, 2026-11-07; re-check both against ElevenLabs before generating) | elevenlabs.io → API keys |

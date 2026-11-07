@@ -98,11 +98,27 @@ export function StallClient({ stall, initial = null }: { stall: string; initial?
   // The buyer's own PAID: the copy comes to the middle of the screen, where the stamp lands (they are
   // usually coming back from PayPal's window, and the copy may sit under the comment bar), and a short
   // buzz on phones that support it.
+  // Browsers drop a vibration from a hidden page, and the buyer is often still in PayPal's tab when
+  // PayPal confirms, so the moment waits until the stall is visible again. (iOS Safari has no
+  // Vibration API; there the stamp is the moment.)
   useEffect(() => {
     if (celebrate === null) return;
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    document.querySelector(".copy[data-celebrate]")?.scrollIntoView({ block: "center", behavior: reduce ? "auto" : "smooth" });
-    if ("vibrate" in navigator) navigator.vibrate([24, 60, 48]);
+    const land = () => {
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      document.querySelector(".copy[data-celebrate]")?.scrollIntoView({ block: "center", behavior: reduce ? "auto" : "smooth" });
+      if ("vibrate" in navigator) navigator.vibrate([24, 60, 48]);
+    };
+    if (document.visibilityState === "visible") {
+      land();
+      return;
+    }
+    const onVisible = () => {
+      if (document.visibilityState !== "visible") return;
+      document.removeEventListener("visibilitychange", onVisible);
+      land();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
   }, [celebrate]);
 
   async function send(text: string, via: "typed" | "tap", what: string): Promise<boolean> {
