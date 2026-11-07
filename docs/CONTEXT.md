@@ -33,6 +33,7 @@ touching an integration.
 | `gemini-3.5-flash-lite` | Google | free tier; exact limits only in AI Studio; occasional 503 "high demand" | 178/180, ~4–5 s per batch | E-005 |
 
 ## Traps
+- **T-15 · Invoice refusal codes (verified 2026-11-07):** cancel twice → 422 `INVOICE_CANCELED_ALREADY` (E-011); cancel a PAID invoice → 422 `CANNOT_CANCEL_PAID_INVOICE`, status stays PAID (E-012). `configuration.partial_payment.allow_partial_payment` and `allow_tip` live under `configuration`; `detail.reference` ≤ 120 chars; `invoice_number` auto-generated if omitted (invoicing/object.md).
 - **T-1 · PayPal reuses the same OAuth access token for up to 9 h.** After enabling a feature (Invoicing) the old token kept the old scopes and every call returned 403 `NOT_AUTHORIZED`. Fix: `POST /v1/oauth2/token/terminate`, then request a new token. (E-001 notes)
 - **T-2 · `invoicer.email_address`, if sent, must match the token's sandbox Business account.** Omit it. (invoicing troubleshooting doc)
 - **T-3 · Venmo payouts are unsupported in the sandbox**, and one Venmo item fails the whole batch. (E-004)
