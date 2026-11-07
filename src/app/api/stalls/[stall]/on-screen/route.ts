@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { db } from "@/lib/db";
+import { invalidateStall } from "@/lib/service/catalog";
 import { publish, serial } from "@/lib/service/runtime";
 
 const Body = z.object({ code: z.string().trim().min(1).max(8) });
@@ -16,6 +17,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ stall: 
       where s.stall_id = ${stall} and s.status = 'live' and i.stall_id = ${stall} and upper(i.code) = upper(${parsed.data.code})
       returning s.id`;
     if (rows.length) {
+      invalidateStall(stall);
       await db()`insert into events (stall_id, kind, payload) values (${stall}, 'show.on_screen', ${db().json({ code: parsed.data.code.toUpperCase() })})`;
       publish(stall);
     }

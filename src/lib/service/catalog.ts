@@ -14,7 +14,23 @@ export interface StallContext {
   catalog: StallItem[];
 }
 
+// Small in-memory cache: the catalog changes only on seed or an on-screen change (which invalidates).
+const cache = new Map<string, { at: number; ctx: StallContext | null }>();
+const TTL_MS = 30_000;
+
+export function invalidateStall(stallId: string): void {
+  cache.delete(stallId);
+}
+
 export async function loadStall(stallId: string): Promise<StallContext | null> {
+  const hit = cache.get(stallId);
+  if (hit && Date.now() - hit.at < TTL_MS) return hit.ctx;
+  const ctx = await readStall(stallId);
+  cache.set(stallId, { at: Date.now(), ctx });
+  return ctx;
+}
+
+async function readStall(stallId: string): Promise<StallContext | null> {
   const sql = db();
   const [stall] = await sql<{ id: string; name: string; payment_window_seconds: number; is_demo: boolean }[]>`
     select id, name, payment_window_seconds, is_demo from stalls where id = ${stallId}`;

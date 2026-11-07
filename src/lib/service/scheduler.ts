@@ -29,7 +29,7 @@ function tick() {
 function poll() {
   const stalls = new Set([...rt.deadlines.values()].map((d) => d.stallId));
   for (const stallId of stalls) {
-    serial(stallId, () => pollPayments(stallId)).catch((e) =>
+    pollPayments(stallId).catch((e) =>
       console.error(JSON.stringify({ scope: "poll", stallId, error: (e as Error).message.slice(0, 200) })),
     );
   }

@@ -276,24 +276,30 @@ async function cancelFor(ctx: StallContext, buyerId: string, parsed: ParsedComme
   return `Still checking PayPal for ${name}.`;
 }
 
-/** Called by the scheduler while holds are open: a PAID invoice ends its hold Paid. */
+/**
+ * Called by the scheduler while holds are open. PayPal reads happen outside the stall queue so they
+ * never delay a buyer's claim; only a PAID result enters the queue to end its hold (still B1-safe:
+ * markPaid only moves a hold that is still Holding).
+ */
 export async function pollPayments(stallId: string): Promise<void> {
   const open = await db()<HoldRow[]>`
     select id, serial, stall_id, variant_id, buyer_id, state, invoice_id from holds where stall_id = ${stallId} and state = 'Holding'`;
-  let changed = false;
   for (const h of open) {
     if (!h.invoice_id) continue;
     try {
       const inv = await getInvoice(h.invoice_id);
       if (decideEnding(inv.status) === "paid") {
-        await markPaid(stallId, h, inv);
-        changed = true;
-      } else {
+        await serial(stallId, async () => {
+          const [still] = await db()<HoldRow[]>`select id, serial, stall_id, variant_id, buyer_id, state, invoice_id from holds where id = ${h.id}`;
+          if (still?.state !== "Holding") return;
+          await markPaid(stallId, still, inv);
+          publish(stallId);
+        });
+      } else if (inv.status !== "UNPAID") {
         await db()`update invoices set status = ${inv.status}, last_read_at = now() where id = ${inv.id}`;
       }
     } catch (e) {
       console.error(JSON.stringify({ scope: "poll", hold: h.id, error: (e as Error).message.slice(0, 200) }));
     }
   }
-  if (changed) publish(stallId);
 }
