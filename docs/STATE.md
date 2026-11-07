@@ -2,8 +2,8 @@
 _Last verified: 2026-11-07 09:45 UTC at ba911fb_
 
 **Thesis:** Every hold ends one of two ways: paid through PayPal, or passed to the next buyer.
-**Milestone:** M0 · Rigged (checkpoint 2026-11-07 22:06 UTC) · **Deadline:** 2026-11-12 20:00 UTC (time left: the clock line)
-**Next action:** the user opens https://hawker-8q2t.onrender.com on a phone with Wi-Fi off (last M0 check); then start M1 with `impeccable shape` for the seller board and the database choice.
+**Milestone:** M0 · Rigged **done** 09:47 UTC → next M1 · Walking skeleton (checkpoint 2026-11-09 13:24 UTC) · **Deadline:** 2026-11-12 20:00 UTC (time left: the clock line)
+**Next action:** on the user's go-ahead, start M1: `impeccable shape` for the seller board and Hold card, choose the external free database (D-011), then break M1 into work items in PLAN.md.
 **Blocked on:** nothing.
 
 ## Works (verified this session)
@@ -19,14 +19,13 @@ _Last verified: 2026-11-07 09:45 UTC at ba911fb_
 | What | Environment | URL | Last checked |
 |---|---|---|---|
 | Repo (private, D-009) | GitHub | https://github.com/emmanuelist/hawker | 2026-11-07 |
-| Web service `hawker` (free plan, D-011), auto-deploys from `main` | Render | https://hawker-8q2t.onrender.com (health: `/api/health`) | 2026-11-07 09:43 UTC, commit ba911fb (E-008) |
+| Web service `hawker` (free plan, D-011), auto-deploys from `main` | Render | https://hawker-8q2t.onrender.com (health: `/api/health`) | 2026-11-07 09:43 UTC, commit ba911fb (E-008); phone on mobile data 09:47 UTC (E-009) |
 
 ## Broken or unverified
 - No product code yet. The claim engine, parser client, PayPal client and ingest start in M1.
 - Database choice is open (D-002 consequence); decide at the start of M1.
 - Design direction not set; run `impeccable shape` before the first real UI.
 - Render free plan sleeps after 15 min idle (D-011); the keep-warm loop isn't built yet (M1).
-- Phone-on-cellular check of the deployed URL: pending (user).
 
 ## Claims not yet verified
 - C-1 the thesis: needs the hold ledger on the deployed app (M2).
