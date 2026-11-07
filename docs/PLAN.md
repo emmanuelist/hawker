@@ -21,7 +21,7 @@ Deadline source: https://paypalaihackathon.devpost.com/rules §1 ("Thursday Nov 
 
 ### M1 · Walking skeleton
 - [x] Design direction set: Invoice Pad (D-012); stall page as the buyer surface (D-013)
-- [ ] Database: Neon free Postgres (D-014), schema + migrations, done when `npm run db:migrate` applies cleanly to Neon and `/api/health` reports `db: ok`
+- [x] Database (E-013): Neon free Postgres (D-014), schema + migrations, done when `npm run db:migrate` applies cleanly to Neon (`db: ok` health check moves to the service item, since `/api/health` must not touch the DB per D-014)
 - [x] Claim engine (pure) rules (`src/lib/domain/engine.ts`, 27 tests): comments → holds / waitlist / cancel / expiry → pass, invariants B1–B3, done when `npm test` covers claim, over-stock waitlist, cancel, expiry-pass, a pay-vs-expiry race, and unknown-variant clarify
 - [x] Parser (E-010: eval 60/60, 0 phantom, failover exercised): regex fast path + one model client (Groq → Gemini failover, timeout, retries, request-ID logs), done when `npm run eval` re-runs the 60-comment set through the app's own client with 0 phantom claims
 - [x] PayPal client (E-011, E-012): token cache + terminate, shareable invoice create / send / get / cancel, done when `npm run sandbox:invoice` creates, reads and cancels a real sandbox invoice

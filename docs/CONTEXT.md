@@ -11,6 +11,7 @@ touching an integration.
 | Groq | Model API (free tier) | org-level limits | `https://api.groq.com/openai/v1` (`GROQ_API_KEY`) | console.groq.com | 2026-11-07, E-005 |
 | Google Gemini API | Model API (free tier) | Nigeria is on the official available-regions list | `https://generativelanguage.googleapis.com/v1beta` (`GEMINI_API_KEY`, header `x-goog-api-key`) | aistudio.google.com | 2026-11-07, E-005 |
 | Twitch chat | Chat source | anonymous IRC over WebSocket | `wss://irc-ws.chat.twitch.tv:443` | — | 2026-11-07, E-006 |
+| Neon | Postgres (free, Vercel-managed org) | project `neon-red-garden` (broad-glade-55248869), branch `main`, **database `hawker`** (separate from that project's `neondb`), pooled endpoint `ep-sparkling-cell-a44mims4-pooler.us-east-1.aws.neon.tech`, AWS US East 1 | `DATABASE_URL` (pooled, `sslmode=require&channel_binding=require`) | console.neon.tech | 2026-11-07, E-013 |
 | Render | Hosting | Web service `hawker`, **free plan** (a paid plan requires a card on file even with the $50 credit, D-011), Blueprint `exs-dbneutm7bikc73ccae0g`, auto-deploys `main` | https://hawker-8q2t.onrender.com | dashboard.render.com | 2026-11-07, E-008 |
 
 ## SDKs and APIs
@@ -34,6 +35,7 @@ touching an integration.
 
 ## Traps
 - **T-15 · Invoice refusal codes (verified 2026-11-07):** cancel twice → 422 `INVOICE_CANCELED_ALREADY` (E-011); cancel a PAID invoice → 422 `CANNOT_CANCEL_PAID_INVOICE`, status stays PAID (E-012). `configuration.partial_payment.allow_partial_payment` and `allow_tip` live under `configuration`; `detail.reference` ≤ 120 chars; `invoice_number` auto-generated if omitted (invoicing/object.md).
+- **T-16 · The database is in AWS US East 1 while the Render service is in Oregon**, about 60–70 ms per round trip. Keep transactions short; PayPal calls (1–2 s) dominate anyway. The branch was archived and unarchives on the first query (a few seconds once).
 - **T-1 · PayPal reuses the same OAuth access token for up to 9 h.** After enabling a feature (Invoicing) the old token kept the old scopes and every call returned 403 `NOT_AUTHORIZED`. Fix: `POST /v1/oauth2/token/terminate`, then request a new token. (E-001 notes)
 - **T-2 · `invoicer.email_address`, if sent, must match the token's sandbox Business account.** Omit it. (invoicing troubleshooting doc)
 - **T-3 · Venmo payouts are unsupported in the sandbox**, and one Venmo item fails the whole batch. (E-004)
