@@ -23,3 +23,5 @@ services:
         sync: false
       - key: DATABASE_URL
         sync: false
+      - key: NEXT_PUBLIC_AG_STUDIO_LICENSE_KEY
+        sync: false

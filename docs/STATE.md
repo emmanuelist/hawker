@@ -1,15 +1,16 @@
 # State
-_Last verified: 2026-11-07 14:55 UTC at d2beaa1_
+_Last verified: 2026-11-07 17:40 UTC at b954d86_
 
 **Thesis:** Every hold ends one of two ways: paid through PayPal, or passed to the next buyer.
-**Milestone:** M1 **done** → design pass (D-016) → independent review + fixes (D-017) → **M2 · Core claim** (checkpoint 2026-11-10 22:09 UTC) · **Deadline:** 2026-11-12 20:00 UTC (time left: the clock line)
-**Next action:** the user confirms the remaining M2 items (hold ledger in AG Studio, last-second payment through the UI, the refusals panel; phase gate, AGENTS rule 3); then write them into docs/PLAN.md and start the first.
+**Milestone:** M1 **done** → design pass (D-016) → independent review + fixes (D-017) → **M2 · Core claim** (ledger done, D-018) (checkpoint 2026-11-10 22:09 UTC) · **Deadline:** 2026-11-12 20:00 UTC (time left: the clock line)
+**Next action:** M2 item 2, a last-second payment through the UI (B1 in the browser), then item 3, the refusals panel (both in docs/PLAN.md). Optional user action: request a free AG Studio trial key and set `NEXT_PUBLIC_AG_STUDIO_LICENSE_KEY` on Render to remove AG's watermark/console banner (T-27).
 **Blocked on:** nothing.
 
 ## Works (verified this session)
 | Capability | Verified by | Evidence |
 |---|---|---|
 | Gate | lint (0 warnings), typecheck, 70 tests, build at d2beaa1 | E-007 |
+| **Hold ledger in AG Studio** (`/ledger`): real holds, custom widgets, Invoice Pad theme; Hawker's agent with PayPal/totals/chart tools, delegating to Studio's agents | deployed, three agent questions answered | E-026 |
 | Landing: live pad, labelled replay of the latest real ending, server-rendered first view | deployed: replay Holding at 2 s, stamped by 5.5 s; LCP 2.4 / 2.2 s on slow 4G | E-025 |
 | Stall: tap/typed claims, earlier-on-this-live, release, passed notice + Claim again, 30 s warning | deployed flows (No. 0014–0016) | E-025 |
 | Stall first view from the server; controls wait for hydration | slow 4G: LCP 2.8 / 2.3 s (was 6.4 / 5.0); joined at 6.6 s, URL clean | E-025 |
@@ -32,6 +33,8 @@ _Last verified: 2026-11-07 14:55 UTC at d2beaa1_
 - Paid count is 1 against 12+ Passed on the demo stall; run real sandbox payments before the film (D-017).
 - A last-second payment racing the expiry through the UI (B1 in the browser): proven at PayPal (E-012) and in engine tests only.
 - The buyer's PAID moment after the redesign (stamp across the copy, vibration): built, not exercised with a payment since.
+- Ledger: open-ended edits delegated to Studio's built-in agents depend on Gemini's free per-minute quota and once claimed a change they didn't make (T-26); the common actions are code-backed tools.
+- Ledger grid's Amount column truncates ("$48…."); a newly added chart lands below the fold.
 - Code doesn't yet answer stock questions ("is the L still there?") from the catalog; they read as questions for the seller.
 - Why Groq failed on one deployed call (E-020): unknown without Render logs.
 

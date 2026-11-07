@@ -316,7 +316,8 @@ export default function LedgerStudio({ stall, rows }: { stall: string; rows: Led
   }, [stall]);
 
   return (
-    <AgStudioProvider modules={MODULES}>
+    // A trial key removes AG's watermark and console banner (T-27). Public by design: AG licence keys ship in the client.
+    <AgStudioProvider modules={MODULES} licenseKey={process.env.NEXT_PUBLIC_AG_STUDIO_LICENSE_KEY || undefined}>
       <AgStudio
         style={{ height: "100%", width: "100%" }}
         data={data}
