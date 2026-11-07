@@ -22,6 +22,9 @@ export function fastParse(text: string, onScreen: CatalogItem | null, catalog: C
   if (!s) return { intent: "other", items: [] };
 
   if (/^(cancel|nevermind|never mind)$/.test(s)) return { intent: "cancel", items: [] };
+  // "cancel a2 m" / "cancel my gold": cancel one named hold (the stall's Release button posts this).
+  const named = s.match(/^cancel(?: my)? (.+)$/);
+  if (named) return fastCancel(named[1].split(" "), onScreen, catalog);
 
   const tokens = s.split(" ");
   let claimWord = false;
@@ -86,4 +89,26 @@ export function fastParse(text: string, onScreen: CatalogItem | null, catalog: C
   // If a variant was read against the on-screen item but the code names another item, re-check it.
   if (code && variant && !catalog.find((i) => i.code === code)?.variants.some((v) => v.label === variant)) return null;
   return { intent: "claim", items: [{ code: itemCode, variant, qty: qty ?? 1 }] };
+}
+
+function fastCancel(tokens: string[], onScreen: CatalogItem | null, catalog: CatalogItem[]): ParsedComment | null {
+  let code: string | null = null;
+  let variant: string | null = null;
+  for (const t of tokens) {
+    const asCode = catalog.find((i) => i.code.toLowerCase() === t);
+    if (asCode && !code) {
+      code = asCode.code;
+      continue;
+    }
+    const target = code ? catalog.find((i) => i.code === code) : onScreen;
+    const asVariant = target?.variants.find((v) => v.label.toLowerCase() === (SYNONYMS[t] ?? t));
+    if (asVariant && !variant) {
+      variant = asVariant.label;
+      continue;
+    }
+    return null; // anything else ("cancel the red one abeg"): the model reads it
+  }
+  const itemCode = code ?? onScreen?.code ?? null;
+  if (!itemCode || (!code && !variant)) return null;
+  return { intent: "cancel", items: [{ code: itemCode, variant, qty: 1 }] };
 }

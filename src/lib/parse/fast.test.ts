@@ -39,7 +39,6 @@ describe("fastParse defers anything uncertain to the model (never guesses a clai
     "how much be this one?",
     "sis mine 1 gold and 1 black",
     "mine L... actually no M",
-    "cancel my red",
     "I want am",
     "someone cancel? I'm next for L",
     "is A2 coming back on?",
@@ -67,5 +66,43 @@ describe("fastParse non-claims", () => {
   });
   test("two quantities is not guessed", () => {
     expect(fastParse("+2 x3 red", A3, catalog)).toBeNull();
+  });
+});
+
+// One-tap claims from the stall post canonical comments. An earlier item is named by its code, so
+// the claim must land on that item, never on the one on screen; a variant the named item doesn't
+// have must go to the model rather than become a claim.
+describe("fastParse reads the stall's tapped claims", () => {
+  const A5 = { id: 5, code: "A5", name: "Aso-oke stole", priceCents: 4000, variants: [{ id: 51, label: "one size" }] };
+  const withA5 = [...catalog, A5];
+  test.each([
+    ["mine gold", A3, { code: "A3", variant: "gold", qty: 1 }], // the item on screen
+    ["mine a4 wine", A3, { code: "A4", variant: "wine", qty: 1 }], // an earlier item, by code
+    ["mine a1 m", A3, { code: "A1", variant: "M", qty: 1 }],
+    ["mine a5", A3, { code: "A5", variant: null, qty: 1 }], // a single-variant earlier item
+    ["mine", A5, { code: "A5", variant: null, qty: 1 }], // a single-variant item on screen
+  ])("%s", (text, onScreen, ref) => {
+    expect(fastParse(text, onScreen, withA5)).toEqual({ intent: "claim", items: [ref] });
+  });
+  test("a variant the named item doesn't have defers to the model", () => {
+    expect(fastParse("mine a4 gold", A3, withA5)).toBeNull();
+  });
+});
+
+// The stall's Release button posts "cancel <code> <variant>"; it must cancel that hold and nothing else.
+describe("fastParse reads a named cancel", () => {
+  test.each([
+    ["cancel a4 wine", A3, { code: "A4", variant: "wine", qty: 1 }],
+    ["cancel my gold", A3, { code: "A3", variant: "gold", qty: 1 }],
+    ["cancel my red", A3, { code: "A3", variant: "red", qty: 1 }], // was deferred to the model before named cancels
+    ["cancel a1", A3, { code: "A1", variant: null, qty: 1 }],
+  ])("%s", (text, onScreen, ref) => {
+    expect(fastParse(text, onScreen, catalog)).toEqual({ intent: "cancel", items: [ref] });
+  });
+  test.each(["cancel a4 gold", "cancel the red one abeg", "cancel pls"])("defers %s to the model", (text) => {
+    expect(fastParse(text, A3, catalog)).toBeNull();
+  });
+  test("a bare cancel still cancels the latest hold", () => {
+    expect(fastParse("cancel", A3, catalog)).toEqual({ intent: "cancel", items: [] });
   });
 });

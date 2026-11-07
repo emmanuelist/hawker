@@ -2,17 +2,7 @@
 import { cookies } from "next/headers";
 import { buyerFromToken, cookieName } from "@/lib/service/buyers";
 import { subscribe } from "@/lib/service/runtime";
-import { getSnapshot, type Snapshot } from "@/lib/service/snapshot";
-
-/** The stall view never exposes other buyers' invoice links or IDs. */
-function forBuyer(s: Snapshot, buyerId: string | null): Snapshot {
-  return {
-    ...s,
-    holds: s.holds.map((h) =>
-      h.buyerId === buyerId ? h : { ...h, buyerId: "", payerLink: null, invoiceId: null, transactionId: null },
-    ),
-  };
-}
+import { forBuyer, getSnapshot } from "@/lib/service/snapshot";
 
 export async function GET(req: Request, { params }: { params: Promise<{ stall: string }> }) {
   const { stall } = await params;

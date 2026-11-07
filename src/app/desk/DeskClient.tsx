@@ -38,21 +38,24 @@ export function DeskClient({ stall }: { stall: string }) {
     [stall],
   );
 
-  const next = useMemo(() => {
-    if (!snap) return null;
+  const [prev, next] = useMemo(() => {
+    if (!snap || !snap.items.length) return [null, null];
+    const n = snap.items.length;
     const i = snap.items.findIndex((x) => x.code === snap.onScreen);
-    return snap.items[(i + 1) % snap.items.length]?.code ?? null;
+    return [snap.items[(i - 1 + n) % n]?.code ?? null, snap.items[(i + 1) % n]?.code ?? null];
   }, [snap]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key.toLowerCase() !== "n" || e.metaKey || e.ctrlKey || e.altKey) return;
+      const k = e.key.toLowerCase();
+      if ((k !== "n" && k !== "p") || e.metaKey || e.ctrlKey || e.altKey) return;
       if ((e.target as HTMLElement)?.closest("input, textarea, [contenteditable]")) return;
-      if (next && !busy) void setOnScreen(next);
+      const to = k === "n" ? next : prev;
+      if (to && !busy) void setOnScreen(to);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [next, busy, setOnScreen]);
+  }, [next, prev, busy, setOnScreen]);
 
   const active = useMemo(
     () =>
@@ -118,10 +121,15 @@ export function DeskClient({ stall }: { stall: string }) {
   const pad: { hold: SnapshotHold; leaving: boolean }[] = active.map((h) => ({ hold: h, leaving: false }));
   for (const x of [...leaving].sort((a, b) => a.index - b.index)) pad.splice(Math.min(x.index, pad.length), 0, { hold: x.hold, leaving: true });
   const serials = snap.holds.map((h) => h.serial);
+  const byComment = new Map(snap.holds.map((h) => [h.commentSeq, h]));
+  const questions = snap.comments.filter((c) => c.intent === "question").slice(0, 3);
   const first = serials.length ? Math.min(...serials) : null;
 
   return (
     <div className="grid h-dvh grid-cols-[minmax(0,1fr)] grid-rows-[auto_1fr_auto] overflow-hidden">
+      <h1 className="sr-only">
+        {snap.stall.name} · {snap.show.title} · the desk
+      </h1>
       <Rail snap={snap} link={link} sound={sound} />
 
       <main className="grid min-h-0 grid-cols-[19rem_minmax(0,1fr)_22rem] max-[1180px]:grid-cols-[17rem_minmax(0,1fr)_19rem]">
@@ -165,15 +173,31 @@ export function DeskClient({ stall }: { stall: string }) {
           )}
 
           {next && (
-            <button
-              type="button"
-              onClick={() => void setOnScreen(next)}
-              disabled={busy}
-              className="mt-6 flex h-11 w-full items-center justify-between bg-rail px-4 font-display font-extrabold text-rail-ink hover:bg-rail-deep disabled:opacity-60"
-            >
-              <span>{busy ? "Changing…" : `Next item: ${next}`}</span>
-              <kbd className="border border-rail-muted px-1.5 font-mono text-[0.75rem] font-bold">N</kbd>
-            </button>
+            <div className="mt-6 flex gap-2">
+              {prev && prev !== next && (
+                <button
+                  type="button"
+                  onClick={() => void setOnScreen(prev)}
+                  disabled={busy}
+                  aria-keyshortcuts="P"
+                  aria-label={`Previous item: ${prev}`}
+                  className="flex h-11 items-center gap-2 border border-rail px-3 font-display font-extrabold text-rail hover:bg-paid disabled:opacity-60"
+                >
+                  <kbd className="border border-rule px-1.5 font-mono text-[0.75rem] font-bold">P</kbd>
+                  {prev}
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => void setOnScreen(next)}
+                disabled={busy}
+                aria-keyshortcuts="N"
+                className="flex h-11 flex-1 items-center justify-between bg-rail px-4 font-display font-extrabold text-rail-ink hover:bg-rail-deep disabled:opacity-60"
+              >
+                <span>{busy ? "Changing…" : `Next item: ${next}`}</span>
+                <kbd className="border border-rail-muted px-1.5 font-mono text-[0.75rem] font-bold">N</kbd>
+              </button>
+            </div>
           )}
           {error && (
             <p className="mt-2 text-[0.8125rem] text-serial" role="alert">
@@ -245,7 +269,7 @@ export function DeskClient({ stall }: { stall: string }) {
                   <p className="text-[0.8125rem] text-ink-muted">The stubs left in the booklet, latest first</p>
                 </div>
                 <ol>
-                  {ended.slice(0, 14).map((h) => (
+                  {ended.slice(0, 8).map((h) => (
                     <Stub key={h.id} h={h} arrived={arrived.has(h.id)} />
                   ))}
                 </ol>
@@ -259,12 +283,26 @@ export function DeskClient({ stall }: { stall: string }) {
             Chat
           </h2>
           <p className="mt-0.5 text-[0.8125rem] text-ink-muted">As written, and what Hawker read</p>
+          {questions.length > 0 && (
+            <section aria-labelledby="questions" className="mt-4 border border-rule bg-paid px-3.5 py-3">
+              <h3 id="questions" className="print">
+                For the seller to answer on the live
+              </h3>
+              <ol className="mt-2 grid gap-2">
+                {questions.map((q) => (
+                  <li key={q.seq} className="text-[0.9375rem] leading-snug">
+                    <span className="font-semibold">@{q.handle}</span> <span className="[overflow-wrap:anywhere]">{q.text}</span>
+                  </li>
+                ))}
+              </ol>
+            </section>
+          )}
           {snap.comments.length === 0 ? (
             <p className="mt-4 text-ink-muted">Comments appear here as buyers type on the stall.</p>
           ) : (
             <ol className="mt-2 divide-y divide-rule">
               {snap.comments.map((c) => (
-                <ChatLine key={c.seq} c={c} showSeq compact />
+                <ChatLine key={c.seq} c={c} showSeq compact hold={byComment.get(c.seq) ?? null} />
               ))}
             </ol>
           )}
@@ -377,14 +415,18 @@ function Stub({ h, arrived }: { h: SnapshotHold; arrived: boolean }) {
   const what = h.singleVariant ? `${h.code} ${h.itemName}` : `${h.code} ${h.itemName} — ${h.variant}`;
   return (
     <li className={`${arrived ? "stub " : ""}grid grid-cols-[8.5rem_4.75rem_minmax(0,1fr)_auto] items-center gap-x-4 border-b border-rule py-2.5 text-[0.875rem] max-[1180px]:grid-cols-[7.5rem_minmax(0,1fr)_auto]`}>
-      <span className="stamp justify-self-start text-[0.75rem]" data-kind={h.state === "Paid" ? "paid" : "passed"} style={{ rotate: "-3deg" }}>
-        {h.state}
-        {h.state === "Passed" && h.passedTo && <span className="stamp-to">→ @{h.passedTo}</span>}
+      <span className="flex flex-col items-start gap-1">
+        <span className="stamp text-[0.75rem]" data-kind={h.state === "Paid" ? "paid" : "passed"} style={{ rotate: "-3deg" }}>
+          {h.state}
+        </span>
+        {h.state === "Passed" && (
+          <span className="text-[0.8125rem] font-semibold text-stamp-passed">{h.passedTo ? `→ @${h.passedTo}` : "→ next buyer"}</span>
+        )}
       </span>
       <span className="font-mono font-bold text-serial num max-[1180px]:hidden">{copyNo(h.serial)}</span>
       <span className="min-w-0">
         <span className="block truncate font-semibold">@{h.handle}</span>
-        <span className="block truncate text-[0.8125rem] text-ink-muted">
+        <span className="block text-[0.8125rem] leading-snug text-ink-muted">
           <span className="min-[1181px]:hidden">{copyNo(h.serial)} · </span>
           {what}
           {h.qty > 1 ? ` ×${h.qty}` : ""} · {money(h.priceCents * h.qty)}
@@ -414,14 +456,14 @@ function Tape({ ended }: { ended: SnapshotHold[] }) {
       {ended.length === 0 ? (
         <p className="text-[0.8125rem] text-ink-muted">Endings land here: PAID with its PayPal transaction, or PASSED to the next buyer.</p>
       ) : (
-        <ol className="flex gap-6 overflow-x-auto text-[0.8125rem] whitespace-nowrap">
+        <ol aria-label="Latest endings" className="flex gap-6 overflow-x-auto text-[0.8125rem] whitespace-nowrap [mask-image:linear-gradient(to_right,#000_88%,transparent)] [scrollbar-width:none]">
           {ended.map((h) => (
             <li key={h.id} className="flex items-baseline gap-2">
               <span className={`font-display font-black tracking-[0.08em] uppercase ${h.state === "Paid" ? "text-stamp-paid" : "text-stamp-passed"}`}>{h.state}</span>
               <span className="font-mono font-bold text-serial num">{copyNo(h.serial)}</span>
               <span>@{h.handle}</span>
               <span className="font-mono text-ink-muted">
-                {h.state === "Paid" ? `txn ${h.transactionId ?? "—"}` : h.passedTo ? `→ @${h.passedTo}` : h.endReason === "cancelled" ? "cancelled" : "expired"}
+                {h.state === "Paid" ? `txn ${h.transactionId ?? "—"}` : h.passedTo ? `→ @${h.passedTo}` : "→ next buyer"}
               </span>
             </li>
           ))}

@@ -5,16 +5,18 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChatLine } from "@/components/ChatLine";
 import { ArrowOut, Copy, lineInfo } from "@/components/Copy";
-import { linkLabel, mmss, money, useLiveSnapshot, useServerNow } from "@/components/live";
+import { Countdown } from "@/components/Countdown";
+import { copyNo, linkLabel, mmss, money, useLiveSnapshot, useServerNow } from "@/components/live";
 import type { Snapshot, SnapshotHold } from "@/lib/service/snapshot";
 
 const order: Record<SnapshotHold["state"], number> = { Holding: 0, Waiting: 1, Paid: 2, Passed: 3 };
 type Note = { text: string; error: boolean } | null;
-type Pending = { text: string; label: string } | null;
+type Pending = { text: string; key: string; label: string } | null;
+type Item = Snapshot["items"][number];
 
-export function StallClient({ stall }: { stall: string }) {
+export function StallClient({ stall, initial = null }: { stall: string; initial?: Snapshot | null }) {
   const [nonce, setNonce] = useState(0);
-  const { snap, offset, link } = useLiveSnapshot(stall, "stall", nonce);
+  const { snap, offset, link } = useLiveSnapshot(stall, "stall", nonce, initial);
   const now = useServerNow(offset);
   const [announce, setAnnounce] = useState("");
   const [fresh, setFresh] = useState<ReadonlySet<number>>(new Set());
@@ -22,6 +24,10 @@ export function StallClient({ stall }: { stall: string }) {
   const [busy, setBusy] = useState<string | null>(null); // what is in flight: "join", "send" or a tile label
   const [note, setNote] = useState<Note>(null);
   const [pending, setPending] = useState<Pending>(null);
+  const [openEarlier, setOpenEarlier] = useState<string | null>(null);
+  const [passedNotice, setPassedNotice] = useState<SnapshotHold | null>(null);
+  const [released, setReleased] = useState<ReadonlySet<number>>(new Set());
+  const [warned, setWarned] = useState<ReadonlySet<number>>(new Set());
   const nameRef = useRef<HTMLInputElement>(null);
   const commentRef = useRef<HTMLInputElement>(null);
 
@@ -57,7 +63,10 @@ export function StallClient({ stall }: { stall: string }) {
           msgs.push(`Copy ${h.serial} is paid. It's yours.`);
           paid = h.id;
         }
-        if (h.state === "Passed") msgs.push(`Copy ${h.serial} passed${h.passedTo ? ` to @${h.passedTo}` : ""}.`);
+        if (h.state === "Passed") {
+          msgs.push(`Copy ${h.serial} passed${h.passedTo ? ` to @${h.passedTo}` : " to the next buyer"}.`);
+          if (!released.has(h.id)) setPassedNotice(h);
+        }
       }
     }
     setPrevMine(mine);
@@ -67,6 +76,13 @@ export function StallClient({ stall }: { stall: string }) {
       setAnnounce(msgs.join(" "));
       if (note && !note.error) setNote(null);
     }
+  }
+
+  // Under 30 seconds left on one of my copies: say so once.
+  const lowTime = now > 0 ? mine.find((h) => h.state === "Holding" && h.deadlineAt && new Date(h.deadlineAt).getTime() - now < 30_000 && !warned.has(h.id)) : undefined;
+  if (lowTime) {
+    setWarned(new Set([...warned, lowTime.id]));
+    setAnnounce(`Copy ${lowTime.serial}: under 30 seconds left to pay.`);
   }
 
   // The buyer's own PAID: a short buzz on phones that support it.
@@ -117,21 +133,33 @@ export function StallClient({ stall }: { stall: string }) {
       const p = pending;
       setPending(null);
       setBusy(null);
-      if (p) await send(p.text, "tap", p.label);
+      if (p) await send(p.text, "tap", p.key);
     } catch {
       setNote({ text: "No connection. Try again.", error: true });
       setBusy(null);
     }
   }
 
-  function claim(text: string, label: string) {
+  function release(h: SnapshotHold) {
+    setReleased(new Set([...released, h.id]));
+    const text = h.singleVariant ? `cancel ${h.code.toLowerCase()}` : `cancel ${h.code.toLowerCase()} ${h.variant.toLowerCase()}`;
+    void send(text, "tap", `release:${h.id}`);
+  }
+
+  function claimAgain(h: SnapshotHold) {
+    setPassedNotice(null);
+    const text = h.singleVariant ? `mine ${h.code.toLowerCase()}` : `mine ${h.code.toLowerCase()} ${h.variant.toLowerCase()}`;
+    void send(text, "tap", `${h.code}:${h.variant}`);
+  }
+
+  function claim(text: string, key: string, label: string) {
     if (!me) {
-      setPending({ text, label });
+      setPending({ text, key, label });
       setNote(null);
       nameRef.current?.focus();
       return;
     }
-    void send(text, "tap", label);
+    void send(text, "tap", key);
   }
 
   if (!snap) {
@@ -148,9 +176,13 @@ export function StallClient({ stall }: { stall: string }) {
   const lines = lineInfo(snap.holds);
   const holding = mine.filter((h) => h.state === "Holding").sort((a, b) => (a.deadlineAt ?? "").localeCompare(b.deadlineAt ?? ""));
   const payNow = holding.find((h) => h.payerLink) ?? null;
+  const waitingCopy = mine.find((h) => h.state === "Waiting") ?? null;
+  const byComment = new Map(snap.holds.map((h) => [h.commentSeq, h]));
+  const earlierItems = snap.earlier.map((c) => snap.items.find((i) => i.code.toUpperCase() === c)).filter((i): i is Item => !!i);
+  const openItem = earlierItems.find((i) => i.code === openEarlier) ?? null;
 
   return (
-    <main className={`mx-auto flex min-h-dvh max-w-[30rem] flex-col px-5 ${payNow ? "pb-48" : "pb-32"}`}>
+    <main className={`mx-auto flex min-h-dvh max-w-[30rem] flex-col px-5 ${payNow || waitingCopy ? "pb-48" : "pb-32"}`}>
       <div className="flex items-center justify-between gap-3 pt-4">
         <p className="font-display text-[0.9375rem] font-black tracking-[0.16em] uppercase">Hawker</p>
         <p className="flex items-center gap-2 text-[0.8125rem] text-ink-muted">
@@ -184,63 +216,75 @@ export function StallClient({ stall }: { stall: string }) {
             On the live now
           </p>
 
-          <ul className="mt-4 grid grid-cols-[repeat(auto-fit,minmax(6.25rem,1fr))] gap-2.5" aria-label={`Claim ${item.code}`}>
-            {item.variants.map((v) => {
-              const single = item.variants.length === 1;
-              const text = single ? "mine" : `mine ${v.label.toLowerCase()}`;
-              const label = single ? item.name : v.label;
-              const myHold = mine.find((h) => h.code === item.code && h.variant === v.label && (h.state === "Holding" || h.state === "Waiting"));
-              const kind = myHold ? (myHold.state === "Holding" ? "yours" : "inline") : v.available > 0 ? "claim" : "line";
-              const inFlight = busy === label;
-              const yoursLeft = myHold?.deadlineAt && now ? new Date(myHold.deadlineAt).getTime() - now : snap.stall.windowSeconds * 1000;
-              const action =
-                kind === "yours"
-                  ? "Yours"
-                  : kind === "inline"
-                    ? `No. ${(myHold && lines.position(myHold)) ?? 1} in line`
-                    : inFlight
-                      ? "Reading…"
-                      : kind === "claim"
-                        ? "Claim"
-                        : "Join the line";
+          <ClaimTiles
+            item={item}
+            onScreen
+            mine={mine}
+            lines={lines}
+            now={now}
+            windowSeconds={snap.stall.windowSeconds}
+            busy={busy}
+            onClaim={claim}
+          />
+          <p className="mt-3.5 text-[0.875rem] leading-snug text-ink-muted">
+            Tap to claim, or type it like on the live: “I go take 2”, “akin yung black”. Unpaid after {Math.round(snap.stall.windowSeconds / 60)}:00
+            {snap.stall.isDemo ? " (demo)" : ""}, a hold passes to the next buyer.
+          </p>
+        </section>
+      ) : (
+        <p className="border-b border-rule py-5 text-ink-muted">The seller hasn&rsquo;t put an item on screen yet. It shows here the moment they do.</p>
+      )}
+
+      {earlierItems.length > 0 && (
+        <section aria-labelledby="earlier" className="border-b border-rule py-5">
+          <h2 id="earlier" className="font-display text-lg leading-tight font-extrabold">
+            Earlier on this live
+          </h2>
+          <p className="mt-0.5 text-[0.875rem] text-ink-muted">Still yours to claim while stock lasts.</p>
+          <ul className="-mx-5 mt-3 flex snap-x gap-2.5 overflow-x-auto px-5 pb-1 [scrollbar-width:none]">
+            {earlierItems.map((i) => {
+              const left = i.variants.reduce((n, v) => n + v.available, 0);
+              const open = openEarlier === i.code;
               return (
-                <li key={v.label} className={single ? "col-span-full" : "flex"}>
+                <li key={i.code} className="shrink-0 snap-start">
                   <button
                     type="button"
-                    className="tile h-full w-full"
-                    data-kind={kind}
-                    disabled={kind === "yours" || kind === "inline" || busy !== null}
-                    aria-label={
-                      kind === "claim"
-                        ? `Claim ${item.code} ${label}, ${v.available} left`
-                        : kind === "line"
-                          ? `Join the line for ${item.code} ${label}, sold out, ${v.waiting} waiting`
-                          : `${item.code} ${label}: ${action}`
-                    }
-                    onClick={() => claim(text, label)}
+                    aria-pressed={open}
+                    aria-controls="earlier-claim"
+                    onClick={() => setOpenEarlier(open ? null : i.code)}
+                    className="flex min-h-[4.75rem] w-[8.5rem] flex-col items-start justify-between border border-rule bg-paid px-3 py-2.5 text-left hover:bg-white aria-pressed:border-print aria-pressed:bg-waiting"
                   >
-                    <span className="font-display text-[1.0625rem] leading-none font-extrabold capitalize">{label}</span>
-                    <span className="font-mono text-[0.875rem] text-ink-muted num">
-                      {kind === "yours" ? "On hold" : kind === "inline" ? "Sold out" : v.available > 0 ? `${v.available} left` : "Sold out"}
-                      {kind !== "yours" && v.waiting > 0 && ` · ${v.waiting} waiting`}
+                    <span className="flex w-full items-baseline justify-between gap-2">
+                      <span className="font-display text-xl leading-none font-black">{i.code}</span>
+                      <span className={`font-mono text-[0.75rem] num ${left === 0 ? "text-serial" : "text-ink-muted"}`}>{left === 0 ? "sold out" : `${left} left`}</span>
                     </span>
-                    <span className="flex items-center justify-between gap-2 border-t border-rule pt-2 text-[0.875rem] font-semibold">
-                      <span>{action}</span>
-                      {(kind === "claim" || kind === "line") && !inFlight && <Plus />}
-                      {kind === "yours" && <span className="font-mono num">{mmss(yoursLeft)}</span>}
-                    </span>
+                    <span className="w-full truncate text-[0.8125rem] font-medium">{i.name}</span>
                   </button>
                 </li>
               );
             })}
           </ul>
-          <p className="mt-3.5 text-[0.875rem] leading-snug text-ink-muted">
-            Tap to claim, or type it the way you would on the live: “I go take 2”, “akin yung black”. A hold lasts{" "}
-            {Math.round(snap.stall.windowSeconds / 60)} min{snap.stall.isDemo ? " here (demo window)" : ""}; if it isn&rsquo;t paid, it passes to the next buyer.
-          </p>
+          {openItem && (
+            <div id="earlier-claim" className="mt-4">
+              <p className="flex items-baseline justify-between gap-3">
+                <span className="font-semibold">
+                  {openItem.code} {openItem.name}
+                </span>
+                <span className="font-mono font-bold num">{money(openItem.priceCents)}</span>
+              </p>
+              <ClaimTiles
+                item={openItem}
+                onScreen={false}
+                mine={mine}
+                lines={lines}
+                now={now}
+                windowSeconds={snap.stall.windowSeconds}
+                busy={busy}
+                onClaim={claim}
+              />
+            </div>
+          )}
         </section>
-      ) : (
-        <p className="border-b border-rule py-5 text-ink-muted">The seller hasn&rsquo;t put an item on screen yet. It shows here the moment they do.</p>
       )}
 
       {me && mine.length > 0 && (
@@ -263,6 +307,8 @@ export function StallClient({ stall }: { stall: string }) {
                 linePosition={h.state === "Waiting" ? lines.position(h) : null}
                 fresh={fresh.has(h.id)}
                 celebrate={celebrate === h.id}
+                onRelease={() => release(h)}
+                releasing={busy === `release:${h.id}`}
               />
             ))}
           </div>
@@ -277,9 +323,12 @@ export function StallClient({ stall }: { stall: string }) {
           <p className="mt-2 text-ink-muted">No comments yet. Be first.</p>
         ) : (
           <ol className="mt-1 divide-y divide-rule">
-            {snap.comments.slice(0, 14).map((c) => (
-              <ChatLine key={c.seq} c={c} compact />
-            ))}
+            {snap.comments
+              .slice(0, 14)
+              .reverse()
+              .map((c) => (
+                <ChatLine key={c.seq} c={c} compact hold={byComment.get(c.seq) ?? null} showSource={false} />
+              ))}
           </ol>
         )}
       </section>
@@ -292,6 +341,11 @@ export function StallClient({ stall }: { stall: string }) {
         snap={snap}
         now={now}
         payNow={payNow}
+        passedNotice={payNow ? null : passedNotice}
+        onClaimAgain={claimAgain}
+        onDismissNotice={() => setPassedNotice(null)}
+        waitingCopy={waitingCopy}
+        waitingPosition={waitingCopy ? lines.position(waitingCopy) : null}
         joined={!!me}
         handle={me?.handle ?? null}
         busy={busy}
@@ -310,10 +364,102 @@ export function StallClient({ stall }: { stall: string }) {
   );
 }
 
+/** Variant tiles for one item. A tap posts a canonical comment through the normal pipeline:
+ *  "mine gold" for the item on screen, "mine a4 wine" for an earlier item (the code names it). */
+function ClaimTiles({
+  item,
+  onScreen,
+  mine,
+  lines,
+  now,
+  windowSeconds,
+  busy,
+  onClaim,
+}: {
+  item: Item;
+  onScreen: boolean;
+  mine: SnapshotHold[];
+  lines: ReturnType<typeof lineInfo>;
+  now: number;
+  windowSeconds: number;
+  busy: string | null;
+  onClaim: (text: string, key: string, label: string) => void;
+}) {
+  const single = item.variants.length === 1;
+  return (
+    <ul className="mt-4 grid grid-cols-[repeat(auto-fit,minmax(5.25rem,1fr))] gap-2.5" aria-label={`Claim ${item.code}`}>
+      {item.variants.map((v) => {
+        const label = single ? item.name : v.label;
+        const ref = onScreen ? "" : `${item.code.toLowerCase()} `;
+        const text = single ? (onScreen ? "mine" : `mine ${item.code.toLowerCase()}`) : `mine ${ref}${v.label.toLowerCase()}`;
+        const key = `${item.code}:${v.label}`;
+        const myHold = mine.find((h) => h.code === item.code && h.variant === v.label && (h.state === "Holding" || h.state === "Waiting"));
+        const kind = myHold ? (myHold.state === "Holding" ? "yours" : "inline") : v.available > 0 ? "claim" : "line";
+        const inFlight = busy === key;
+        const yoursLeft = myHold?.deadlineAt && now ? new Date(myHold.deadlineAt).getTime() - now : windowSeconds * 1000;
+        const action =
+          kind === "yours"
+            ? "Yours"
+            : kind === "inline"
+              ? `No. ${(myHold && lines.position(myHold)) ?? 1} in line`
+              : inFlight
+                ? "Reading…"
+                : kind === "claim"
+                  ? "Claim"
+                  : "Join the line";
+        return (
+          <li key={v.label} className={single ? "col-span-full" : "flex"}>
+            <button
+              type="button"
+              className="tile h-full w-full"
+              data-kind={kind}
+              disabled={kind === "yours" || kind === "inline" || busy !== null}
+              aria-label={
+                kind === "claim"
+                  ? `Claim ${item.code} ${label}, ${v.available} left`
+                  : kind === "line"
+                    ? `Join the line for ${item.code} ${label}, sold out, ${v.waiting} waiting`
+                    : `${item.code} ${label}: ${action}`
+              }
+              onClick={() => onClaim(text, key, onScreen ? label : `${item.code} ${label}`)}
+            >
+              <span className="flex items-center justify-between gap-2">
+                <span className="font-display text-[1.0625rem] leading-none font-extrabold capitalize">{label}</span>
+                {(kind === "claim" || kind === "line") && !inFlight && <Plus />}
+                {kind === "yours" && <span className="font-mono text-[0.875rem] font-bold num">{mmss(yoursLeft)}</span>}
+              </span>
+              <span className="text-[0.8125rem] leading-tight text-ink-muted">
+                {kind === "claim" &&
+                  !inFlight &&
+                  (v.available === 1 ? (
+                    <span className="font-semibold text-serial">Last one</span>
+                  ) : (
+                    <>
+                      <span className="font-mono text-ink num">{v.available}</span> left
+                    </>
+                  ))}
+                {kind === "line" && !inFlight && `Sold out · join the line${v.waiting > 0 ? ` (${v.waiting})` : ""}`}
+                {inFlight && "Reading…"}
+                {kind === "yours" && "Yours, pay below"}
+                {kind === "inline" && action}
+              </span>
+            </button>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
 function BottomBar({
   snap,
   now,
   payNow,
+  passedNotice,
+  onClaimAgain,
+  onDismissNotice,
+  waitingCopy,
+  waitingPosition,
   joined,
   handle,
   busy,
@@ -328,6 +474,11 @@ function BottomBar({
   snap: Snapshot;
   now: number;
   payNow: SnapshotHold | null;
+  passedNotice: SnapshotHold | null;
+  onClaimAgain: (h: SnapshotHold) => void;
+  onDismissNotice: () => void;
+  waitingCopy: SnapshotHold | null;
+  waitingPosition: number | null;
   joined: boolean;
   handle: string | null;
   busy: string | null;
@@ -349,16 +500,43 @@ function BottomBar({
             href={payNow.payerLink}
             target="_blank"
             rel="noreferrer"
-            className="mb-3 flex h-14 items-center justify-between gap-3 bg-rail pr-2 pl-5 text-rail-ink hover:bg-rail-deep active:translate-y-px"
-            aria-label={`Pay ${money(payNow.priceCents * payNow.qty)} with PayPal for copy ${payNow.serial}, ${mmss(left)} left`}
+            className="mb-3 flex h-15 items-center justify-between gap-3 bg-rail pr-2 pl-4 text-rail-ink hover:bg-rail-deep active:translate-y-px"
           >
-            <span className="flex items-center gap-2.5">
-              <span className="font-display text-[0.9375rem] font-extrabold tracking-wide whitespace-nowrap min-[360px]:text-[1.0625rem]">Pay {money(payNow.priceCents * payNow.qty)} with PayPal</span>
+            <span className="flex min-w-0 items-center gap-2.5">
+              <span className="flex flex-col leading-tight">
+                <span className="font-display text-[1.125rem] font-extrabold whitespace-nowrap">Pay {money(payNow.priceCents * payNow.qty)}</span>
+                <span className="text-[0.8125rem] text-rail-muted">with PayPal · copy {copyNo(payNow.serial)}</span>
+              </span>
               <ArrowOut />
             </span>
-            <span className={`flex h-10 items-center px-3 font-mono text-base font-bold num ${expiring ? "bg-serial text-white" : "bg-rail-deep text-rail-ink"}`}>
-              {mmss(left)}
+            <span className="pr-1.5">
+              <Countdown ms={left} tone={expiring ? "expiring" : "rail"} size="lg" />
             </span>
+          </a>
+        )}
+        {passedNotice && (
+          <div role="alert" className="mb-3 flex items-center justify-between gap-3 bg-serial py-2 pr-2 pl-4 text-white">
+            <p className="min-w-0 text-[0.9375rem] leading-snug">
+              <span className="font-display font-extrabold">Copy {copyNo(passedNotice.serial)} passed.</span>{" "}
+              {passedNotice.endReason === "cancelled" ? "It was cancelled." : "Time ran out before payment."}
+            </p>
+            <span className="flex shrink-0 items-center gap-1">
+              <button type="button" onClick={() => onClaimAgain(passedNotice)} disabled={busy !== null} className="h-10 bg-white px-3 font-display text-[0.9375rem] font-extrabold text-serial disabled:opacity-70">
+                Claim again
+              </button>
+              <button type="button" onClick={onDismissNotice} className="h-10 px-2 text-[0.875rem] underline" aria-label="Dismiss">
+                OK
+              </button>
+            </span>
+          </div>
+        )}
+        {!payNow && !passedNotice && waitingCopy && (
+          <a href="#mine" className="mb-3 flex h-11 items-center justify-between gap-3 border border-rule bg-waiting px-4 text-[0.9375rem]">
+            <span>
+              <span className="label mr-2">Waiting</span>
+              No. {waitingPosition ?? 1} in line for {waitingCopy.code} {waitingCopy.singleVariant ? waitingCopy.itemName : waitingCopy.variant}
+            </span>
+            <span className="text-[0.8125rem] font-semibold underline">Your copy</span>
           </a>
         )}
         {note && (note.error || !payNow) && (

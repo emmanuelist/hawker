@@ -41,6 +41,7 @@ touching an integration.
 - **T-19 · EventSource never reconnects after an error response** (e.g. a 500 before the stream opens); it closes for good. `live.ts` reopens it after 5 s (E-018). A server-side read failure after the stream opens is sent as `event: oops` and retried by the server.
 - **T-20 · CSS grid: a `whitespace-nowrap` child sets the min width of an implicit `auto` column** and widens the whole page past the viewport (the desk's tape at 1280 px, E-019). Give layout grids `minmax(0,1fr)` columns.
 - **T-21 · Live lists that prepend need `overflow-anchor: none`.** With the default scroll anchoring, a new comment added at the top of a scrolled column shifts the column to keep the old lines in place, hiding the newest. The desk's chat and pad columns turn it off (2026-11-07).
+- **T-22 · The scheduler assumes one process per database.** Deadlines and the stall queue are in memory, and a server loads every open hold when it starts. A local server pointed at the shared Neon database while Render runs would expire the same holds as Render and could promote the next buyer twice. Run local previews with `HAWKER_SCHEDULER=off`, or only when no hold is open.
 - **T-1 · PayPal reuses the same OAuth access token for up to 9 h.** After enabling a feature (Invoicing) the old token kept the old scopes and every call returned 403 `NOT_AUTHORIZED`. Fix: `POST /v1/oauth2/token/terminate`, then request a new token. (E-001 notes)
 - **T-2 · `invoicer.email_address`, if sent, must match the token's sandbox Business account.** Omit it. (invoicing troubleshooting doc)
 - **T-3 · Venmo payouts are unsupported in the sandbox**, and one Venmo item fails the whole batch. (E-004)
@@ -64,3 +65,4 @@ touching an integration.
 | `GROQ_API_KEY` | Primary model | console.groq.com → API Keys |
 | `GEMINI_API_KEY` | Failover model | aistudio.google.com → Get API key |
 | `RENDER_GIT_COMMIT` | Commit shown by `/api/health` | Set by Render at runtime (verified 2026-11-07, E-008) |
+| `HAWKER_SCHEDULER` | `off` disables the hold scheduler, for a local preview against the shared database while Render runs | Local only; never set on Render (T-22) |

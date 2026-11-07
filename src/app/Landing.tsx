@@ -2,7 +2,7 @@
 // The landing page (Persuade). Everything on it that looks like data is data: the pad, the chat line,
 // the trace and the endings all come from the demo stall's live stream, the same one the desk reads.
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { SOURCE } from "@/components/ChatLine";
 import { ArrowOut, Copy, lineInfo, shortId } from "@/components/Copy";
 import { copyNo, money, useLiveSnapshot, useServerNow } from "@/components/live";
@@ -13,8 +13,8 @@ const DEMO = "ada";
 /** Active invoices on the public page are shown, never linked: a stranger shouldn't pay someone's hold. */
 const publicCopy = (h: SnapshotHold): SnapshotHold => (h.state === "Holding" || h.state === "Waiting" ? { ...h, payerLink: null } : h);
 
-export function Landing() {
-  const { snap, offset, link } = useLiveSnapshot(DEMO, "desk");
+export function Landing({ initial = null }: { initial?: Snapshot | null }) {
+  const { snap, offset, link } = useLiveSnapshot(DEMO, "desk", 0, initial);
   const now = useServerNow(offset);
 
   const top = useMemo(() => pickTop(snap), [snap]);
@@ -28,16 +28,17 @@ export function Landing() {
 
   const paid = snap?.holds.filter((h) => h.state === "Paid") ?? [];
   const passed = snap?.holds.filter((h) => h.state === "Passed") ?? [];
-  const latestComment = snap?.comments[0] ?? null;
+  // The hero quotes the latest claim, not any comment: claims are short and on topic.
+  const latestComment = snap?.comments.find((c) => c.intent === "claim") ?? null;
 
   return (
     <div className="min-h-dvh overflow-x-clip">
       <Nav />
 
       <main>
-        <section aria-labelledby="claim" className="mx-auto grid max-w-[78rem] items-center gap-12 px-5 pt-10 pb-4 sm:px-8 sm:pt-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,30rem)] lg:gap-14 xl:grid-cols-[minmax(0,1fr)_32rem] xl:gap-20">
+        <section aria-labelledby="claim" className="mx-auto grid max-w-[78rem] grid-cols-[minmax(0,1fr)] items-center gap-x-12 gap-y-10 px-5 pt-10 pb-4 sm:px-8 sm:pt-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,30rem)] lg:gap-14 xl:grid-cols-[minmax(0,1fr)_32rem] xl:gap-20">
           <div>
-            <h1 id="claim" className="font-display text-[2.6rem] leading-[0.98] font-black tracking-[-0.035em] sm:text-[3.5rem] xl:text-[4.25rem]">
+            <h1 id="claim" className="font-display text-[2.15rem] leading-[0.98] font-black tracking-[-0.035em] min-[360px]:text-[2.6rem] sm:text-[3.5rem] xl:text-[4.25rem]">
               Every hold ends one of two ways: <span className="text-stamp-paid">paid through PayPal</span>, or <span className="text-stamp-passed">passed to the next buyer</span>.
             </h1>
             <p className="mt-6 max-w-[36rem] text-[1.0625rem] leading-relaxed text-ink-muted sm:text-[1.1875rem]">
@@ -45,18 +46,37 @@ export function Landing() {
               next buyer in line.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Link href={`/s/${DEMO}`} className="flex h-13 items-center justify-center gap-2.5 bg-rail px-6 font-display text-[1.0625rem] font-extrabold whitespace-nowrap text-rail-ink hover:bg-rail-deep">
+              <Link href={`/s/${DEMO}`} className="flex min-h-13 items-center justify-center gap-2.5 bg-rail px-6 py-2 text-center font-display text-[1.0625rem] font-extrabold text-rail-ink hover:bg-rail-deep sm:whitespace-nowrap">
                 Claim on the demo stall
                 <ArrowRight />
               </Link>
-              <Link href="/desk" className="flex h-13 items-center justify-center border border-ink px-6 font-display text-[1.0625rem] font-extrabold whitespace-nowrap hover:bg-paid">
+              <Link href="/desk" className="flex min-h-13 items-center justify-center border border-ink px-6 py-2 text-center font-display text-[1.0625rem] font-extrabold hover:bg-paid sm:whitespace-nowrap">
                 Watch the desk
               </Link>
             </div>
             <p className="mt-4 text-[0.8125rem] text-ink-muted">PayPal sandbox: no real money moves. Ada&rsquo;s Closet is a demo store with the builder&rsquo;s own catalog.</p>
           </div>
 
-          <Instrument snap={snap} now={now} top={top} freshId={freshId} latestComment={latestComment} paid={paid} passed={passed} link={link} />
+          <div className="lg:col-start-2 lg:row-span-2 lg:row-start-1">
+            <Instrument snap={snap} now={now} top={top} freshId={freshId} latestComment={latestComment} paid={paid} passed={passed} link={link} />
+          </div>
+
+          <div className="lg:col-start-1 lg:row-start-2 lg:self-start">
+            <dl className="grid max-w-[38rem] gap-4 border-t border-rule pt-5 sm:grid-cols-3 sm:gap-6">
+              <div>
+                <dt className="print">The seller</dt>
+                <dd className="mt-1 text-[0.9375rem] leading-snug">Goes live anywhere and pins the stall link.</dd>
+              </div>
+              <div>
+                <dt className="print">Buyers</dt>
+                <dd className="mt-1 text-[0.9375rem] leading-snug">Claim on the stall, then pay on PayPal.</dd>
+              </div>
+              <div>
+                <dt className="print">A helper</dt>
+                <dd className="mt-1 text-[0.9375rem] leading-snug">Watches every hold on the desk.</dd>
+              </div>
+            </dl>
+          </div>
         </section>
 
         <Trace snap={snap} />
@@ -84,28 +104,66 @@ function pickTop(snap: Snapshot | null): SnapshotHold | null {
   const holding = snap.holds.filter((h) => h.state === "Holding").sort((a, b) => (a.deadlineAt ?? "").localeCompare(b.deadlineAt ?? ""));
   if (holding[0]) return holding[0];
   const ended = snap.holds.filter((h) => h.state === "Paid" || h.state === "Passed").sort((a, b) => (b.endedAt ?? "").localeCompare(a.endedAt ?? ""));
-  return ended[0] ?? null;
+  return ended.find((h) => h.state === "Passed" && h.passedTo) ?? ended.find((h) => h.state === "Paid") ?? ended[0] ?? null;
+}
+
+const REPLAY_MS = 2800;
+const BASE = 1_000_000_000_000; // any fixed instant: the replay's clock only needs to move forward
+
+/** When nothing is live, play the top copy's real ending once, sped up and labelled as a replay
+ *  (PRODUCT.md principle 5), so the stamp lands within seconds. Skipped for reduced motion. */
+function useReplay(top: SnapshotHold | null) {
+  const endedId = top && (top.state === "Paid" || top.state === "Passed") ? top.id : null;
+  const [phase, setPhase] = useState<{ id: number | null; progress: number | null }>({ id: null, progress: null });
+  const [round, setRound] = useState(0);
+  useEffect(() => {
+    if (endedId === null) return;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let iv: ReturnType<typeof setInterval> | null = null;
+    const start = setTimeout(
+      () => {
+        if (reduced) {
+          setPhase({ id: endedId, progress: 1 });
+          return;
+        }
+        const t0 = performance.now();
+        setPhase({ id: endedId, progress: 0 });
+        iv = setInterval(() => {
+          const p = Math.min(1, (performance.now() - t0) / REPLAY_MS);
+          setPhase({ id: endedId, progress: p });
+          if (p >= 1 && iv) clearInterval(iv);
+        }, 80);
+      },
+      reduced ? 0 : 500,
+    );
+    return () => {
+      clearTimeout(start);
+      if (iv) clearInterval(iv);
+    };
+  }, [endedId, round]);
+  const progress = endedId !== null ? (phase.id === endedId ? phase.progress : 0) : null;
+  return { progress, landed: progress === 1, again: () => setRound((r) => r + 1) };
 }
 
 function Nav() {
   return (
     <header className="border-b border-rule">
       <div className="mx-auto flex h-16 max-w-[78rem] items-center justify-between gap-4 px-5 sm:px-8">
-        <Link href="/" className="font-display text-lg font-black tracking-[0.18em] uppercase">
+        <Link href="/" className="flex min-h-11 items-center font-display text-lg font-black tracking-[0.18em] uppercase">
           Hawker
         </Link>
         <nav aria-label="Page" className="flex items-center gap-6 text-[0.9375rem]">
-          <a href="#how" className="hidden hover:underline md:inline">
+          <a href="#how" className="hidden min-h-11 items-center hover:underline md:inline-flex">
             How a hold ends
           </a>
-          <a href="#proof" className="hidden hover:underline md:inline">
+          <a href="#proof" className="hidden min-h-11 items-center hover:underline md:inline-flex">
             Check it yourself
           </a>
-          <Link href="/desk" className="hidden hover:underline sm:inline">
+          <Link href="/desk" className="hidden min-h-11 items-center hover:underline sm:inline-flex">
             Desk
           </Link>
-          <Link href={`/s/${DEMO}`} className="flex h-10 items-center bg-ink px-4 font-display font-extrabold text-white hover:bg-black">
-            Open the stall
+          <Link href={`/s/${DEMO}`} className="flex h-11 items-center bg-ink px-4 font-display font-extrabold text-white hover:bg-black">
+            Demo stall
           </Link>
         </nav>
       </div>
@@ -133,6 +191,12 @@ function Instrument({
   link: string;
 }) {
   const lines = snap ? lineInfo(snap.holds) : null;
+  const replay = useReplay(top);
+  const replaying = replay.progress !== null && !replay.landed && snap && top;
+  const shown: SnapshotHold | null =
+    snap && top && replaying ? { ...top, state: "Holding", deadlineAt: new Date(BASE + snap.stall.windowSeconds * 1000).toISOString(), payerLink: null } : top;
+  const shownNow = snap && replaying ? BASE + (replay.progress ?? 0) * snap.stall.windowSeconds * 1000 : now;
+  const minsAgo = top?.endedAt && now ? Math.max(0, Math.round((now - new Date(top.endedAt).getTime()) / 60000)) : null;
   return (
     <figure aria-label="The demo stall, live" className="m-0">
       <div className="flex items-start gap-4">
@@ -153,40 +217,59 @@ function Instrument({
             </span>
           </p>
         ) : (
-          <p className="text-[0.9375rem] text-ink-muted">{link === "live" ? "No comments yet." : "Opening the demo stall…"}</p>
+          <p className="text-[0.9375rem] text-ink-muted">—</p>
         )}
       </div>
 
       <Leader />
 
       <div className="binding flex items-baseline justify-between gap-3 px-4 py-2">
-        <span className="min-w-0 truncate font-display text-[0.875rem] font-extrabold tracking-[0.04em]">{snap?.stall.name ?? "Ada's Closet"} · sales invoice pad</span>
+        <span className="min-w-0 truncate font-display text-[0.875rem] font-extrabold tracking-[0.04em]">{snap?.stall.name ?? "Ada's Closet"} · invoice pad</span>
         <span className="flex shrink-0 items-center gap-1.5 text-[0.75rem] text-rail-muted">
-          <span className={`inline-block size-1.5 rounded-full ${link === "live" ? "bg-[#7ee2a1]" : "bg-[#ffb4b4]"}`} aria-hidden="true" />
-          {link === "live" ? "live" : "connecting"}
+          {replay.progress !== null ? (
+            "replay · sped up"
+          ) : (
+            <>
+              <span className={`inline-block size-1.5 rounded-full ${link === "live" ? "bg-[#7ee2a1]" : "bg-[#ffb4b4]"}`} aria-hidden="true" />
+              {link === "live" ? "live" : "connecting"}
+            </>
+          )}
         </span>
       </div>
       <div className="pad-stack mb-3.5">
-        {snap && top ? (
+        {snap && shown ? (
           <Copy
-            key={top.id}
-            hold={publicCopy(top)}
-            now={now}
+            key={shown.id}
+            hold={publicCopy(shown)}
+            now={shownNow}
             windowSeconds={snap.stall.windowSeconds}
             size="hero"
             store={snap.stall.name}
-            nextInLine={top.state === "Holding" && lines ? lines.next(top).handle : null}
-            lineDepth={top.state === "Holding" && lines ? lines.next(top).depth : 0}
-            fresh={freshId === top.id}
+            nextInLine={replaying ? (top?.passedTo ?? null) : shown.state === "Holding" && lines ? lines.next(shown).handle : null}
+            lineDepth={replaying ? (top?.passedTo ? 1 : 0) : shown.state === "Holding" && lines ? lines.next(shown).depth : 0}
+            fresh={freshId === shown.id || replay.landed}
             showInvoice
           />
         ) : (
           <div className="copy p-8" data-state="Paid" style={{ animation: "none" }}>
-            <p className="print">{snap ? "Waiting for the first claim" : "Opening the demo stall"}</p>
-            <p className="mt-3 text-ink-muted">{snap ? "Claim something on the demo stall and the copy lands here." : "The pad shows the stall's real copies as they happen."}</p>
+            <p className="print">{snap ? "Waiting for the first claim" : "Sales invoice"}</p>
+            <p className="mt-3 text-ink-muted">{snap ? "Claim something on the demo stall and the copy lands here." : "—"}</p>
           </div>
         )}
       </div>
+      {replay.progress !== null && top && (
+        <p className="mt-3 mb-1 flex items-baseline justify-between gap-3 text-[0.8125rem] text-ink-muted">
+          <span>
+            Replay of copy {copyNo(top.serial)}
+            {minsAgo !== null ? `, which ended ${minsAgo === 0 ? "just now" : `${minsAgo} min ago`}` : ""}. Live copies show here as they happen.
+          </span>
+          {replay.landed && (
+            <button type="button" onClick={replay.again} className="shrink-0 font-semibold text-print underline">
+              Replay
+            </button>
+          )}
+        </p>
+      )}
 
       <Leader />
 
@@ -216,7 +299,7 @@ function Instrument({
             <span className="font-mono text-2xl font-bold num">{snap ? snap.counters.Passed : "–"}</span>
           </p>
           <p className="mt-1.5 text-[0.8125rem] leading-snug text-ink-muted">
-            {passed[0] ? `Last: ${copyNo(passed[0].serial)}, ${passed[0].passedTo ? `to @${passed[0].passedTo}` : "back to stock"}` : "To the next buyer in line."}
+            {passed[0] ? `Last: ${copyNo(passed[0].serial)}, ${passed[0].passedTo ? `to @${passed[0].passedTo}` : "open to the next buyer"}` : "To the next buyer in line."}
           </p>
         </div>
       </figcaption>
@@ -321,7 +404,7 @@ function Trace({ snap }: { snap: Snapshot | null }) {
                     {h.passedTo && <span className="stamp-to">→ @{h.passedTo}</span>}
                   </span>
                   <p className="mt-3 text-[0.9375rem] leading-snug text-ink-muted">
-                    {h.passedTo ? `@${h.passedTo} now holds it, with a new invoice.` : h.endReason === "cancelled" ? "The buyer cancelled; it went back to stock." : "Time ran out with no one in line; it went back to stock."}
+                    {h.passedTo ? `@${h.passedTo} now holds it, with a new invoice.` : h.endReason === "cancelled" ? "The buyer released it; it's open to the next buyer who claims." : "Time ran out with no one in line; it's open to the next buyer who claims."}
                   </p>
                 </>
               )
@@ -345,7 +428,7 @@ function Beat({ title, n, last = false, children }: { title: string; n: number; 
 }
 
 function Pending() {
-  return <p className="text-ink-muted">Opening the demo stall…</p>;
+  return <p className="text-ink-muted">—</p>;
 }
 
 function Endings({ snap, now, paid, passed }: { snap: Snapshot | null; now: number; paid: SnapshotHold | null; passed: SnapshotHold | null }) {
@@ -423,7 +506,7 @@ function Proof({ snap, paid }: { snap: Snapshot | null; paid: SnapshotHold[] }) 
           title="Claim, then watch it end"
           body={`Claim on the demo stall from your phone, then watch the desk: ${snap ? `${snap.counters.Paid} paid and ${snap.counters.Passed} passed so far` : "every copy"}, each with its stamp.`}
           href={`/s/${DEMO}`}
-          action="Open the demo stall"
+          action="Claim on the demo stall"
         />
         <ProofItem title="The running build" body="The service reports the exact commit it runs and how long it has been up." href="/api/health" action="Open /api/health" />
       </ul>
@@ -442,12 +525,12 @@ function ProofItem({ title, body, href, action, external = false }: { title: str
       <p className="mt-2 text-[0.9375rem] leading-relaxed text-ink-muted [overflow-wrap:anywhere]">{body}</p>
       {href ? (
         external ? (
-          <a href={href} target="_blank" rel="noreferrer" className="mt-4 inline-flex items-center gap-1.5 font-semibold text-print underline">
+          <a href={href} target="_blank" rel="noreferrer" className="mt-2 inline-flex min-h-11 items-center gap-1.5 font-semibold text-print underline">
             {action}
             <ArrowOut className="size-3.5" />
           </a>
         ) : (
-          <Link href={href} className="mt-4 inline-flex items-center gap-1.5 font-semibold text-print underline">
+          <Link href={href} className="mt-2 inline-flex min-h-11 items-center gap-1.5 font-semibold text-print underline">
             {action}
           </Link>
         )

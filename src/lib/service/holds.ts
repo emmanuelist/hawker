@@ -163,7 +163,7 @@ async function claimOne(ctx: StallContext, buyerId: string, seq: number, variant
   });
   rt.deadlines.set(holdId, { stallId: ctx.stall.id, at: Date.now() + ctx.stall.windowSeconds * 1000 });
   await event(ctx.stall.id, "hold.holding", holdId, { serial: serialNo, invoice: inv.id, debugId: inv.debugId });
-  return `Held: ${name}. Copy ${copyNo(serialNo)} — pay within ${mmss(ctx.stall.windowSeconds)}.`;
+  return `Held: ${name}. Copy ${copyNo(serialNo)}. Pay within ${mmss(ctx.stall.windowSeconds)}.`;
 }
 
 interface HoldRow { id: string; serial: number; stall_id: string; variant_id: number; buyer_id: string; state: string; invoice_id: string | null }

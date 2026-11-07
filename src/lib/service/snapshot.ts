@@ -48,6 +48,8 @@ export interface Snapshot {
   stall: { id: string; name: string; isDemo: boolean; windowSeconds: number };
   show: { id: number; title: string };
   onScreen: string | null;
+  /** Items shown earlier on this live (not the one on screen now), most recent first. */
+  earlier: string[];
   items: { code: string; name: string; priceCents: number; variants: { label: string; stock: number; available: number; holding: number; waiting: number }[] }[];
   counters: Record<HoldState, number>;
   /** The serial the next copy on this stall's pad will carry (copies are numbered per stall). */
@@ -62,7 +64,7 @@ export async function getSnapshot(stallId: string, buyerId: string | null = null
   const ctx = await loadStall(stallId);
   if (!ctx) return null;
   const sql = db();
-  const [usage, holds, comments, counts, me] = await Promise.all([
+  const [usage, holds, comments, counts, me, shown] = await Promise.all([
     sql<{ variant_id: number; used: number; holding: number; waiting: number }[]>`
       select variant_id,
         coalesce(sum(qty) filter (where state in ('Holding', 'Paid')), 0)::int used,
@@ -97,6 +99,17 @@ export async function getSnapshot(stallId: string, buyerId: string | null = null
       where c.show_id = ${ctx.show.id} order by c.seq desc limit 50`,
     sql<{ state: HoldState; n: number; top: number }[]>`select state, count(*)::int n, max(serial)::int top from holds where stall_id = ${stallId} group by state`,
     buyerId ? sql<{ id: string; handle: string }[]>`select id, handle from buyers where id = ${buyerId}` : Promise.resolve([]),
+    // What has been on screen during this show: the desk's on-screen changes, plus the item that was
+    // on screen when each comment arrived (which also covers the show's opening item).
+    sql<{ code: string }[]>`
+      select code from (
+        select upper(e.payload->>'code') code, e.at from events e
+        where e.stall_id = ${stallId} and e.kind = 'show.on_screen'
+          and e.at >= (select started_at from shows where id = ${ctx.show.id})
+        union all
+        select upper(c.on_screen_code), c.received_at from comments c
+        where c.show_id = ${ctx.show.id} and c.on_screen_code is not null
+      ) x where code is not null group by code order by max(at) desc`,
   ]);
   const use = new Map(usage.map((u) => [u.variant_id, u]));
   const counters: Record<HoldState, number> = { Waiting: 0, Holding: 0, Paid: 0, Passed: 0 };
@@ -111,6 +124,7 @@ export async function getSnapshot(stallId: string, buyerId: string | null = null
     stall: ctx.stall,
     show: ctx.show,
     onScreen: ctx.onScreenCode,
+    earlier: shown.map((r) => r.code).filter((c) => c !== ctx.onScreenCode?.toUpperCase() && ctx.catalog.some((i) => i.code.toUpperCase() === c)),
     items: ctx.catalog.map((i) => ({
       code: i.code,
       name: i.name,
@@ -160,5 +174,13 @@ export async function getSnapshot(stallId: string, buyerId: string | null = null
     })),
     reader: { lastSource: lastParsed?.parse_source ?? null, degraded: lastParsed?.parse_source === "unavailable" },
     me: me[0] ? { buyerId: me[0].id, handle: me[0].handle } : null,
+  };
+}
+
+/** The stall view never exposes other buyers' invoice links or IDs. */
+export function forBuyer(s: Snapshot, buyerId: string | null): Snapshot {
+  return {
+    ...s,
+    holds: s.holds.map((h) => (h.buyerId === buyerId ? h : { ...h, buyerId: "", payerLink: null, invoiceId: null, transactionId: null })),
   };
 }

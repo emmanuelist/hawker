@@ -24,8 +24,8 @@ export function linkLabel(link: LinkState): string {
 
 const REOPEN_MS = 5000;
 
-export function useLiveSnapshot(stall: string, view: "desk" | "stall", nonce = 0) {
-  const [snap, setSnap] = useState<Snapshot | null>(null);
+export function useLiveSnapshot(stall: string, view: "desk" | "stall", nonce = 0, initial: Snapshot | null = null) {
+  const [snap, setSnap] = useState<Snapshot | null>(initial);
   const [offset, setOffset] = useState(0); // server time − client time, ms
   const [link, setLink] = useState<LinkState>("connecting");
   const [attempt, setAttempt] = useState(0);

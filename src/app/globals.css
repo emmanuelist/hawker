@@ -83,6 +83,10 @@ body {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
 }
+.bg-rail :focus-visible,
+.binding :focus-visible {
+  outline-color: var(--rail-ink);
+}
 
 a {
   text-underline-offset: 3px;
@@ -103,7 +107,7 @@ h3 {
 .print {
   font-family: var(--font-franklin), sans-serif;
   font-weight: 800;
-  font-size: 0.625rem;
+  font-size: 0.6875rem;
   line-height: 1.2;
   letter-spacing: 0.13em;
   text-transform: uppercase;
@@ -392,15 +396,15 @@ h3 {
   box-shadow: inset 0 -3px 0 var(--rail-deep);
 }
 
-/* ——— stall: one-tap claim tiles ——— */
+/* ——— stall: one-tap claim tiles. Two rows, the whole tile is the tap target (like an odds button). ——— */
 .tile {
   position: relative;
   display: flex;
-  min-height: 5.75rem;
+  min-height: 4.25rem;
   flex-direction: column;
-  justify-content: space-between;
-  gap: 0.5rem;
-  padding: 0.75rem 0.85rem;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.7rem 0.8rem;
   text-align: left;
   background: var(--copy-paid);
   border: 1px solid color-mix(in oklab, var(--ink) 18%, transparent);
@@ -436,10 +440,47 @@ h3 {
   }
 }
 
+/* ——— the countdown as a numbering machine's wheels ——— */
+.wheels {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15em;
+  font-family: var(--font-courier), monospace;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.wheel {
+  padding: 0.18em 0.28em 0.14em;
+  background: color-mix(in oklab, var(--ink) 9%, transparent);
+  color: var(--ink);
+}
+.wheels[data-tone="expiring"] .wheel {
+  background: var(--expiring);
+  color: #ffffff;
+}
+.wheels[data-tone="expiring"] .wheel-sep {
+  color: var(--expiring);
+}
+.wheels[data-tone="rail"] .wheel {
+  background: var(--rail-deep);
+  color: var(--rail-ink);
+}
+.wheels[data-size="lg"] {
+  font-size: 1.125rem;
+}
+.wheels[data-size="sm"] {
+  font-size: 0.875rem;
+}
+
 /* ——— landing: the live pad instrument. Under the top copy, the pad's next blank forms. ——— */
 .pad-stack {
   position: relative;
   isolation: isolate;
+}
+/* One height for every state, so the hero doesn't jump when a stamp replaces the countdown. */
+.pad-stack > .copy {
+  min-height: 19.5rem;
 }
 .pad-stack::before,
 .pad-stack::after {

@@ -4,7 +4,8 @@
 // countdown edge is the exact time left, and its ending is a stamp: PAID (read from PayPal) or
 // PASSED → the next buyer. Under a Holding copy sit the blue copies of the buyers waiting behind it.
 import type { SnapshotHold } from "@/lib/service/snapshot";
-import { copyNo, mmss, money } from "./live";
+import { Countdown } from "./Countdown";
+import { copyNo, money } from "./live";
 
 export const shortId = (id: string) => (id.length > 14 ? `${id.slice(0, 9)}…${id.slice(-4)}` : id);
 
@@ -30,6 +31,8 @@ export function Copy({
   leaving = false,
   celebrate = false,
   showInvoice = size !== "stall",
+  onRelease,
+  releasing = false,
 }: {
   hold: SnapshotHold;
   now: number;
@@ -49,6 +52,9 @@ export function Copy({
   leaving?: boolean;
   celebrate?: boolean;
   showInvoice?: boolean;
+  /** The buyer's own copy: release a hold or leave the line (posts a named cancel through the chat). */
+  onRelease?: () => void;
+  releasing?: boolean;
 }) {
   const s = S[size];
   const left = hold.deadlineAt ? (now ? new Date(hold.deadlineAt).getTime() - now : windowSeconds * 1000) : 0;
@@ -68,7 +74,10 @@ export function Copy({
       aria-label={`Copy ${copyNo(hold.serial)}, ${hold.state}, ${what}, ${amount}, for @${hold.handle}`}
     >
       <header className="flex items-baseline justify-between gap-3">
-        <span className="print min-w-0 truncate">{store} · Sales invoice</span>
+        <span className="print min-w-0 truncate">
+          {store}
+          {size !== "desk" && " · Invoice"}
+        </span>
         <span className={`shrink-0 font-mono font-bold text-serial num ${s.serial}`}>{copyNo(hold.serial)}</span>
       </header>
       <div className="form-rule mt-2" aria-hidden="true" />
@@ -96,12 +105,10 @@ export function Copy({
             <i style={{ transform: `scaleX(${frac})` }} />
           </div>
           <div className="mt-1.5 flex items-baseline justify-between gap-3">
-            <p className="flex items-baseline gap-2">
+            <p className="flex items-center gap-2">
               <span className="label text-ink">Holding</span>
-              <span className={`font-mono font-bold num ${expiring ? "text-serial" : ""}`} role="timer" aria-live="off">
-                {mmss(left)}
-              </span>
-              <span className={expiring ? "font-semibold text-serial" : "text-ink-muted"}>{expiring ? "then it passes" : "to pay"}</span>
+              <Countdown ms={left} tone={expiring ? "expiring" : "ink"} size={size === "desk" ? "sm" : "md"} />
+              <span className={expiring ? "font-semibold text-serial" : "text-ink-muted"}>to pay</span>
             </p>
             {showInvoice && hold.invoiceId && (
               <span className="shrink-0 font-mono text-[0.75rem] text-ink-muted">
@@ -122,7 +129,7 @@ export function Copy({
                   Next in line: <span className="font-semibold text-ink">@{nextInLine}</span>
                 </>
               ) : (
-                "No one waiting: it goes back to stock"
+                "No one waiting yet: it opens to the next buyer"
               )}
             </p>
           )}
@@ -149,6 +156,14 @@ export function Copy({
         </p>
       )}
 
+      {onRelease && (hold.state === "Holding" || hold.state === "Waiting") && (
+        <p className="mt-3 text-right">
+          <button type="button" onClick={onRelease} disabled={releasing} className="text-[0.875rem] text-ink-muted underline hover:text-ink disabled:no-underline">
+            {releasing ? "Releasing…" : hold.state === "Holding" ? "Release this copy" : "Leave the line"}
+          </button>
+        </p>
+      )}
+
       {hold.state === "Paid" && (
         <div className="mt-4 flex items-end justify-between gap-3">
           <span className={`stamp ${celebrate ? "" : s.stampPaid}`} data-kind="paid">
@@ -168,7 +183,7 @@ export function Copy({
         <div className="mt-4 flex items-end justify-between gap-3">
           <span className={`stamp ${s.stampPassed}`} data-kind="passed">
             Passed
-            {hold.passedTo && <span className="stamp-to">→ @{hold.passedTo}</span>}
+            <span className="stamp-to">{hold.passedTo ? `→ @${hold.passedTo}` : "→ next buyer"}</span>
           </span>
           <span className="text-right text-[0.75rem]">{hold.endReason === "cancelled" ? "Cancelled by the buyer" : "Time ran out"}</span>
         </div>

@@ -13,7 +13,7 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
     // Research spikes and captures are not app code.
-    "internal/**",
+    "internal/**", ".playwright-mcp/**",
   ]),
 ]);
 
