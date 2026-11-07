@@ -1,10 +1,10 @@
 # State
-_Last verified: 2026-11-07 10:47 UTC at 4404e14_
+_Last verified: 2026-11-07 11:25 UTC at 8932580_
 
 **Thesis:** Every hold ends one of two ways: paid through PayPal, or passed to the next buyer.
 **Milestone:** M0 · Rigged **done** 09:47 UTC → **M1 · Walking skeleton** (checkpoint 2026-11-09 13:24 UTC) · **Deadline:** 2026-11-12 20:00 UTC (time left: the clock line)
-**Next action:** once `DATABASE_URL` (Neon, pooled) is in `.env`: `npm run db:migrate && npm run db:seed`, then build the service layer (claim → hold → invoice, expiry sweeper with the B1 re-read, payment poll), then the stall `/s/ada` and desk `/desk` per the direction contract (PLAN M1).
-**Blocked on:** the user creating the Neon project and pasting `DATABASE_URL` into `.env` (and later into Render's environment), D-014.
+**Next action:** the user adds `DATABASE_URL` to the Render service's environment; then verify the M1 round trip on https://hawker-8q2t.onrender.com (stall comment → hold + invoice → desk live), record the evidence, and close M1.
+**Blocked on:** `DATABASE_URL` missing on Render (the deployed stream reports `DATABASE_URL not set`). The user adds it in the dashboard.
 
 ## Works (verified this session)
 | Capability | Verified by | Evidence |
@@ -15,6 +15,9 @@ _Last verified: 2026-11-07 10:47 UTC at 4404e14_
 | Parsing through the app pipeline | `npm run eval`: 60/60 commerce-critical, 0 phantom, Groq→Gemini failover exercised | E-010 |
 | PayPal shareable invoice client | `npm run sandbox:invoice`: create→UNPAID→cancel→CANCELLED; 2nd cancel refused `INVOICE_CANCELED_ALREADY` | E-011 |
 | PayPal refuses cancelling a PAID invoice (B1 at PayPal) | live call: 422 `CANNOT_CANCEL_PAID_INVOICE` | E-012 |
+| Database on Neon with DB-enforced invariants | migrate + seed; DB refused Holding-without-invoice and Paid→Passed | E-013 |
+| Service layer end to end (hold, wait, expire→pass→promote, cancel; invoices CANCELLED at PayPal) | `npm run e2e:service` 9/9 (re-run after the perf change) | E-014 |
+| Stall + desk live in the browser, including the PASSED → @next reversal | local production build on real Neon + PayPal sandbox | E-015 |
 
 ## Deployed
 | What | Environment | URL | Last checked |
@@ -23,9 +26,11 @@ _Last verified: 2026-11-07 10:47 UTC at 4404e14_
 | Web service `hawker` (free plan, D-011), auto-deploys `main` | Render | https://hawker-8q2t.onrender.com | 2026-11-07 09:43 UTC (E-008), still the hello-world |
 
 ## Broken or unverified
-- `db/migrations/001_init.sql` and `scripts/seed.ts` are written but **never run** (no database yet).
-- No service layer, stall or desk UI yet.
-- Keep-warm loop not built; the Render free plan sleeps after 15 min idle (D-011).
+- The deployed app can't reach the database until `DATABASE_URL` is set on Render.
+- PAID through the UI (buyer pays the hosted invoice → poll → PAID stamp) is not yet exercised in the browser; the PayPal side is proven (E-001, E-012).
+- Latency: a fast-path claim took ~13 s locally from Lagos (≈20 queries × ~200 ms to US East). Two fixes shipped (8932580); remeasure on Render.
+- The client doesn't yet show the SSE `oops` event (it stays on "Opening…").
+- Keep-warm is built (scheduler, `RENDER_EXTERNAL_URL`) but unverified on Render.
 
 ## Claims not yet verified
 - C-1 the thesis: needs the hold ledger on the deployed app (M2).
