@@ -47,4 +47,6 @@ internal/
 !.env.example
 .playwright-mcp/
 .claude/settings.local.json
-.impeccable/
+.impeccable/*
+!.impeccable/surfaces/
+!.impeccable/config.json

@@ -1,0 +1,98 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "low-contrast",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/assigned.html"
+        ],
+        "createdAt": "2026-11-07T10:00:59.608Z",
+        "reason": "agent: decision-round sketch, drawn as a skeleton by serve-question (text <22px renders as bars); not shipped UI; the shipped board is held to WCAG AA per PRODUCT.md"
+      },
+      {
+        "rule": "tiny-text",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/assigned.html"
+        ],
+        "createdAt": "2026-11-07T10:00:59.630Z",
+        "reason": "agent: decision-round sketch, drawn as a skeleton by serve-question (text <22px renders as bars); not shipped UI; the shipped board is held to WCAG AA per PRODUCT.md"
+      },
+      {
+        "rule": "low-contrast",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/model-pick.html"
+        ],
+        "createdAt": "2026-11-07T10:00:59.652Z",
+        "reason": "agent: decision-round sketch, drawn as a skeleton by serve-question (text <22px renders as bars); not shipped UI; the shipped board is held to WCAG AA per PRODUCT.md"
+      },
+      {
+        "rule": "tiny-text",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/model-pick.html"
+        ],
+        "createdAt": "2026-11-07T10:00:59.675Z",
+        "reason": "agent: decision-round sketch, drawn as a skeleton by serve-question (text <22px renders as bars); not shipped UI; the shipped board is held to WCAG AA per PRODUCT.md"
+      },
+      {
+        "rule": "low-contrast",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/challenger-gate.html"
+        ],
+        "createdAt": "2026-11-07T10:00:59.699Z",
+        "reason": "agent: decision-round sketch, drawn as a skeleton by serve-question (text <22px renders as bars); not shipped UI; the shipped board is held to WCAG AA per PRODUCT.md"
+      },
+      {
+        "rule": "tiny-text",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/challenger-gate.html"
+        ],
+        "createdAt": "2026-11-07T10:00:59.723Z",
+        "reason": "agent: decision-round sketch, drawn as a skeleton by serve-question (text <22px renders as bars); not shipped UI; the shipped board is held to WCAG AA per PRODUCT.md"
+      },
+      {
+        "rule": "low-contrast",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/canon.html"
+        ],
+        "createdAt": "2026-11-07T10:00:59.746Z",
+        "reason": "agent: decision-round sketch, drawn as a skeleton by serve-question (text <22px renders as bars); not shipped UI; the shipped board is held to WCAG AA per PRODUCT.md"
+      },
+      {
+        "rule": "tiny-text",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/canon.html"
+        ],
+        "createdAt": "2026-11-07T10:00:59.770Z",
+        "reason": "agent: decision-round sketch, drawn as a skeleton by serve-question (text <22px renders as bars); not shipped UI; the shipped board is held to WCAG AA per PRODUCT.md"
+      },
+      {
+        "rule": "undersized-ui-text",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/challenger-gate.html"
+        ],
+        "createdAt": "2026-11-07T10:01:25.434Z",
+        "reason": "agent: decision-round sketch drawn as a skeleton by serve-question (text <22px renders as bars); not shipped UI; the shipped board follows PRODUCT.md accessibility"
+      },
+      {
+        "rule": "flat-type-hierarchy",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/canon.html"
+        ],
+        "createdAt": "2026-11-07T10:01:25.462Z",
+        "reason": "agent: decision-round sketch drawn as a skeleton by serve-question (text <22px renders as bars); not shipped UI; the shipped board follows PRODUCT.md accessibility"
+      }
+    ]
+  }
+}
