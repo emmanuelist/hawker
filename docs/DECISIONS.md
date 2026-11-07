@@ -85,3 +85,12 @@ The rules require a public repo with an open-source license at submission. Pendi
 - Render's free Postgres expires after 30 days [unverified], which would fall before judging ends on 2026-12-15.
 **Decision:** a paid Render instance funded by the $50 PayPal AI Hackathon credit, which the user has claimed.
 **Consequences:** the service must stay up until winners are announced (2026-12-21); credit burn is to be checked at deploy. Whether applying the credit requires a card is [unverified].
+
+## D-009 · Repo private now, public at M3 · 2026-11-07 · accepted · supersedes D-007
+**Decision:** `emmanuelist/hawker` is created private. It is made public (MIT license visible in About) at the M3 proof milestone, no later than 2026-11-11 17:48 UTC, before the submission at M4.
+**Why:** it hides the work from other entrants while building; judges only need access from submission.
+**Evidence:** the user chose "Private now, public later" on 2026-11-07.
+
+## D-010 · Solo scope cuts accepted · 2026-11-07 · accepted · supersedes D-006
+**Decision:** D-006 as written. Chat ingest is Twitch plus a labelled real-time replay. Not built: TikTok, Facebook Live and Instagram ingest; label OCR; multi-seller accounts; Venmo payouts. YouTube Live remains deferred.
+**Evidence:** the user chose "Accept the cuts" on 2026-11-07.

@@ -3,8 +3,8 @@ _Last verified: 2026-11-07 09:20 UTC at the first commit (foundation)_
 
 **Thesis:** Every hold ends one of two ways: paid through PayPal, or passed to the next buyer.
 **Milestone:** M0 · Rigged (checkpoint 2026-11-07 22:06 UTC) · **Deadline:** 2026-11-12 20:00 UTC (time left: the clock line)
-**Next action:** create the GitHub remote (visibility per D-007) and push, so CI runs; then deploy the hello-world to Render and confirm `/api/health` from a phone on cellular (PLAN M0 items 3–5).
-**Blocked on:** the user's repo-visibility decision (D-007) and Render dashboard access (connecting the repo, applying the $50 credit).
+**Next action:** confirm CI green on GitHub, then deploy the hello-world to Render and confirm `/api/health` from a phone on cellular (PLAN M0 items 4–5).
+**Blocked on:** Render dashboard access: the user connects the repo and applies the $50 credit.
 
 ## Works (verified this session)
 | Capability | Verified by | Evidence |
@@ -31,5 +31,4 @@ _Last verified: 2026-11-07 09:20 UTC at the first commit (foundation)_
 - C-2 multilingual parsing: needs the committed eval in `eval/` and the app's own model client (M1/M3).
 
 ## Open questions
-- Repo visibility: private now and public before submission, or public now? (user, D-007)
-- Confirm the solo scope cuts in D-006. (user)
+- none

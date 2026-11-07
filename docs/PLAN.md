@@ -16,7 +16,7 @@ Deadline source: https://paypalaihackathon.devpost.com/rules §1 ("Thursday Nov 
 - [x] D-001 build choice recorded, done when DECISIONS.md has it (D-001)
 - [x] Riskiest dependencies spiked, done when evidence exists for PayPal invoice pay/cancel/track (E-001, E-002), Orders + payouts (E-003, E-004), parsing on free models (E-005), Twitch read (E-006)
 - [ ] Repo committed with the gate green locally, done when `npm run lint && npm run typecheck && npm test && npm run build` exits 0 at the first commit
-- [ ] GitHub remote + CI green, done when the first CI run on `main` passes (needs the user's visibility decision, D-007)
+- [ ] GitHub remote + CI green, done when the first CI run on `main` passes (private, D-009)
 - [ ] Hello-world on Render, done when `curl https://<service>.onrender.com/api/health` returns `ok: true` with the deployed commit SHA, and it loads from a phone on cellular
 
 ### M1 · Walking skeleton
@@ -30,7 +30,7 @@ Deadline source: https://paypalaihackathon.devpost.com/rules §1 ("Thursday Nov 
 
 ## Cut list
 Things deliberately not being built. Each entry links the DECISIONS entry that cut it.
-- TikTok / Facebook Live / Instagram comment ingest. These need platform approval; stated as a README limit. D-006 (proposed)
-- Photo-of-shipping-label OCR. D-006 (proposed)
-- Multi-seller accounts. D-006 (proposed)
-- Venmo payouts. Not supported in the sandbox (E-004). D-006 (proposed)
+- TikTok / Facebook Live / Instagram comment ingest. These need platform approval; stated as a README limit. D-010
+- Photo-of-shipping-label OCR. D-010
+- Multi-seller accounts. D-010
+- Venmo payouts. Not supported in the sandbox (E-004). D-010
