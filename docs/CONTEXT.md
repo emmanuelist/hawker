@@ -1,0 +1,57 @@
+# Context
+Verified facts about everything this project depends on. Each entry says how it was
+verified, so no session has to re-derive it or trust training data. Read before
+touching an integration.
+
+## Platforms and environments
+| Name | Kind | ID | Endpoint (env var) | Console | Verified |
+|---|---|---|---|---|---|
+| PayPal sandbox | Payments sandbox | REST app `APP-70B06370VJ205311U` ("live-sale-desk"), attached to a **US** sandbox Business account; features include **Invoicing** (enabled 2026-11-07), Payouts, Subscriptions, Payment links | `https://api-m.sandbox.paypal.com` (`PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET`) | developer.paypal.com/dashboard (Sandbox toggle) | 2026-11-07, OAuth + calls in E-001…E-004 |
+| PayPal sandbox buyer | Test account | US Personal sandbox account; logs in at sandbox.paypal.com | `SANDBOX_BUYER_EMAIL`, `SANDBOX_BUYER_PASSWORD` (scripts only) | Testing Tools → Sandbox Accounts | 2026-11-07, paid E-001 and E-003 |
+| Groq | Model API (free tier) | org-level limits | `https://api.groq.com/openai/v1` (`GROQ_API_KEY`) | console.groq.com | 2026-11-07, E-005 |
+| Google Gemini API | Model API (free tier) | Nigeria is on the official available-regions list | `https://generativelanguage.googleapis.com/v1beta` (`GEMINI_API_KEY`, header `x-goog-api-key`) | aistudio.google.com | 2026-11-07, E-005 |
+| Twitch chat | Chat source | anonymous IRC over WebSocket | `wss://irc-ws.chat.twitch.tv:443` | — | 2026-11-07, E-006 |
+| Render | Hosting | $50 PayPal AI Hackathon credit claimed by the user | — | dashboard.render.com | [unverified]: no service created yet |
+
+## SDKs and APIs
+| API | Calls we use (exact) | Verified in |
+|---|---|---|
+| PayPal OAuth | `POST /v1/oauth2/token` (Basic client:secret, `grant_type=client_credentials`) → `access_token`, `scope`, `expires_in` (32400). `POST /v1/oauth2/token/terminate` body `token=<t>&token_type_hint=ACCESS_TOKEN` → 200 | E-001 run |
+| PayPal Invoicing v2 | `POST /v2/invoicing/invoices` (no `primary_recipients` → shareable) → 201 `{id}` · `POST /v2/invoicing/invoices/{id}/send` body `{send_to_recipient:false, send_to_invoicer:false}` → 200 `{href: https://www.sandbox.paypal.com/invoice/p/#<id>}` · `GET /v2/invoicing/invoices/{id}` → `status` (`UNPAID`/`PAID`/`CANCELLED`), `payments.transactions[].payment_id` · `POST /v2/invoicing/invoices/{id}/cancel` body `{subject, note, send_to_recipient}` → 200 · `POST /v2/invoicing/invoices/{id}/generate-qr-code` body `{width,height}` → 200 (multipart image) · `POST /v2/invoicing/generate-next-invoice-number` → `{invoice_number}` | E-001, E-002; docs `developer.paypal.com/api/invoicing.md` (raw copies in internal/research/raw/paypal-docs-2026-11-07/) |
+| PayPal Add Tracking | `POST /v1/shipping/trackers-batch` `{trackers:[{transaction_id, tracking_number, status:"SHIPPED", carrier:"USPS", notify_buyer}]}` → 200 · `GET /v1/shipping/trackers/{txn}-{tracking}` | E-001, E-003 |
+| PayPal Orders v2 (fallback) | `POST /v2/checkout/orders` (intent CAPTURE, `payment_source.paypal.experience_context`) → `payer-action` link · `POST /v2/checkout/orders/{id}/capture` with `PayPal-Request-Id` | E-003 |
+| PayPal Payouts | `POST /v1/payments/payouts` → batch; `GET /v1/payments/payouts/{batch}` | E-004 |
+| PayPal Webhooks | `POST /v1/notifications/webhooks` `{url, event_types:[{name}]}` (max 10 per app) · `GET /v1/notifications/webhooks-events` | E-001…E-003 |
+| Groq chat completions | `POST /chat/completions` `{model, temperature:0, messages}`; Qwen accepts `reasoning_effort:"none"`. Response headers `x-ratelimit-limit-tokens: 8000`, `x-ratelimit-limit-requests: 1000` | E-005 |
+| Gemini generateContent | `POST /models/{model}:generateContent` `{system_instruction:{parts}, contents:[{role,parts}], generationConfig:{responseMimeType:"application/json", temperature:0}}` | E-005 |
+| Twitch IRC | send `PASS SCHMOOPIIE`, `NICK justinfan<n>`, `JOIN #<channel>`; reply `PONG :tmi.twitch.tv` to `PING`; messages match `^:(\w+)!\S+ PRIVMSG #(\w+) :(.*)$` | E-006 |
+
+## Models (AI builds)
+| Model (exact) | Provider | Limits (read 2026-11-07) | Eval | Verified |
+|---|---|---|---|---|
+| `qwen/qwen3.8-27b` | Groq | 1,000 requests/day, 8,000 tokens/min; a 10-comment batch is ~898 in + ~318 out tokens | 300/300 commerce-critical, ~2 s per batch | E-005 |
+| `gemini-3.5-flash-lite` | Google | free tier; exact limits only in AI Studio; occasional 503 "high demand" | 178/180, ~4–5 s per batch | E-005 |
+
+## Traps
+- **T-1 · PayPal reuses the same OAuth access token for up to 9 h.** After enabling a feature (Invoicing) the old token kept the old scopes and every call returned 403 `NOT_AUTHORIZED`. Fix: `POST /v1/oauth2/token/terminate`, then request a new token. (E-001 notes)
+- **T-2 · `invoicer.email_address`, if sent, must match the token's sandbox Business account.** Omit it. (invoicing troubleshooting doc)
+- **T-3 · Venmo payouts are unsupported in the sandbox**, and one Venmo item fails the whole batch. (E-004)
+- **T-4 · Sandbox order-capture webhooks are unreliable** (never delivered in 40 min); invoice webhooks arrived in seconds. Read status from PayPal. (E-003, E-001)
+- **T-5 · The Webhooks Simulator signs with a special webhook ID, so signature verification fails on simulated events.** Test with real sandbox transactions. (invoicing troubleshooting doc)
+- **T-6 · Hosted PayPal MCP server `mcp.sandbox.paypal.com` fails every call** ("Unsupported cache mode: default"), paypal/agent-toolkit#119, open since 2026-10-30.
+- **T-7 · `docs.paypal.ai` was retired.** Links redirect to 404 (AI-Toolkit commit 2026-09-21). Use developer.paypal.com and its `llms.txt` / `.md` pages.
+- **T-8 · Transaction Search lags up to 3 h.** Never drive the live board from it.
+- **T-9 · A sandbox merchant registered in a send-only country can't receive payments** (forum 45513). Use a US sandbox Business account.
+- **T-10 · Groq's free tier returns 429 on the token-per-minute limit and occasional 503 "over capacity"; Gemini Flash-Lite occasionally returns 503 "high demand".** Retry with backoff and fail over.
+- **T-11 · `gemini-3.8-flash` is too slow for live parsing** (one 6-batch run didn't finish in ~20 min).
+- **T-12 · `paypaldev/hackathon-paypal-ag-grid-boilerplate` has no license.** Don't copy from it.
+- **T-13 · Next 16: with `cacheComponents` on, `GET` route handlers prerender unless they touch request-time data.** Call `await connection()` (from `next/server`) for per-request output. (`node_modules/next/dist/docs/01-app/01-getting-started/15-route-handlers.md`)
+
+## Environment
+| Var | Purpose | Where to get it |
+|---|---|---|
+| `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET` | Sandbox REST app | developer.paypal.com → Apps & Credentials (Sandbox) → live-sale-desk |
+| `SANDBOX_BUYER_EMAIL`, `SANDBOX_BUYER_PASSWORD` | End-to-end scripts only (paying as the buyer) | Testing Tools → Sandbox Accounts → US Personal → View/Edit |
+| `GROQ_API_KEY` | Primary model | console.groq.com → API Keys |
+| `GEMINI_API_KEY` | Failover model | aistudio.google.com → Get API key |
+| `RENDER_GIT_COMMIT` | Commit shown by `/api/health` | Set by Render at runtime [unverified until first deploy] |

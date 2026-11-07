@@ -1,0 +1,22 @@
+# Render Blueprint: one persistent Node web service (D-002, D-008).
+# Field names checked against https://render.com/docs/blueprint-spec.md on 2026-11-07.
+# Node version comes from .node-version (Render docs: node-version).
+services:
+  - type: web
+    name: hawker
+    runtime: node
+    # Paid plan, funded by the PayPal AI Hackathon credit. `free` sleeps when idle,
+    # which would drop the chat socket and the hold timers.
+    plan: 0.5c-512mb
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: PAYPAL_CLIENT_ID
+        sync: false
+      - key: PAYPAL_CLIENT_SECRET
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
