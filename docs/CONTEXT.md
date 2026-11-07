@@ -11,7 +11,7 @@ touching an integration.
 | Groq | Model API (free tier) | org-level limits | `https://api.groq.com/openai/v1` (`GROQ_API_KEY`) | console.groq.com | 2026-11-07, E-005 |
 | Google Gemini API | Model API (free tier) | Nigeria is on the official available-regions list | `https://generativelanguage.googleapis.com/v1beta` (`GEMINI_API_KEY`, header `x-goog-api-key`) | aistudio.google.com | 2026-11-07, E-005 |
 | Twitch chat | Chat source | anonymous IRC over WebSocket | `wss://irc-ws.chat.twitch.tv:443` | — | 2026-11-07, E-006 |
-| Render | Hosting | $50 PayPal AI Hackathon credit claimed by the user | — | dashboard.render.com | [unverified]: no service created yet |
+| Render | Hosting | Web service `hawker`, **free plan** (a paid plan requires a card on file even with the $50 credit, D-011), Blueprint `exs-dbneutm7bikc73ccae0g`, auto-deploys `main` | https://hawker-8q2t.onrender.com | dashboard.render.com | 2026-11-07, E-008 |
 
 ## SDKs and APIs
 | API | Calls we use (exact) | Verified in |
@@ -45,6 +45,7 @@ touching an integration.
 - **T-10 · Groq's free tier returns 429 on the token-per-minute limit and occasional 503 "over capacity"; Gemini Flash-Lite occasionally returns 503 "high demand".** Retry with backoff and fail over.
 - **T-11 · `gemini-3.8-flash` is too slow for live parsing** (one 6-batch run didn't finish in ~20 min).
 - **T-12 · `paypaldev/hackathon-paypal-ag-grid-boilerplate` has no license.** Don't copy from it.
+- **T-14 · Render free web services sleep after 15 min without inbound HTTP/WebSocket traffic** and take ~1 min to wake; Render may restart them at any time; free Render Postgres expires after 30 days (render.com/docs/free, 2026-11-07).
 - **T-13 · Next 16: with `cacheComponents` on, `GET` route handlers prerender unless they touch request-time data.** Call `await connection()` (from `next/server`) for per-request output. (`node_modules/next/dist/docs/01-app/01-getting-started/15-route-handlers.md`)
 
 ## Environment
@@ -54,4 +55,4 @@ touching an integration.
 | `SANDBOX_BUYER_EMAIL`, `SANDBOX_BUYER_PASSWORD` | End-to-end scripts only (paying as the buyer) | Testing Tools → Sandbox Accounts → US Personal → View/Edit |
 | `GROQ_API_KEY` | Primary model | console.groq.com → API Keys |
 | `GEMINI_API_KEY` | Failover model | aistudio.google.com → Get API key |
-| `RENDER_GIT_COMMIT` | Commit shown by `/api/health` | Set by Render at runtime [unverified until first deploy] |
+| `RENDER_GIT_COMMIT` | Commit shown by `/api/health` | Set by Render at runtime (verified 2026-11-07, E-008) |

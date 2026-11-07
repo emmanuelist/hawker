@@ -1,10 +1,10 @@
 # State
-_Last verified: 2026-11-07 09:20 UTC at the first commit (foundation)_
+_Last verified: 2026-11-07 09:45 UTC at ba911fb_
 
 **Thesis:** Every hold ends one of two ways: paid through PayPal, or passed to the next buyer.
 **Milestone:** M0 · Rigged (checkpoint 2026-11-07 22:06 UTC) · **Deadline:** 2026-11-12 20:00 UTC (time left: the clock line)
-**Next action:** deploy the hello-world to Render and confirm `/api/health` from a phone on cellular (PLAN M0 item 5).
-**Blocked on:** Render dashboard access: the user connects the repo and applies the $50 credit.
+**Next action:** the user opens https://hawker-8q2t.onrender.com on a phone with Wi-Fi off (last M0 check); then start M1 with `impeccable shape` for the seller board and the database choice.
+**Blocked on:** nothing.
 
 ## Works (verified this session)
 | Capability | Verified by | Evidence |
@@ -19,12 +19,14 @@ _Last verified: 2026-11-07 09:20 UTC at the first commit (foundation)_
 | What | Environment | URL | Last checked |
 |---|---|---|---|
 | Repo (private, D-009) | GitHub | https://github.com/emmanuelist/hawker | 2026-11-07 |
+| Web service `hawker` (free plan, D-011), auto-deploys from `main` | Render | https://hawker-8q2t.onrender.com (health: `/api/health`) | 2026-11-07 09:43 UTC, commit ba911fb (E-008) |
 
 ## Broken or unverified
 - No product code yet. The claim engine, parser client, PayPal client and ingest start in M1.
 - Database choice is open (D-002 consequence); decide at the start of M1.
 - Design direction not set; run `impeccable shape` before the first real UI.
-- Whether the Render credit can be applied without a card: unverified (D-008).
+- Render free plan sleeps after 15 min idle (D-011); the keep-warm loop isn't built yet (M1).
+- Phone-on-cellular check of the deployed URL: pending (user).
 
 ## Claims not yet verified
 - C-1 the thesis: needs the hold ledger on the deployed app (M2).

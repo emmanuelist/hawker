@@ -17,7 +17,7 @@ Deadline source: https://paypalaihackathon.devpost.com/rules §1 ("Thursday Nov 
 - [x] Riskiest dependencies spiked, done when evidence exists for PayPal invoice pay/cancel/track (E-001, E-002), Orders + payouts (E-003, E-004), parsing on free models (E-005), Twitch read (E-006)
 - [x] Repo committed with the gate green locally (4d9e725), done when `npm run lint && npm run typecheck && npm test && npm run build` exits 0 at the first commit
 - [x] GitHub remote + CI green (E-007), done when the first CI run on `main` passes (private, D-009)
-- [ ] Hello-world on Render, done when `curl https://<service>.onrender.com/api/health` returns `ok: true` with the deployed commit SHA, and it loads from a phone on cellular
+- [ ] Hello-world on Render, done when `curl https://hawker-8q2t.onrender.com/api/health` returns `ok: true` with the deployed commit SHA (**done, E-008**), and it loads from a phone on cellular (pending: user)
 
 ### M1 · Walking skeleton
 - [ ] Placeholder: break down at the start of M1. First item: run `impeccable shape` for the seller board before writing UI.
