@@ -4,7 +4,8 @@
 import type { CatalogItem, ParsedComment } from "../domain/types";
 
 const CLAIM_WORDS = new Set(["mine", "sold", "akin", "+"]);
-const FILLER = new Set(["pls", "please", "plz", "abeg", "po", "o", "for", "me", "sis", "ma", "sir", "biko", "oo"]);
+// "yung" / "ung" is Taglish for "the" ("akin yung black"); like the rest, it never makes a claim on its own.
+const FILLER = new Set(["pls", "please", "plz", "abeg", "po", "o", "for", "me", "sis", "ma", "sir", "biko", "oo", "yung", "ung"]);
 // Words that turn a bare variant into a request: "M pls", "large for me", "gold abeg".
 const REQUEST = new Set(["pls", "please", "plz", "abeg", "biko"]);
 const SYNONYMS: Record<string, string> = { small: "s", medium: "m", med: "m", large: "l" };
@@ -110,5 +111,6 @@ function fastCancel(tokens: string[], onScreen: CatalogItem | null, catalog: Cat
   }
   const itemCode = code ?? onScreen?.code ?? null;
   if (!itemCode || (!code && !variant)) return null;
-  return { intent: "cancel", items: [{ code: itemCode, variant, qty: 1 }] };
+  // A cancel names a hold, not a quantity: qty is "not stated", as the model and the eval's gold read it.
+  return { intent: "cancel", items: [{ code: itemCode, variant, qty: null }] };
 }

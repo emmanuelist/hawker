@@ -27,6 +27,10 @@ describe("fastParse claims", () => {
     ["M pls", A1, { code: "A1", variant: "M", qty: 1 }],
     ["large for me", A1, { code: "A1", variant: "L", qty: 1 }],
     ["gold abeg", A3, { code: "A3", variant: "gold", qty: 1 }],
+    // Taglish: "yung" / "ung" is "the" (found on the deployed stall, E-030: the model dropped the size)
+    ["akin yung a1 m po", A3, { code: "A1", variant: "M", qty: 1 }],
+    ["akin yung black", A3, { code: "A3", variant: "black", qty: 1 }],
+    ["akin ung gold po", A3, { code: "A3", variant: "gold", qty: 1 }],
   ])("%s", (text, onScreen, ref) => {
     expect(fastParse(text, onScreen, catalog)).toEqual({ intent: "claim", items: [ref] });
   });
@@ -92,10 +96,10 @@ describe("fastParse reads the stall's tapped claims", () => {
 // The stall's Release button posts "cancel <code> <variant>"; it must cancel that hold and nothing else.
 describe("fastParse reads a named cancel", () => {
   test.each([
-    ["cancel a4 wine", A3, { code: "A4", variant: "wine", qty: 1 }],
-    ["cancel my gold", A3, { code: "A3", variant: "gold", qty: 1 }],
-    ["cancel my red", A3, { code: "A3", variant: "red", qty: 1 }], // was deferred to the model before named cancels
-    ["cancel a1", A3, { code: "A1", variant: null, qty: 1 }],
+    ["cancel a4 wine", A3, { code: "A4", variant: "wine", qty: null }],
+    ["cancel my gold", A3, { code: "A3", variant: "gold", qty: null }],
+    ["cancel my red", A3, { code: "A3", variant: "red", qty: null }], // was deferred to the model before named cancels
+    ["cancel a1", A3, { code: "A1", variant: null, qty: null }],
   ])("%s", (text, onScreen, ref) => {
     expect(fastParse(text, onScreen, catalog)).toEqual({ intent: "cancel", items: [ref] });
   });
@@ -104,5 +108,15 @@ describe("fastParse reads a named cancel", () => {
   });
   test("a bare cancel still cancels the latest hold", () => {
     expect(fastParse("cancel", A3, catalog)).toEqual({ intent: "cancel", items: [] });
+  });
+});
+
+describe("fastParse: Taglish 'yung' is filler, never a claim by itself", () => {
+  test("no claim word, so no claim", () => {
+    const r = fastParse("yung a1 m", A3, catalog);
+    expect(r === null || r.intent !== "claim").toBe(true);
+  });
+  test("a bare 'yung black' asks what they meant rather than holding", () => {
+    expect(fastParse("yung black", A3, catalog)).toEqual({ intent: "unclear", items: [] });
   });
 });
