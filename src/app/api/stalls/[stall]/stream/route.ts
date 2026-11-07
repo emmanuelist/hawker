@@ -23,20 +23,39 @@ export async function GET(req: Request, { params }: { params: Promise<{ stall: s
   let timer: ReturnType<typeof setTimeout> | null = null;
   let ping: ReturnType<typeof setInterval> | null = null;
   let unsubscribe: (() => void) | null = null;
+  let closed = false;
+  const RETRY_MS = 5000;
+
+  const stop = () => {
+    closed = true;
+    unsubscribe?.();
+    if (timer) clearTimeout(timer);
+    if (ping) clearInterval(ping);
+  };
 
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
+      const push = (chunk: string) => {
+        if (!closed) controller.enqueue(enc.encode(chunk));
+      };
       const send = async () => {
         try {
           const snap = await getSnapshot(stall, me?.id ?? null);
           if (!snap) {
-            controller.enqueue(enc.encode(`event: gone\ndata: {}\n\n`));
+            push(`event: gone\ndata: {}\n\n`);
             return;
           }
           const body = view === "desk" ? snap : forBuyer(snap, me?.id ?? null);
-          controller.enqueue(enc.encode(`data: ${JSON.stringify(body)}\n\n`));
+          push(`data: ${JSON.stringify(body)}\n\n`);
         } catch (e) {
-          controller.enqueue(enc.encode(`event: oops\ndata: ${JSON.stringify({ error: (e as Error).message.slice(0, 120) })}\n\n`));
+          // The reason stays in the server log; the client is told only that a retry is coming,
+          // and the retry is scheduled here so a failed read never leaves the page waiting forever.
+          console.error(JSON.stringify({ scope: "stream", stall, view, error: (e as Error).message.slice(0, 200) }));
+          push(`event: oops\ndata: ${JSON.stringify({ retryInMs: RETRY_MS })}\n\n`);
+          if (!closed) {
+            if (timer) clearTimeout(timer);
+            timer = setTimeout(send, RETRY_MS);
+          }
         }
       };
       await send();
@@ -44,11 +63,9 @@ export async function GET(req: Request, { params }: { params: Promise<{ stall: s
         if (timer) clearTimeout(timer);
         timer = setTimeout(send, 150);
       });
-      ping = setInterval(() => controller.enqueue(enc.encode(`: ping\n\n`)), 20000);
+      ping = setInterval(() => push(`: ping\n\n`), 20000);
       req.signal.addEventListener("abort", () => {
-        unsubscribe?.();
-        if (timer) clearTimeout(timer);
-        if (ping) clearInterval(ping);
+        stop();
         try {
           controller.close();
         } catch {
@@ -57,9 +74,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ stall: s
       });
     },
     cancel() {
-      unsubscribe?.();
-      if (timer) clearTimeout(timer);
-      if (ping) clearInterval(ping);
+      stop();
     },
   });
 

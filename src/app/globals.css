@@ -192,6 +192,15 @@ a {
 .stamp[data-kind="passed"] {
   color: var(--stamp-passed);
 }
+/* The stamp's sub-line: who the copy passed to. Its own line, so a long handle never spills the copy. */
+.stamp-to {
+  display: block;
+  margin-top: 0.3em;
+  font-size: 0.72em;
+  letter-spacing: 0.03em;
+  text-transform: none;
+  overflow-wrap: anywhere;
+}
 
 @keyframes stamp-land {
   0% {

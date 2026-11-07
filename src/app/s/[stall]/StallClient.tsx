@@ -2,7 +2,7 @@
 // The buyer's phone screen (D-013): what's on screen, your copies, the comment box, the chat.
 import { useMemo, useRef, useState } from "react";
 import { Copy } from "@/components/Copy";
-import { money, useLiveSnapshot, useServerNow } from "@/components/live";
+import { linkLabel, money, useLiveSnapshot, useServerNow } from "@/components/live";
 import type { SnapshotHold } from "@/lib/service/snapshot";
 
 const order: Record<SnapshotHold["state"], number> = { Holding: 0, Waiting: 1, Paid: 2, Passed: 3 };
@@ -12,6 +12,7 @@ export function StallClient({ stall }: { stall: string }) {
   const { snap, offset, link } = useLiveSnapshot(stall, "stall", nonce);
   const now = useServerNow(offset);
   const [announce, setAnnounce] = useState("");
+  const [changes, setChanges] = useState(0); // bumps when one of my copies changes state
 
   const me = snap?.me ?? null;
   const mine = useMemo(
@@ -37,13 +38,18 @@ export function StallClient({ stall }: { stall: string }) {
       }
     }
     setPrevMine(mine);
-    if (msgs.length) setAnnounce(msgs.join(" "));
+    if (msgs.length) {
+      setAnnounce(msgs.join(" "));
+      setChanges((c) => c + 1);
+    }
   }
 
   if (!snap) {
     return (
       <main className="mx-auto flex min-h-dvh max-w-[30rem] items-center justify-center px-4">
-        <p className="text-ink-muted">{link === "gone" ? "This stall isn't live right now." : "Opening the stall…"}</p>
+        <p className="text-ink-muted" role="status">
+          {link === "gone" ? "This stall isn't live right now." : link === "trouble" || link === "reconnecting" ? "Can't reach the stall right now. Retrying every few seconds…" : "Opening the stall…"}
+        </p>
       </main>
     );
   }
@@ -59,7 +65,7 @@ export function StallClient({ stall }: { stall: string }) {
         <p className="font-display text-[0.95rem] font-black tracking-[0.12em] uppercase">Hawker</p>
         <p className="flex items-center gap-2 text-[0.8125rem] text-ink-muted">
           <span className={`inline-block size-2 rounded-full ${link === "live" ? "bg-[#1f7a3f]" : "bg-serial"}`} aria-hidden="true" />
-          {link === "live" ? "Live" : link === "reconnecting" ? "Reconnecting…" : "Connecting…"}
+          {linkLabel(link)}
         </p>
       </div>
 
@@ -142,14 +148,33 @@ export function StallClient({ stall }: { stall: string }) {
         {announce}
       </div>
 
-      <Composer stall={stall} joined={!!me} handle={me?.handle ?? null} onJoined={() => setNonce((n) => n + 1)} />
+      <Composer stall={stall} joined={!!me} handle={me?.handle ?? null} changes={changes} onJoined={() => setNonce((n) => n + 1)} />
     </main>
   );
 }
 
-function Composer({ stall, joined, handle, onJoined }: { stall: string; joined: boolean; handle: string | null; onJoined: () => void }) {
+function Composer({
+  stall,
+  joined,
+  handle,
+  changes,
+  onJoined,
+}: {
+  stall: string;
+  joined: boolean;
+  handle: string | null;
+  changes: number;
+  onJoined: () => void;
+}) {
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState<{ text: string; error: boolean } | null>(null);
+  // A reply like "pay within 3:00" goes stale once that copy is paid or passed; the copy itself
+  // now carries the truth, so clear the reply when any of my copies changes state.
+  const [seenChanges, setSeenChanges] = useState(changes);
+  if (seenChanges !== changes) {
+    setSeenChanges(changes);
+    if (note && !note.error) setNote(null);
+  }
   const inputRef = useRef<HTMLInputElement>(null);
 
   async function join(handleValue: string) {

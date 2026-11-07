@@ -11,6 +11,7 @@
     "test": "vitest run --passWithNoTests",
     "eval": "tsx eval/run.ts",
     "sandbox:invoice": "tsx scripts/sandbox-invoice.ts",
+    "invoice:read": "tsx scripts/read-invoice.mts",
     "db:migrate": "tsx scripts/migrate.ts",
     "db:seed": "tsx scripts/seed.ts",
     "e2e:service": "tsx scripts/e2e-service.ts"

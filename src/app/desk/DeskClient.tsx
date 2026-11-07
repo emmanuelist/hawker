@@ -2,7 +2,7 @@
 // The helper's board (direction contract: .impeccable/surfaces/src-app-desk-page-tsx.md).
 import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { Copy } from "@/components/Copy";
-import { copyNo, money, useLiveSnapshot, useServerNow } from "@/components/live";
+import { copyNo, linkLabel, money, useLiveSnapshot, useServerNow, type LinkState } from "@/components/live";
 import type { Snapshot, SnapshotHold } from "@/lib/service/snapshot";
 
 const SOURCE: Record<string, string> = { fast: "fast path", groq: "Groq Qwen", gemini: "Gemini", unavailable: "AI unavailable" };
@@ -53,7 +53,9 @@ export function DeskClient({ stall }: { stall: string }) {
   if (!snap) {
     return (
       <main className="flex min-h-dvh items-center justify-center">
-        <p className="text-ink-muted">{link === "gone" ? "This stall isn't live." : "Opening the desk…"}</p>
+        <p className="text-ink-muted" role="status">
+          {link === "gone" ? "This stall isn't live." : link === "trouble" || link === "reconnecting" ? "Can't read the stall right now. Retrying every few seconds…" : "Opening the desk…"}
+        </p>
       </main>
     );
   }
@@ -65,10 +67,10 @@ export function DeskClient({ stall }: { stall: string }) {
   const item = snap.items.find((i) => i.code === snap.onScreen) ?? null;
 
   return (
-    <div className="grid h-dvh grid-rows-[auto_1fr_auto] overflow-hidden">
+    <div className="grid h-dvh grid-cols-[minmax(0,1fr)] grid-rows-[auto_1fr_auto] overflow-hidden">
       <Rail snap={snap} link={link} />
 
-      <main className="grid min-h-0 grid-cols-[19rem_1fr_22rem] max-[1180px]:grid-cols-[17rem_1fr_19rem]">
+      <main className="grid min-h-0 grid-cols-[19rem_minmax(0,1fr)_22rem] max-[1180px]:grid-cols-[17rem_minmax(0,1fr)_19rem]">
         <section aria-labelledby="onscreen" className="min-h-0 overflow-y-auto border-r border-rule px-5 py-5">
           {item ? (
             <>
@@ -148,7 +150,7 @@ export function DeskClient({ stall }: { stall: string }) {
             <p className="text-[0.8125rem] text-ink-muted">Holding by time left, then the line</p>
           </div>
           {active.length === 0 ? (
-            <EmptyPad stall={snap.stall.id} />
+            <EmptyPad stall={snap.stall.id} anyEnded={ended.length > 0} />
           ) : (
             <div className="mt-4 grid grid-cols-[repeat(auto-fill,minmax(15rem,1fr))] gap-4">
               {active.map((h) => (
@@ -213,7 +215,7 @@ export function DeskClient({ stall }: { stall: string }) {
   );
 }
 
-function Rail({ snap, link }: { snap: Snapshot; link: string }) {
+function Rail({ snap, link }: { snap: Snapshot; link: LinkState }) {
   const chips: [string, number, string][] = [
     ["Holding", snap.counters.Holding, "bg-holding text-ink"],
     ["Waiting", snap.counters.Waiting, "bg-waiting text-ink"],
@@ -230,7 +232,7 @@ function Rail({ snap, link }: { snap: Snapshot; link: string }) {
       </p>
       <p className="flex items-center gap-2 text-[0.8125rem] text-rail-muted">
         <span className={`inline-block size-2 rounded-full ${link === "live" ? "bg-[#7ee2a1]" : "bg-[#ffb4b4]"}`} aria-hidden="true" />
-        {link === "live" ? "Live" : link === "reconnecting" ? "Reconnecting…" : "Connecting…"}
+        {linkLabel(link)}
         <span aria-hidden="true">·</span>
         <span>Reader: {reader}</span>
       </p>
@@ -246,7 +248,7 @@ function Rail({ snap, link }: { snap: Snapshot; link: string }) {
   );
 }
 
-function EmptyPad({ stall }: { stall: string }) {
+function EmptyPad({ stall, anyEnded }: { stall: string; anyEnded: boolean }) {
   const origin = useSyncExternalStore(
     () => () => {},
     () => window.location.origin,
@@ -254,9 +256,11 @@ function EmptyPad({ stall }: { stall: string }) {
   );
   return (
     <div className="mt-4 border border-dashed border-rule px-6 py-10">
-      <p className="font-display text-lg font-extrabold">No holds yet.</p>
+      <p className="font-display text-lg font-extrabold">{anyEnded ? "Nothing open." : "No holds yet."}</p>
       <p className="mt-1 max-w-prose text-ink-muted">
-        Open the stall on a phone and type a claim the way a buyer would, for example “mine gold”. The copy appears here the moment Hawker reads it.
+        {anyEnded
+          ? "Every hold so far has ended, paid or passed. The next claim from the stall appears here the moment Hawker reads it."
+          : "Open the stall on a phone and type a claim the way a buyer would, for example “mine gold”. The copy appears here the moment Hawker reads it."}
       </p>
       <p className="mt-3 font-mono text-[0.9375rem] font-bold">{origin ? `${origin}/s/${stall}` : `/s/${stall}`}</p>
     </div>

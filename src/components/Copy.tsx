@@ -91,7 +91,8 @@ export function Copy({
       {hold.state === "Passed" && (
         <div className="mt-3 flex items-end justify-between gap-3">
           <span className={`stamp ${big ? "text-xl" : "text-base"}`} data-kind="passed">
-            {hold.passedTo ? `Passed → @${hold.passedTo}` : "Passed"}
+            Passed
+            {hold.passedTo && <span className="stamp-to">→ @{hold.passedTo}</span>}
           </span>
           <span className="text-[0.75rem]">{hold.endReason === "cancelled" ? "cancelled" : "time ran out"}</span>
         </div>
