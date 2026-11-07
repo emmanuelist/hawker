@@ -1,26 +1,217 @@
 @import "tailwindcss";
 
+/* Hawker — Invoice Pad world (D-012). Token names follow the mechanic: copies, stamps, serials, the rail.
+   Contrast checked (WCAG AA): ink/board 14.9, ink/holding 13.1, serial/holding 5.6, white/rail 10.0,
+   passed-ink/passed 6.1, stamp-passed/passed 4.8, stamp-paid/paid 9.7. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --board: #e6eaf2; /* the pad's backing board */
+  --rail: #2a3a8f; /* carbon blue: header rail, PAID stamp */
+  --rail-ink: #ffffff;
+  --rail-muted: #c9d2f2;
+  --ink: #171717;
+  --ink-muted: #4b5263;
+  --rule: #b9c0d6;
+  --serial: #a8121d; /* numbering-machine red */
+  --copy-holding: #f3dd6a; /* yellow copy: the timer is running */
+  --copy-holding-ink: #5a4a0e;
+  --copy-waiting: #cfe0f5; /* blue copy: in line */
+  --copy-paid: #fbfcfd; /* white top copy, stamped PAID */
+  --copy-passed: #d9dbde; /* grey copy, stamped PASSED */
+  --copy-passed-ink: #4a4d52;
+  --stamp-paid: #2a3a8f;
+  --stamp-passed: #b3202b;
+  --expiring: #a8121d;
+  --focus: #2a3a8f;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-board: var(--board);
+  --color-rail: var(--rail);
+  --color-rail-ink: var(--rail-ink);
+  --color-rail-muted: var(--rail-muted);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-rule: var(--rule);
+  --color-serial: var(--serial);
+  --color-holding: var(--copy-holding);
+  --color-holding-ink: var(--copy-holding-ink);
+  --color-waiting: var(--copy-waiting);
+  --color-paid: var(--copy-paid);
+  --color-passed: var(--copy-passed);
+  --color-passed-ink: var(--copy-passed-ink);
+  --color-stamp-paid: var(--stamp-paid);
+  --color-stamp-passed: var(--stamp-passed);
+  --font-sans: var(--font-public);
+  --font-display: var(--font-franklin);
+  --font-mono: var(--font-courier);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  background: var(--board);
+  color: var(--ink);
+  scrollbar-color: var(--rule) var(--board);
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--board);
+  color: var(--ink);
+  font-family: var(--font-public), system-ui, sans-serif;
+  caret-color: var(--rail);
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--copy-holding);
+  color: var(--ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+a {
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ——— the copy: a numbered carbon copy, tinted by state ——— */
+.copy {
+  position: relative;
+  background: var(--copy-waiting);
+  border: 1px solid color-mix(in oklab, var(--ink) 18%, transparent);
+  box-shadow: 0 1px 2px rgb(23 23 23 / 0.08), 0 6px 14px -8px rgb(23 23 23 / 0.25);
+  opacity: 1;
+  translate: 0 0;
+  transition:
+    opacity 0.32s cubic-bezier(0.16, 1, 0.3, 1),
+    translate 0.32s cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 0.2s linear;
+
+  @starting-style {
+    opacity: 0;
+    translate: 0 -10px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: background-color 0.2s linear;
+    @starting-style {
+      translate: 0 0;
+    }
+  }
+}
+
+/* perforated top edge: the copy was torn from the pad */
+.copy::before {
+  content: "";
+  position: absolute;
+  inset: -1px 0 auto 0;
+  height: 6px;
+  background: radial-gradient(circle at 5px -1px, var(--board) 3px, transparent 3.5px) 0 0 / 10px 6px repeat-x;
+  pointer-events: none;
+}
+
+.copy[data-state="Holding"] {
+  background: var(--copy-holding);
+}
+.copy[data-state="Waiting"] {
+  background: var(--copy-waiting);
+}
+.copy[data-state="Paid"] {
+  background: var(--copy-paid);
+}
+.copy[data-state="Passed"] {
+  background: var(--copy-passed);
+  color: var(--copy-passed-ink);
+  animation: tear-off 0.48s cubic-bezier(0.16, 1, 0.3, 1) both;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+@keyframes tear-off {
+  from {
+    rotate: 0deg;
+    translate: 0 0;
+  }
+  to {
+    rotate: -1.2deg;
+    translate: 0 4px;
+  }
+}
+
+/* ——— the countdown edge: exact length = exact time left ——— */
+.edge {
+  height: 6px;
+  background: color-mix(in oklab, var(--ink) 12%, transparent);
+  overflow: hidden;
+}
+.edge > i {
+  display: block;
+  height: 100%;
+  background: var(--ink);
+  transform-origin: left center;
+  transition: transform 1s linear;
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+}
+.edge[data-expiring="true"] > i {
+  background: var(--expiring);
+}
+
+/* ——— the stamp: the one authored moment. Lands in two frames, no easing. ——— */
+.stamp {
+  display: inline-block;
+  padding: 0.18em 0.55em 0.12em;
+  border: 3px double currentColor;
+  font-family: var(--font-franklin), sans-serif;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1;
+  rotate: -7deg;
+  mix-blend-mode: multiply;
+  opacity: 0.92;
+  animation: stamp-land 0.18s steps(2, jump-end) both;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+.stamp[data-kind="paid"] {
+  color: var(--stamp-paid);
+}
+.stamp[data-kind="passed"] {
+  color: var(--stamp-passed);
+}
+
+@keyframes stamp-land {
+  0% {
+    scale: 1.7;
+    opacity: 0;
+  }
+  50% {
+    scale: 1.15;
+    opacity: 0.7;
+  }
+  100% {
+    scale: 1;
+    opacity: 0.92;
+  }
+}
+
+.label {
+  font-family: var(--font-franklin), sans-serif;
+  font-weight: 800;
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
 }
