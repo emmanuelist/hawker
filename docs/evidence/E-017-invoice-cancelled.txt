@@ -1,0 +1,10 @@
+# PayPal GET /v2/invoicing/invoices/{id}, read 2026-11-07T12:23:26Z via npm run invoice:read
+{
+  "id": "INV2-E7YV-QF8V-SAZ9-ALTM",
+  "status": "CANCELLED",
+  "payerLink": "https://www.sandbox.paypal.com/invoice/p/#E7YVQF8VSAZ9ALTM",
+  "totalCents": 4400,
+  "paidCents": 0,
+  "transactionId": null,
+  "paidAt": null
+}

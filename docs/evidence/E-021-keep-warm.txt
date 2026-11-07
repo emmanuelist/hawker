@@ -1,0 +1,4 @@
+# Keep-warm check on Render free plan, 2026-11-07. Background job: wait for the deploy of 2fe7219, then no requests from us for 1200 s, then one GET /api/health.
+deployed 2026-11-07T12:24:03Z {"ok":true,"service":"hawker","commit":"2fe72197ef3674cac9d3d2dc266b980e5ebc4605","time":"2026-11-07T12:24:03.989Z","uptimeSeconds":19}
+idle from 2026-11-07T12:24:03Z; no requests for 1200 s
+after idle 2026-11-07T12:44:06Z {"ok":true,"service":"hawker","commit":"2fe72197ef3674cac9d3d2dc266b980e5ebc4605","time":"2026-11-07T12:44:05.238Z","uptimeSeconds":1220} ttfb=2.310928s

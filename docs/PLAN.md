@@ -6,7 +6,7 @@ Deadline source: https://paypalaihackathon.devpost.com/rules §1 ("Thursday Nov 
 | # | Milestone | When | Exit criteria (a stranger could check these) | Due | Status |
 |---|---|---|---|---|---|
 | M0 | Rigged | 10% | D-001 recorded; riskiest dependencies spiked with evidence; hello-world deployed to production on Render, `/api/health` reachable from a phone on cellular | 2026-11-07 22:06 UTC | **done** 2026-11-07 09:47 UTC (E-008, E-009) |
-| M1 | Walking skeleton | 40% | On the deployed app, one real comment typed on the stall page travels every layer: parsed (fast path or a real model call) → hold persisted in the database → shareable PayPal sandbox invoice created → the buyer's copy on the stall and the hold on the desk, both live | 2026-11-09 13:24 UTC | |
+| M1 | Walking skeleton | 40% | On the deployed app, one real comment typed on the stall page travels every layer: parsed (fast path or a real model call) → hold persisted in the database → shareable PayPal sandbox invoice created → the buyer's copy on the stall and the hold on the desk, both live | 2026-11-09 13:24 UTC | **done** 2026-11-07 12:48 UTC (E-016, E-020, E-021) |
 | M2 | Core claim | 65% | The thesis end to end with real data: one hold ends `Paid` (buyer pays, status re-read from PayPal) and one ends `Passed` (timer expires → invoice cancelled → next buyer holds with a new invoice), both visible in the hold ledger; seller board in AG Studio | 2026-11-10 22:09 UTC | |
 | M3 | Proof surface | freeze | README proof section; parsing eval committed and re-runnable; every claim has a verified row; demo video recorded; `benchmark` run | 2026-11-11 17:48 UTC | |
 | M4 | Submitted | deadline − buffer | Devpost form submitted with the verbatim thesis; YouTube video public, < 3 min; repo public with license in About; preflight passed from a phone on cellular | 2026-11-12 06:54 UTC | |
@@ -28,7 +28,7 @@ Deadline source: https://paypalaihackathon.devpost.com/rules §1 ("Thursday Nov 
 - [x] Direction contract recorded (`.impeccable/surfaces/src-app-desk-page-tsx.md`) before any UI code, done when `impeccable surface-brief read src/app/desk/page.tsx` shows all six blocks + seed reference
 - [x] Stall page `/s/[stall]` (E-015, local): on-screen item, live stock, comment box, the buyer's numbered copy with countdown and Pay with PayPal, done when a comment typed on a phone creates a hold and shows its invoice link
 - [x] Desk `/desk` (E-015, local): on-screen control, holds live over SSE, chat with parse results, done when that hold appears on the desk without a reload
-- [ ] Deployed: the M1 round trip works on hawker-8q2t.onrender.com, with keep-warm that never touches the database
+- [x] Deployed (E-016, E-020, E-021): the M1 round trip works on hawker-8q2t.onrender.com, with keep-warm that never touches the database. Fast-path claim → hold + invoice → stall and desk live → paid on PayPal → PAID stamp 8.1 s later (E-016); Pidgin claim read by the model path (Gemini after a Groq failover; Groq on the next comment) (E-020); idle 20 min, uptime 19 → 1220 s (E-021)
 
 ### M2 · Core claim
 - [ ] Placeholder

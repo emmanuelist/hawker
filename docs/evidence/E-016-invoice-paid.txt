@@ -1,0 +1,10 @@
+# PayPal GET /v2/invoicing/invoices/{id}, read 2026-11-07T12:23:22Z via npm run invoice:read
+{
+  "id": "INV2-V7RS-2P7J-DGGV-JJYF",
+  "status": "PAID",
+  "payerLink": "https://www.sandbox.paypal.com/invoice/p/#V7RS2P7JDGGVJJYF",
+  "totalCents": 2200,
+  "paidCents": 2200,
+  "transactionId": "82433159Y3061500A",
+  "paidAt": "2026-11-07"
+}

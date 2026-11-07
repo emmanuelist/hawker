@@ -159,3 +159,15 @@ The rules require a public repo with an open-source license at submission. Pendi
 **Consequences:**
 - The keep-warm request and `/api/health` must not query the database, or the compute allowance burns 24/7. The DB is touched only on real events and while holds are open.
 - Neon cold start adds latency to the first query after 5 idle minutes.
+
+## D-015 · The database lives in the user's existing Neon project, US East 1 · 2026-11-07 · accepted · supersedes the project and region in D-014
+**Context:** D-014 planned a new Neon project `hawker` in AWS US West 2, next to Render Oregon. When the database was created, the user pointed to their existing Neon projects instead (screenshots in session): `neon-red-garden`, which is managed through a Vercel integration, and `neon-indigo-house`, which must not be touched.
+**Decision:**
+- A separate database `hawker` inside `neon-red-garden` (AWS US East 1), apart from that project's own `neondb`. Connection details in CONTEXT.md.
+- Driver, migrations and validation stay as D-014 says.
+**Alternatives:**
+- A new Neon project in US West 2 (D-014): about 60 ms closer per query. Not used; the database went into the existing project the user shared.
+**Consequences:**
+- Every query crosses Oregon → Virginia, about 60–70 ms (T-16). Measured on Render: a fast-path claim including the PayPal invoice answered in 3.4 s (E-016), a model-path claim in 4.5 s (E-020); PayPal calls dominate.
+- The Vercel-managed project's compute allowance is shared with whatever else uses it.
+- Moving to a West project later is a connection-string change plus `npm run db:migrate` and `npm run db:seed`.
