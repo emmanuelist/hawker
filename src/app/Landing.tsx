@@ -7,6 +7,7 @@ import { SOURCE } from "@/components/ChatLine";
 import { ArrowOut, Copy, lineInfo, shortId } from "@/components/Copy";
 import { copyNo, money, useLiveSnapshot, useServerNow } from "@/components/live";
 import type { Snapshot, SnapshotHold } from "@/lib/service/snapshot";
+import { Refusals } from "./Refusals";
 
 const DEMO = "ada";
 
@@ -83,6 +84,8 @@ export function Landing({ initial = null }: { initial?: Snapshot | null }) {
 
         <Endings snap={snap} now={now} paid={paid[0] ?? null} passed={passed[0] ?? null} />
 
+        <Refusals stall={DEMO} />
+
         <Proof snap={snap} paid={paid} />
       </main>
 
@@ -156,7 +159,10 @@ function Nav() {
           <a href="#how" className="hidden min-h-11 items-center hover:underline md:inline-flex">
             How a hold ends
           </a>
-          <a href="#proof" className="hidden min-h-11 items-center hover:underline md:inline-flex">
+          <a href="#refusals" className="hidden min-h-11 items-center hover:underline md:inline-flex">
+            Try to break it
+          </a>
+          <a href="#proof" className="hidden min-h-11 items-center hover:underline lg:inline-flex">
             Check it yourself
           </a>
           <Link href="/desk" className="hidden min-h-11 items-center hover:underline sm:inline-flex">

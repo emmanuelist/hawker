@@ -473,6 +473,79 @@ h3 {
   font-size: 0.875rem;
 }
 
+/* ——— a refusal: the refuser's reply, printed out under the attempt (landing, "Every way out, refused") ——— */
+.refusal {
+  position: relative;
+  padding: 0.9rem 1rem 0.8rem;
+  background: var(--copy-paid);
+  border: 1px solid color-mix(in oklab, var(--ink) 14%, transparent);
+  box-shadow: 0 8px 14px -12px rgb(23 23 23 / 0.4);
+  animation: print-out 0.55s var(--out-expo) both;
+}
+.refusal::before {
+  content: "";
+  position: absolute;
+  inset: -1px 0 auto 0;
+  height: 6px;
+  background: radial-gradient(circle at 5px -1px, var(--board) 3px, transparent 3.5px) 0 0 / 10px 6px repeat-x;
+  pointer-events: none;
+}
+.refusal-verdict {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-franklin), sans-serif;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--serial);
+}
+.refusal[data-outcome="accepted"] .refusal-verdict,
+.refusal[data-outcome="error"] .refusal-verdict {
+  color: var(--copy-holding-ink);
+}
+.refusal[data-outcome="accepted"],
+.refusal[data-outcome="error"] {
+  background: color-mix(in oklab, var(--copy-holding) 45%, var(--copy-paid));
+}
+.refusal-code {
+  margin-top: 0.35rem;
+  font-family: var(--font-courier), monospace;
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: var(--serial);
+  overflow-wrap: anywhere;
+}
+.refusal[data-outcome="accepted"] .refusal-code,
+.refusal[data-outcome="error"] .refusal-code {
+  color: var(--ink);
+}
+.refusal-message {
+  margin-top: 0.15rem;
+  font-family: var(--font-courier), monospace;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+/* the reply prints out of the slot, top first */
+@keyframes print-out {
+  from {
+    clip-path: inset(0 0 100% 0);
+    translate: 0 -6px;
+  }
+  to {
+    clip-path: inset(0 0 -20px 0);
+    translate: 0 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .refusal {
+    animation: none;
+  }
+}
+
 /* ——— a count on numbering-machine wheels: each digit a 0–9 strip that rolls ——— */
 .numwheels {
   display: inline-flex;
