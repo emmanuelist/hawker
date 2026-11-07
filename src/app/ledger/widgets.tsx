@@ -35,14 +35,14 @@ function useRows(params: AgWidgetParams, keys: string[], crossFilter: "filter" |
   return { rows, fields };
 }
 
-/** The clock, ticking each second while `on` (server-corrected by the shell's measured skew). */
-function useNow(on: boolean, skewMs = 0) {
+/** The clock, ticking each second (server-corrected by the shell's measured skew). It always ticks:
+ *  a clock that paused while nobody owed would show a new copy's time from when it paused. */
+function useNow(skewMs = 0) {
   const [now, setNow] = useState(() => Date.now() + skewMs);
   useEffect(() => {
-    if (!on) return;
     const t = setInterval(() => setNow(Date.now() + skewMs), 1000);
     return () => clearInterval(t);
-  }, [on, skewMs]);
+  }, [skewMs]);
   return now;
 }
 
@@ -144,7 +144,7 @@ function OwesWidget(params: AgWidgetParams) {
   const ready = fields.length === 6;
   const [copy, buyer, item, amount, state, deadline] = fields;
   const owing = ready ? (rows ?? []).filter((r) => r[state.key] === "Holding") : [];
-  const now = useNow(owing.length > 0, ctx?.skewMs ?? 0);
+  const now = useNow(ctx?.skewMs ?? 0);
   if (!ready) return null;
   async function readPayPal() {
     setReading("Reading PayPal…");
