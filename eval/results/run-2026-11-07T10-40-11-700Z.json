@@ -1,0 +1,16 @@
+{
+ "summary": {
+  "at": "2026-11-07T10:40:11.700Z",
+  "cases": 60,
+  "commerceCriticalCorrect": 60,
+  "phantomClaims": 0,
+  "missedClaims": 0,
+  "fastPath": 23,
+  "modelBatches": {
+   "gemini": 2,
+   "groq": 2
+  },
+  "seconds": 19.2
+ },
+ "misses": []
+}

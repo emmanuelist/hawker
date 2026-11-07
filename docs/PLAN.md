@@ -21,7 +21,14 @@ Deadline source: https://paypalaihackathon.devpost.com/rules §1 ("Thursday Nov 
 
 ### M1 · Walking skeleton
 - [x] Design direction set: Invoice Pad (D-012); stall page as the buyer surface (D-013)
-- [ ] Placeholder: remaining M1 items are broken down once the database is chosen
+- [ ] Database: Neon free Postgres (D-014), schema + migrations, done when `npm run db:migrate` applies cleanly to Neon and `/api/health` reports `db: ok`
+- [x] Claim engine (pure) rules (`src/lib/domain/engine.ts`, 27 tests): comments → holds / waitlist / cancel / expiry → pass, invariants B1–B3, done when `npm test` covers claim, over-stock waitlist, cancel, expiry-pass, a pay-vs-expiry race, and unknown-variant clarify
+- [x] Parser (E-010: eval 60/60, 0 phantom, failover exercised): regex fast path + one model client (Groq → Gemini failover, timeout, retries, request-ID logs), done when `npm run eval` re-runs the 60-comment set through the app's own client with 0 phantom claims
+- [ ] PayPal client: token cache + terminate, shareable invoice create / send / get / cancel, done when `npm run sandbox:invoice` creates, reads and cancels a real sandbox invoice
+- [ ] Direction contract recorded in the surface brief (D-012) before any UI code, done when `impeccable surface-brief read src/app/desk/page.tsx` shows all six blocks + seed reference
+- [ ] Stall page `/s/[stall]`: on-screen item, live stock, comment box, the buyer's numbered copy with countdown and Pay with PayPal, done when a comment typed on a phone creates a hold and shows its invoice link
+- [ ] Desk `/desk`: on-screen control, holds live over SSE, chat with parse results, done when that hold appears on the desk without a reload
+- [ ] Deployed: the M1 round trip works on hawker-8q2t.onrender.com, with keep-warm that never touches the database
 
 ### M2 · Core claim
 - [ ] Placeholder

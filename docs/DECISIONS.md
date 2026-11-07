@@ -145,3 +145,17 @@ The rules require a public repo with an open-source license at submission. Pendi
 - M1's exit becomes "one real comment typed on the stall".
 - Buyer identity is a per-device session plus a chosen handle.
 - D-010's other cuts stand: no TikTok/FB/IG ingest, no OCR, no multi-seller, no Venmo payouts.
+
+## D-014 · Database: Neon free Postgres, `postgres` driver, plain SQL migrations · 2026-11-07 · accepted
+**Context:** D-011 needs an external database with no expiry and no card. Neon's free plan (neon.com/docs/introduction/plans, read 2026-11-07): $0, 1 GB storage and 100 CU-hours per project per month, 5 GB egress, scale-to-zero after 5 min that cannot be disabled; no expiry stated.
+**Decision:**
+- Neon free project `hawker` in AWS US West 2 (near Render Oregon).
+- The `postgres` 4.1.0 driver with hand-written SQL migrations in `db/migrations/`.
+- `zod` 4.6.7 validates model output and request bodies.
+**Alternatives:**
+- Render free Postgres: expires in 30 days.
+- Supabase free: pauses after inactivity.
+- An ORM (drizzle 0.45): more surface than this schema needs.
+**Consequences:**
+- The keep-warm request and `/api/health` must not query the database, or the compute allowance burns 24/7. The DB is touched only on real events and while holds are open.
+- Neon cold start adds latency to the first query after 5 idle minutes.

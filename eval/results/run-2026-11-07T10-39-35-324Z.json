@@ -1,0 +1,19 @@
+{
+ "summary": {
+  "at": "2026-11-07T10:39:35.324Z",
+  "cases": 60,
+  "commerceCriticalCorrect": 58,
+  "phantomClaims": 0,
+  "missedClaims": 2,
+  "fastPath": 23,
+  "modelBatches": {
+   "groq": 3,
+   "gemini": 1
+  },
+  "seconds": 8.3
+ },
+ "misses": [
+  "#31 [fast] \"M pls\" gold=claim [[\"A1\",\"m\",1]] got=unclear []",
+  "#50 [fast] \"large for me\" gold=claim [[\"A1\",\"l\",1]] got=unclear []"
+ ]
+}

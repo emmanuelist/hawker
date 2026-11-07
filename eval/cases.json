@@ -1,0 +1,612 @@
+[
+ {
+  "onScreen": "A3",
+  "comment": "mine red",
+  "intent": "claim",
+  "items": [
+   {
+    "code": "A3",
+    "variant": "red",
+    "qty": 1
+   }
+  ]
+ },
+ {
+  "onScreen": "A3",
+  "comment": "Mine!!! 🔥",
+  "intent": "claim",
+  "items": [
+   {
+    "code": "A3",
+    "variant": null,
+    "qty": 1
+   }
+  ]
+ },
+ {
+  "onScreen": "A3",
+  "comment": "gold one for me abeg",
+  "intent": "claim",
+  "items": [
+   {
+    "code": "A3",
+    "variant": "gold",
+    "qty": 1
+   }
+  ]
+ },
+ {
+  "onScreen": "A3",
+  "comment": "how much be this one?",
+  "intent": "question",
+  "items": []
+ },
+ {
+  "onScreen": "A3",
+  "comment": "+1 black",
+  "intent": "claim",
+  "items": [
+   {
+    "code": "A3",
+    "variant": "black",
+    "qty": 1
+   }
+  ]
+ },
+ {
+  "onScreen": "A3",
+  "comment": "M2 gold",
+  "intent": "claim",
+  "items": [
+   {
+    "code": "A3",
+    "variant": "gold",
+    "qty": 2
+   }
+  ]
+ },
+ {
+  "onScreen": "A3",
+  "comment": "pls is it real leather",
+  "intent": "question",
+  "items": []
+ },
+ {
+  "onScreen": "A3",
+  "comment": "mine po red",
+  "intent": "claim",
+  "items": [
+   {
+    "code": "A3",
+    "variant": "red",
+    "qty": 1
+   }
+  ]
+ },
+ {
+  "onScreen": "A3",
+  "comment": "cancel my red",
+  "intent": "cancel",
+  "items": [
+   {
+    "code": "A3",
+    "variant": "red",
+    "qty": null
+   }
+  ]
+ },
+ {
+  "onScreen": "A3",
+  "comment": "😍😍😍",
+  "intent": "other",
+  "items": []
+ },
+ {
+  "onScreen": "A3",
+  "comment": "mine A1 M",
+  "intent": "claim",
+  "items": [
+   {
+    "code": "A1",
+    "variant": "M",
+    "qty": 1
+   }
+  ]
+ },
+ {
+  "onScreen": "A3",
+  "comment": "I go take 2 black",
+  "intent": "claim",
+  "items": [
+   {
+    "code": "A3",
+    "variant": "black",
+    "qty": 2
+   }
+  ]
+ },
+ {
+  "onScreen": "A3",
+  "comment": "wait is the gold one still available?",
+  "intent": "question",
+  "items": []
+ },
+ {
+  "onScreen": "A3",
+  "comment": "red",
+  "intent": "unclear",
+  "items": []
+ },
+ {
+  "onScreen": "A3",
+  "comment": "sis mine 1 gold and 1 black",
+  "intent": "claim",
+  "items": [
+   {
+    "code": "A3",
+    "variant": "gold",
+    "qty": 1
+   },
+   {
+    "code": "A3",
+    "variant": "black",
+    "qty": 1
+   }
+  ]
+ },
+ {
+  "onScreen": "A3",
+  "comment": "akin yung black",
+  "intent": "claim",
+  "items": [
+   {
+    "code": "A3",
+    "variant": "black",
+    "qty": 1
+   }
+  ]
+ },
+ {
+  "onScreen": "A3",
+  "comment": "can you ship to Houston?",
+  "intent": "question",
+  "items": []
+ },
+ {
+  "onScreen": "A3",
+  "comment": "mine",
+  "intent": "claim",
+  "items": [
+   {
+    "code": "A3",
+    "variant": null,
+    "qty": 1
+   }
+  ]
+ },
+ {
+  "onScreen": "A3",
+  "comment": "Lol this one fine o",
+  "intent": "other",
+  "items": []
+ },
+ {
+  "onScreen": "A3",
+  "comment": "Nope cancel, my husband said no 😂",
+  "intent": "cancel",
+  "items": []
+ },
+ {
+  "onScreen": "A3",
+  "comment": "+1",
+  "intent": "claim",
+  "items": [
+   {
+    "code": "A3",
+    "variant": null,
+    "qty": 1
+   }
+  ]
+ },
+ {
+  "onScreen": "A3",
+  "comment": "mine red pls, 2pcs",
+  "intent": "claim",
+  "items": [
+   {
+    "code": "A3",
+    "variant": "red",
+    "qty": 2
+   }
+  ]
+ },
+ {
+  "onScreen": "A3",
+  "comment": "is A2 coming back on?",
+  "intent": "question",
+  "items": []
+ },
+ {
+  "onScreen": "A3",
+  "comment": "reserve gold for me till friday",
+  "intent": "claim",
+  "items": [
+   {
+    "code": "A3",
+    "variant": "gold",
+    "qty": 1
+   }
+  ]
+ },
+ {
+  "onScreen": "A3",
+  "comment": "black one don finish?",
+  "intent": "question",
+  "items": []
+ },
+ {
+  "onScreen": "A3",
+  "comment": "A4 wine x2",
+  "intent": "claim",
+  "items": [
+   {
+    "code": "A4",
+    "variant": "wine",
+    "qty": 2
+   }
+  ]
+ },
+ {
+  "onScreen": "A3",
+  "comment": "sold! red",
+  "intent": "claim",
+  "items": [
+   {
+    "code": "A3",
+    "variant": "red",
+    "qty": 1
+   }
+  ]
+ },
+ {
+  "onScreen": "A3",
+  "comment": "how many red left",
+  "intent": "question",
+  "items": []
+ },
+ {
+  "onScreen": "A3",
+  "comment": "mine mine mine",
+  "intent": "claim",
+  "items": [
+   {
+    "code": "A3",
+    "variant": null,
+    "qty": 1
+   }
+  ]
+ },
+ {
+  "onScreen": "A3",
+  "comment": "Hi from Lagos 👋",
+  "intent": "other",
+  "items": []
+ },
+ {
+  "onScreen": "A1",
+  "comment": "mine L",
+  "intent": "claim",
+  "items": [
+   {
+    "code": "A1",
+    "variant": "L",
+    "qty": 1
+   }
+  ]
+ },
+ {
+  "onScreen": "A1",
+  "comment": "M pls",
+  "intent": "claim",
+  "items": [
+   {
+    "code": "A1",
+    "variant": "M",
+    "qty": 1
+   }
+  ]
+ },
+ {
+  "onScreen": "A1",
+  "comment": "mine S and M",
+  "intent": "claim",
+  "items": [
+   {
+    "code": "A1",
+    "variant": "S",
+    "qty": 1
+   },
+   {
+    "code": "A1",
+    "variant": "M",
+    "qty": 1
+   }
+  ]
+ },
+ {
+  "onScreen": "A1",
+  "comment": "what's the length?",
+  "intent": "question",
+  "items": []
+ },
+ {
+  "onScreen": "A1",
+  "comment": "I want this in XL",
+  "intent": "claim",
+  "items": [
+   {
+    "code": "A1",
+    "variant": "XL",
+    "qty": 1
+   }
+  ]
+ },
+ {
+  "onScreen": "A1",
+  "comment": "mine po M",
+  "intent": "claim",
+  "items": [
+   {
+    "code": "A1",
+    "variant": "M",
+    "qty": 1
+   }
+  ]
+ },
+ {
+  "onScreen": "A1",
+  "comment": "kunin ko L",
+  "intent": "claim",
+  "items": [
+   {
+    "code": "A1",
+    "variant": "L",
+    "qty": 1
+   }
+  ]
+ },
+ {
+  "onScreen": "A1",
+  "comment": "cancel the clutch",
+  "intent": "cancel",
+  "items": [
+   {
+    "code": "A3",
+    "variant": null,
+    "qty": null
+   }
+  ]
+ },
+ {
+  "onScreen": "A1",
+  "comment": "na wa, price too high",
+  "intent": "other",
+  "items": []
+ },
+ {
+  "onScreen": "A1",
+  "comment": "2 M for me and my sister",
+  "intent": "claim",
+  "items": [
+   {
+    "code": "A1",
+    "variant": "M",
+    "qty": 2
+   }
+  ]
+ },
+ {
+  "onScreen": "A1",
+  "comment": "Mine A3 gold",
+  "intent": "claim",
+  "items": [
+   {
+    "code": "A3",
+    "variant": "gold",
+    "qty": 1
+   }
+  ]
+ },
+ {
+  "onScreen": "A1",
+  "comment": "do you accept PayPal?",
+  "intent": "question",
+  "items": []
+ },
+ {
+  "onScreen": "A1",
+  "comment": "L",
+  "intent": "unclear",
+  "items": []
+ },
+ {
+  "onScreen": "A1",
+  "comment": "mine L... actually no M",
+  "intent": "claim",
+  "items": [
+   {
+    "code": "A1",
+    "variant": "M",
+    "qty": 1
+   }
+  ]
+ },
+ {
+  "onScreen": "A1",
+  "comment": "+2 S",
+  "intent": "claim",
+  "items": [
+   {
+    "code": "A1",
+    "variant": "S",
+    "qty": 2
+   }
+  ]
+ },
+ {
+  "onScreen": "A1",
+  "comment": "Ma mine size L abeg 🙏🏾",
+  "intent": "claim",
+  "items": [
+   {
+    "code": "A1",
+    "variant": "L",
+    "qty": 1
+   }
+  ]
+ },
+ {
+  "onScreen": "A1",
+  "comment": "someone cancel? I'm next for L",
+  "intent": "claim",
+  "items": [
+   {
+    "code": "A1",
+    "variant": "L",
+    "qty": 1
+   }
+  ]
+ },
+ {
+  "onScreen": "A1",
+  "comment": "Cancel 1 of my M",
+  "intent": "cancel",
+  "items": [
+   {
+    "code": "A1",
+    "variant": "M",
+    "qty": 1
+   }
+  ]
+ },
+ {
+  "onScreen": "A1",
+  "comment": "Beautiful 😍 but no money 😭",
+  "intent": "other",
+  "items": []
+ },
+ {
+  "onScreen": "A1",
+  "comment": "mine medium",
+  "intent": "claim",
+  "items": [
+   {
+    "code": "A1",
+    "variant": "M",
+    "qty": 1
+   }
+  ]
+ },
+ {
+  "onScreen": "A1",
+  "comment": "large for me",
+  "intent": "claim",
+  "items": [
+   {
+    "code": "A1",
+    "variant": "L",
+    "qty": 1
+   }
+  ]
+ },
+ {
+  "onScreen": "A1",
+  "comment": "is it true to size?",
+  "intent": "question",
+  "items": []
+ },
+ {
+  "onScreen": "A1",
+  "comment": "A2 XL mine",
+  "intent": "claim",
+  "items": [
+   {
+    "code": "A2",
+    "variant": "XL",
+    "qty": 1
+   }
+  ]
+ },
+ {
+  "onScreen": "A1",
+  "comment": "mine",
+  "intent": "claim",
+  "items": [
+   {
+    "code": "A1",
+    "variant": null,
+    "qty": 1
+   }
+  ]
+ },
+ {
+  "onScreen": "A1",
+  "comment": "nevermind on the L",
+  "intent": "cancel",
+  "items": [
+   {
+    "code": "A1",
+    "variant": "L",
+    "qty": null
+   }
+  ]
+ },
+ {
+  "onScreen": "A1",
+  "comment": "M x 3",
+  "intent": "claim",
+  "items": [
+   {
+    "code": "A1",
+    "variant": "M",
+    "qty": 3
+   }
+  ]
+ },
+ {
+  "onScreen": "A1",
+  "comment": "lol who else is watching from Abuja",
+  "intent": "other",
+  "items": []
+ },
+ {
+  "onScreen": "A1",
+  "comment": "I want am",
+  "intent": "claim",
+  "items": [
+   {
+    "code": "A1",
+    "variant": null,
+    "qty": 1
+   }
+  ]
+ },
+ {
+  "onScreen": "A1",
+  "comment": "can i pay later?",
+  "intent": "question",
+  "items": []
+ },
+ {
+  "onScreen": "A1",
+  "comment": "mine S pls, ship to Toronto",
+  "intent": "claim",
+  "items": [
+   {
+    "code": "A1",
+    "variant": "S",
+    "qty": 1
+   }
+  ]
+ }
+]

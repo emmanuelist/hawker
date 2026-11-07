@@ -6,7 +6,7 @@ against live state before anything is published.
 | # | Claim (verbatim) | Appears in | Proof | Status | Checked |
 |---|---|---|---|---|---|
 | C-1 | Every hold ends one of two ways: paid through PayPal, or passed to the next buyer. | Planned: repo description, README subtitle, Devpost tagline, video closing card | Planned: hold ledger on the hosted demo (every row `Paid` + PayPal invoice/transaction ID, or `Passed` → next handle + timestamp) and judge-runnable checks in the README. The pre-build rail is proven by E-001, E-002. | unverified (not built) | 2026-11-07 |
-| C-2 | Hawker reads a live-sale chat in English, Pidgin or Taglish. | Planned: README subtitle, video | Pre-build spike E-005 (300/300 on Groq `qwen/qwen3.8-27b`). Needs the committed, re-runnable eval in `eval/` and the same result through the app's own model client. | unverified (spike only) | 2026-11-07 |
+| C-2 | Hawker reads a live-sale chat in English, Pidgin or Taglish. | Planned: README subtitle, video | E-010: `npm run eval` re-runs 60 labelled comments through the app's own pipeline (60/60, 0 phantom). Still to verify end to end on the deployed stall. | verified for the eval set; unverified on the deployed stall | 2026-11-07 |
 
 ## Proofs
 These are pre-build dependency spikes run on 2026-11-07, before the first commit: scripts in `internal/research/spikes/` (gitignored) and `eval/spike-2026-11-07/`. They prove the rails Hawker depends on, not Hawker itself.
@@ -22,3 +22,4 @@ These are pre-build dependency spikes run on 2026-11-07, before the first commit
 | E-007 | 2026-11-07 | CI gate green on GitHub for the hello-world: `npm ci`, lint (0 warnings), typecheck (`next typegen && tsc --noEmit`), test, build | [CI run 42359269913](https://github.com/emmanuelist/hawker/actions/runs/42359269913) (private repo until D-009) | 7e1d387 |
 | E-008 | 2026-11-07 | Hello-world live on Render (free plan): `/api/health` returns `ok: true` with the deployed commit, generated per request; home page HTTP 200 | https://hawker-8q2t.onrender.com/api/health · `docs/evidence/E-008-render-health.md` | ba911fb |
 | E-009 | 2026-11-07 | The deployed home page loads on a phone over mobile data (H+, no Wi-Fi), user-run check at 10:47 local (09:47 UTC) | `docs/evidence/E-009-phone-cellular.jpg` | ba911fb |
+| E-010 | 2026-11-07 | Parsing through the app's own pipeline (fast path → Groq `qwen/qwen3.8-27b` → Gemini `gemini-3.5-flash-lite` failover): **60/60 commerce-critical correct, 0 phantom, 0 missed**; 23 by the fast path, model batches {'gemini': 2, 'groq': 2} | `npm run eval` · `eval/results/run-2026-11-07T10-40-11-700Z.json` | (this commit) |
