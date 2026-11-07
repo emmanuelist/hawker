@@ -16,6 +16,9 @@ export interface SnapshotHold {
   priceCents: number;
   state: HoldState;
   said: string;
+  /** How the buyer entered the comment that made this hold: typed, or a one-tap claim. */
+  saidVia: "typed" | "tap";
+  commentSeq: number;
   deadlineAt: string | null;
   endedAt: string | null;
   endReason: "paid" | "expired" | "cancelled" | null;
@@ -35,6 +38,7 @@ export interface SnapshotComment {
   outcome: string | null;
   source: string | null;
   ms: number | null;
+  via: "typed" | "tap";
   at: string;
   mine: boolean;
 }
@@ -46,6 +50,8 @@ export interface Snapshot {
   onScreen: string | null;
   items: { code: string; name: string; priceCents: number; variants: { label: string; stock: number; available: number; holding: number; waiting: number }[] }[];
   counters: Record<HoldState, number>;
+  /** The serial the next copy on this stall's pad will carry (copies are numbered per stall). */
+  nextSerial: number;
   holds: SnapshotHold[];
   comments: SnapshotComment[];
   reader: { lastSource: string | null; degraded: boolean };
@@ -65,13 +71,13 @@ export async function getSnapshot(stallId: string, buyerId: string | null = null
       from holds where stall_id = ${stallId} group by variant_id`,
     sql<{
       id: string; serial: number; handle: string; buyer_id: string; code: string; item_name: string; label: string; variants: number;
-      qty: number; price_cents: number; state: HoldState; said: string; deadline_at: Date | null; ended_at: Date | null;
+      qty: number; price_cents: number; state: HoldState; said: string; said_via: "typed" | "tap"; comment_seq: string; deadline_at: Date | null; ended_at: Date | null;
       end_reason: SnapshotHold["endReason"]; invoice_id: string | null; payer_link: string | null; inv_status: string | null;
       transaction_id: string | null; passed_to: string | null;
     }[]>`
       select h.id, h.serial, b.handle, h.buyer_id, i.code, i.name item_name, v.label,
         (select count(*) from variants v2 where v2.item_id = i.id)::int variants,
-        h.qty, i.price_cents, h.state, c.text said, h.deadline_at, h.ended_at, h.end_reason,
+        h.qty, i.price_cents, h.state, c.text said, c.via said_via, h.comment_seq, h.deadline_at, h.ended_at, h.end_reason,
         h.invoice_id, inv.payer_link, inv.status inv_status, inv.transaction_id, nb.handle passed_to
       from holds h
       join buyers b on b.id = h.buyer_id
@@ -85,16 +91,20 @@ export async function getSnapshot(stallId: string, buyerId: string | null = null
         and (h.state in ('Waiting', 'Holding') or h.ended_at > now() - interval '6 hours' or h.buyer_id = ${buyerId})
       order by coalesce(h.ended_at, h.deadline_at, h.waiting_since) desc
       limit 120`,
-    sql<{ seq: string; handle: string; buyer_id: string; text: string; intent: string | null; outcome: string | null; parse_source: string | null; parse_ms: number | null; received_at: Date }[]>`
-      select c.seq, b.handle, c.buyer_id, c.text, c.intent, c.outcome, c.parse_source, c.parse_ms, c.received_at
+    sql<{ seq: string; handle: string; buyer_id: string; text: string; intent: string | null; outcome: string | null; parse_source: string | null; parse_ms: number | null; via: "typed" | "tap"; received_at: Date }[]>`
+      select c.seq, b.handle, c.buyer_id, c.text, c.intent, c.outcome, c.parse_source, c.parse_ms, c.via, c.received_at
       from comments c join buyers b on b.id = c.buyer_id
       where c.show_id = ${ctx.show.id} order by c.seq desc limit 50`,
-    sql<{ state: HoldState; n: number }[]>`select state, count(*)::int n from holds where stall_id = ${stallId} group by state`,
+    sql<{ state: HoldState; n: number; top: number }[]>`select state, count(*)::int n, max(serial)::int top from holds where stall_id = ${stallId} group by state`,
     buyerId ? sql<{ id: string; handle: string }[]>`select id, handle from buyers where id = ${buyerId}` : Promise.resolve([]),
   ]);
   const use = new Map(usage.map((u) => [u.variant_id, u]));
   const counters: Record<HoldState, number> = { Waiting: 0, Holding: 0, Paid: 0, Passed: 0 };
-  for (const c of counts) counters[c.state] = c.n;
+  let top = 0;
+  for (const c of counts) {
+    counters[c.state] = c.n;
+    top = Math.max(top, c.top);
+  }
   const lastParsed = comments.find((c) => c.parse_source && c.parse_source !== "fast");
   return {
     now: new Date().toISOString(),
@@ -111,6 +121,7 @@ export async function getSnapshot(stallId: string, buyerId: string | null = null
       }),
     })),
     counters,
+    nextSerial: top + 1,
     holds: holds.map((h) => ({
       id: Number(h.id),
       serial: h.serial,
@@ -124,6 +135,8 @@ export async function getSnapshot(stallId: string, buyerId: string | null = null
       priceCents: h.price_cents,
       state: h.state,
       said: h.said,
+      saidVia: h.said_via,
+      commentSeq: Number(h.comment_seq),
       deadlineAt: h.deadline_at?.toISOString() ?? null,
       endedAt: h.ended_at?.toISOString() ?? null,
       endReason: h.end_reason,
@@ -141,6 +154,7 @@ export async function getSnapshot(stallId: string, buyerId: string | null = null
       outcome: c.outcome,
       source: c.parse_source,
       ms: c.parse_ms,
+      via: c.via,
       at: c.received_at.toISOString(),
       mine: c.buyer_id === buyerId,
     })),

@@ -53,12 +53,12 @@ async function parseOne(ctx: StallContext, seq: number, text: string): Promise<P
 }
 
 /** A buyer's comment: persisted at once (arrival order = seq), parsed, then applied in order. */
-export async function submitComment(stallId: string, buyerId: string, text: string): Promise<CommentResult> {
+export async function submitComment(stallId: string, buyerId: string, text: string, via: "typed" | "tap" = "typed"): Promise<CommentResult> {
   const ctx = await loadStall(stallId);
   if (!ctx) throw new Error(`no live show for stall ${stallId}`);
   const [c] = await db()<{ seq: string }[]>`
-    insert into comments (show_id, buyer_id, text, on_screen_code)
-    values (${ctx.show.id}, ${buyerId}, ${text}, ${ctx.onScreenCode}) returning seq`;
+    insert into comments (show_id, buyer_id, text, on_screen_code, via)
+    values (${ctx.show.id}, ${buyerId}, ${text}, ${ctx.onScreenCode}, ${via}) returning seq`;
   const seq = Number(c.seq);
   publish(stallId);
   const parsing = parseOne(ctx, seq, text);

@@ -3,7 +3,8 @@ import { z } from "zod";
 import { buyerFromToken, cookieName } from "@/lib/service/buyers";
 import { submitComment } from "@/lib/service/holds";
 
-const Body = z.object({ text: z.string().trim().min(1).max(280) });
+// `via: "tap"` marks a one-tap claim from the stall's variant tiles; the chat shows it as tapped.
+const Body = z.object({ text: z.string().trim().min(1).max(280), via: z.enum(["typed", "tap"]).default("typed") });
 
 /** A buyer's comment. Responds with the persisted comment's outcome once it has been applied in order. */
 export async function POST(req: Request, { params }: { params: Promise<{ stall: string }> }) {
@@ -14,7 +15,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ stall: 
   const parsed = Body.safeParse(await req.json().catch(() => ({})));
   if (!parsed.success) return Response.json({ error: "Write 1–280 characters." }, { status: 400 });
   try {
-    const result = await submitComment(stall, me.id, parsed.data.text);
+    const result = await submitComment(stall, me.id, parsed.data.text, parsed.data.via);
     return Response.json(result, { status: 201 });
   } catch (e) {
     console.error(JSON.stringify({ scope: "comment", stall, error: (e as Error).message.slice(0, 200) }));

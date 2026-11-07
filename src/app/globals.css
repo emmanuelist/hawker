@@ -1,13 +1,17 @@
 @import "tailwindcss";
 
-/* Hawker — Invoice Pad world (D-012). Token names follow the mechanic: copies, stamps, serials, the rail.
-   Contrast checked (WCAG AA): ink/board 14.9, ink/holding 13.1, serial/holding 5.6, white/rail 10.0,
+/* Hawker — Invoice Pad world (D-012). Token names follow the mechanic: copies, stamps, serials, the rail,
+   the print on the form. Contrast checked (WCAG AA): ink/board 14.9, ink-muted/board 6.9, print/holding 7.6,
+   print/waiting 7.9, print/passed 7.4, serial/holding 5.6, serial/paid 7.9, white/rail 10.0,
    passed-ink/passed 6.1, stamp-passed/passed 4.8, stamp-paid/paid 9.7. */
 :root {
   --board: #e6eaf2; /* the pad's backing board */
-  --rail: #2a3a8f; /* carbon blue: header rail, PAID stamp */
+  --board-deep: #d9dfeb;
+  --rail: #2a3a8f; /* carbon blue: header rail, printed form, PAID stamp */
+  --rail-deep: #1f2c73;
   --rail-ink: #ffffff;
   --rail-muted: #c9d2f2;
+  --print: #2a3a8f; /* the form's printed labels, in carbon blue */
   --ink: #171717;
   --ink-muted: #4b5263;
   --rule: #b9c0d6;
@@ -22,13 +26,21 @@
   --stamp-passed: #b3202b;
   --expiring: #a8121d;
   --focus: #2a3a8f;
+  --live: #1f7a3f;
+  /* A rubber stamp never inks evenly: fractal noise as an alpha mask, mostly opaque with worn specks. */
+  --ink-wear: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' seed='11'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -3 0 0 0 2.75'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --in-fall: cubic-bezier(0.55, 0, 0.8, 0.2);
 }
 
 @theme inline {
   --color-board: var(--board);
+  --color-board-deep: var(--board-deep);
   --color-rail: var(--rail);
+  --color-rail-deep: var(--rail-deep);
   --color-rail-ink: var(--rail-ink);
   --color-rail-muted: var(--rail-muted);
+  --color-print: var(--print);
   --color-ink: var(--ink);
   --color-ink-muted: var(--ink-muted);
   --color-rule: var(--rule);
@@ -41,6 +53,7 @@
   --color-passed-ink: var(--copy-passed-ink);
   --color-stamp-paid: var(--stamp-paid);
   --color-stamp-passed: var(--stamp-passed);
+  --color-live: var(--live);
   --font-sans: var(--font-public);
   --font-display: var(--font-franklin);
   --font-mono: var(--font-courier);
@@ -76,34 +89,86 @@ a {
   text-decoration-thickness: 1px;
 }
 
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
 .num {
   font-variant-numeric: tabular-nums;
 }
 
-/* ——— the copy: a numbered carbon copy, tinted by state ——— */
+/* Printed on the form in carbon blue: the labels a booklet ships with, before anything is filled in. */
+.print {
+  font-family: var(--font-franklin), sans-serif;
+  font-weight: 800;
+  font-size: 0.625rem;
+  line-height: 1.2;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--print);
+}
+
+.label {
+  font-family: var(--font-franklin), sans-serif;
+  font-weight: 800;
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* ——— the copy: a numbered carbon copy of a printed sales-invoice form, tinted by state ——— */
 .copy {
+  --sheet: var(--copy-waiting);
   position: relative;
   background: var(--copy-waiting);
-  border: 1px solid color-mix(in oklab, var(--ink) 18%, transparent);
-  box-shadow: 0 1px 2px rgb(23 23 23 / 0.08), 0 6px 14px -8px rgb(23 23 23 / 0.25);
-  opacity: 1;
-  translate: 0 0;
-  transition:
-    opacity 0.32s cubic-bezier(0.16, 1, 0.3, 1),
-    translate 0.32s cubic-bezier(0.16, 1, 0.3, 1),
-    background-color 0.2s linear;
-
-  @starting-style {
-    opacity: 0;
-    translate: 0 -10px;
-  }
+  border: 1px solid color-mix(in oklab, var(--ink) 16%, transparent);
+  box-shadow:
+    0 1px 1px rgb(23 23 23 / 0.06),
+    0 10px 18px -12px rgb(23 23 23 / 0.32);
+  transition: background-color 0.24s linear;
+  animation: copy-in 0.42s var(--out-expo) both;
 
   @media (prefers-reduced-motion: reduce) {
-    transition: background-color 0.2s linear;
-    @starting-style {
-      translate: 0 0;
-    }
+    animation: none;
   }
+}
+
+@keyframes copy-in {
+  from {
+    opacity: 0;
+    translate: 0 -8px;
+  }
+}
+
+/* The buyers waiting behind a Holding copy are the blue copies under it on the pad: one sheet edge each. */
+.copy[data-line="1"] {
+  box-shadow:
+    0 1px 1px rgb(23 23 23 / 0.06),
+    0 5px 0 -1px var(--sheet),
+    0 5px 0 0 color-mix(in oklab, var(--ink) 14%, transparent),
+    0 14px 18px -12px rgb(23 23 23 / 0.32);
+}
+.copy[data-line="2"] {
+  box-shadow:
+    0 1px 1px rgb(23 23 23 / 0.06),
+    0 5px 0 -1px var(--sheet),
+    0 5px 0 0 color-mix(in oklab, var(--ink) 14%, transparent),
+    0 10px 0 -2px var(--sheet),
+    0 10px 0 -1px color-mix(in oklab, var(--ink) 14%, transparent),
+    0 18px 18px -12px rgb(23 23 23 / 0.32);
+}
+.copy[data-line="3"] {
+  box-shadow:
+    0 1px 1px rgb(23 23 23 / 0.06),
+    0 5px 0 -1px var(--sheet),
+    0 5px 0 0 color-mix(in oklab, var(--ink) 14%, transparent),
+    0 10px 0 -2px var(--sheet),
+    0 10px 0 -1px color-mix(in oklab, var(--ink) 14%, transparent),
+    0 15px 0 -3px var(--sheet),
+    0 15px 0 -2px color-mix(in oklab, var(--ink) 14%, transparent),
+    0 22px 18px -12px rgb(23 23 23 / 0.32);
 }
 
 /* perforated top edge: the copy was torn from the pad */
@@ -112,7 +177,7 @@ a {
   position: absolute;
   inset: -1px 0 auto 0;
   height: 6px;
-  background: radial-gradient(circle at 5px -1px, var(--board) 3px, transparent 3.5px) 0 0 / 10px 6px repeat-x;
+  background: radial-gradient(circle at 5px -1px, var(--perf-bg, var(--board)) 3px, transparent 3.5px) 0 0 / 10px 6px repeat-x;
   pointer-events: none;
 }
 
@@ -128,22 +193,28 @@ a {
 .copy[data-state="Passed"] {
   background: var(--copy-passed);
   color: var(--copy-passed-ink);
-  animation: tear-off 0.48s cubic-bezier(0.16, 1, 0.3, 1) both;
-
-  @media (prefers-reduced-motion: reduce) {
-    animation: none;
-  }
 }
 
-@keyframes tear-off {
-  from {
-    rotate: 0deg;
-    translate: 0 0;
-  }
-  to {
-    rotate: -1.2deg;
-    translate: 0 4px;
-  }
+/* the form's fields: printed label column, filled-in values */
+.fields {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  column-gap: 0.75rem;
+  row-gap: 0.3rem;
+  align-items: baseline;
+}
+.fields > dt {
+  padding-top: 0.1em;
+}
+.fields > dd {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* the form's printed rule under the letterhead */
+.form-rule {
+  height: 0;
+  border-top: 1px solid color-mix(in oklab, var(--print) 45%, transparent);
 }
 
 /* ——— the countdown edge: exact length = exact time left ——— */
@@ -163,14 +234,17 @@ a {
     transition: none;
   }
 }
+.edge[data-expiring="true"] {
+  background: color-mix(in oklab, var(--expiring) 22%, transparent);
+}
 .edge[data-expiring="true"] > i {
   background: var(--expiring);
 }
 
-/* ——— the stamp: the one authored moment. Lands in two frames, no easing. ——— */
+/* ——— the stamp: the one authored moment ——— */
 .stamp {
   display: inline-block;
-  padding: 0.18em 0.55em 0.12em;
+  padding: 0.2em 0.55em 0.14em;
   border: 3px double currentColor;
   font-family: var(--font-franklin), sans-serif;
   font-weight: 900;
@@ -179,12 +253,11 @@ a {
   line-height: 1;
   rotate: -7deg;
   mix-blend-mode: multiply;
-  opacity: 0.92;
-  animation: stamp-land 0.18s steps(2, jump-end) both;
-
-  @media (prefers-reduced-motion: reduce) {
-    animation: none;
-  }
+  opacity: 0.94;
+  -webkit-mask-image: var(--ink-wear);
+  -webkit-mask-size: 180px;
+  mask-image: var(--ink-wear);
+  mask-size: 180px;
 }
 .stamp[data-kind="paid"] {
   color: var(--stamp-paid);
@@ -202,25 +275,184 @@ a {
   overflow-wrap: anywhere;
 }
 
-@keyframes stamp-land {
-  0% {
-    scale: 1.7;
-    opacity: 0;
-  }
-  50% {
-    scale: 1.15;
-    opacity: 0.7;
-  }
-  100% {
-    scale: 1;
-    opacity: 0.92;
+/* A stamp lands only when it lands live: two frames, no easing, and the copy takes the impression. */
+[data-fresh] .stamp {
+  animation: stamp-land 0.2s steps(2, jump-end) both;
+}
+.copy[data-fresh] {
+  animation: impress 0.2s steps(2, jump-end) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-fresh] .stamp,
+  .copy[data-fresh] {
+    animation: none;
   }
 }
 
-.label {
-  font-family: var(--font-franklin), sans-serif;
-  font-weight: 800;
-  font-size: 0.6875rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+@keyframes stamp-land {
+  0% {
+    scale: 1.9;
+    opacity: 0;
+  }
+  50% {
+    scale: 1.12;
+    opacity: 0.6;
+  }
+  100% {
+    scale: 1;
+    opacity: 0.94;
+  }
+}
+@keyframes impress {
+  50% {
+    translate: 0 2px;
+  }
+}
+
+/* The buyer's own PAID: the stamp lands across the whole copy. */
+.copy[data-celebrate] .stamp {
+  font-size: 2.5rem;
+}
+
+/* ——— leaving the pad (desk): the stamp lands where the helper was looking, then the copy goes ——— */
+.copy[data-leaving] {
+  pointer-events: none;
+  animation:
+    impress 0.2s steps(2, jump-end) both,
+    tear-away 1.35s var(--in-fall) both;
+}
+.copy[data-leaving="Paid"] {
+  animation:
+    impress 0.2s steps(2, jump-end) both,
+    file-away 1.35s var(--in-fall) both;
+}
+.copy[data-leaving] .stamp {
+  animation: stamp-land 0.2s steps(2, jump-end) both;
+}
+@keyframes tear-away {
+  0%,
+  42% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-8%, 64px) rotate(-6deg);
+  }
+}
+@keyframes file-away {
+  0%,
+  42% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(0, 48px) scale(0.97);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .copy[data-leaving],
+  .copy[data-leaving="Paid"] {
+    animation: fade-late 1.35s linear both;
+  }
+  .copy[data-leaving] .stamp {
+    animation: none;
+  }
+}
+@keyframes fade-late {
+  0%,
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* ——— a stub: what stays in the booklet after a copy is torn off ——— */
+.stub {
+  animation: stub-in 0.5s var(--out-expo) both;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+@keyframes stub-in {
+  from {
+    opacity: 0;
+    translate: -10px 0;
+  }
+}
+
+/* ——— the pad's binding: the cloth strip a sales booklet is glued into ——— */
+.binding {
+  background: var(--rail);
+  color: var(--rail-ink);
+  box-shadow: inset 0 -3px 0 var(--rail-deep);
+}
+
+/* ——— stall: one-tap claim tiles ——— */
+.tile {
+  position: relative;
+  display: flex;
+  min-height: 5.75rem;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.75rem 0.85rem;
+  text-align: left;
+  background: var(--copy-paid);
+  border: 1px solid color-mix(in oklab, var(--ink) 18%, transparent);
+  box-shadow: 0 1px 0 color-mix(in oklab, var(--ink) 10%, transparent);
+  transition:
+    translate 0.12s var(--out-expo),
+    box-shadow 0.12s var(--out-expo),
+    background-color 0.2s linear;
+}
+.tile:where(:not(:disabled)):hover {
+  background: #ffffff;
+  box-shadow: 0 6px 14px -10px rgb(23 23 23 / 0.45);
+}
+.tile:where(:not(:disabled)):active {
+  translate: 0 1px;
+  box-shadow: none;
+}
+.tile[data-kind="line"] {
+  background: var(--copy-waiting);
+}
+.tile[data-kind="yours"] {
+  background: var(--copy-holding);
+}
+.tile[data-kind="inline"] {
+  background: var(--copy-waiting);
+}
+.tile:disabled {
+  cursor: default;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tile {
+    transition: background-color 0.2s linear;
+  }
+}
+
+/* ——— landing: the live pad instrument. Under the top copy, the pad's next blank forms. ——— */
+.pad-stack {
+  position: relative;
+  isolation: isolate;
+}
+.pad-stack::before,
+.pad-stack::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  background: var(--copy-paid);
+  border: 1px solid color-mix(in oklab, var(--ink) 16%, transparent);
+}
+.pad-stack::before {
+  inset: 0 5px -7px;
+}
+.pad-stack::after {
+  inset: 0 10px -14px;
+  box-shadow: 0 30px 50px -28px rgb(23 23 23 / 0.45);
 }
