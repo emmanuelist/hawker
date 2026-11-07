@@ -2,7 +2,7 @@
 // The buyer's phone screen (D-013). What's on the live now, one-tap claims, your copy and the Pay bar in
 // the thumb zone, and the chat. A tap posts a real comment ("mine gold") marked as tapped; typing works
 // exactly as on the live. Code decides who holds what; this page only shows it.
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { ChatLine } from "@/components/ChatLine";
 import { ArrowOut, Copy, lineInfo } from "@/components/Copy";
 import { Countdown } from "@/components/Countdown";
@@ -14,7 +14,14 @@ type Note = { text: string; error: boolean } | null;
 type Pending = { text: string; key: string; label: string } | null;
 type Item = Snapshot["items"][number];
 
+// The first view is rendered on the server, so the form is on screen before React is. Until it
+// hydrates, a tap on Join would submit the form natively (a GET that reloads the page), so the
+// controls stay disabled until the page is interactive.
+const noop = () => () => {};
+const useHydrated = () => useSyncExternalStore(noop, () => true, () => false);
+
 export function StallClient({ stall, initial = null }: { stall: string; initial?: Snapshot | null }) {
+  const hydrated = useHydrated();
   const [nonce, setNonce] = useState(0);
   const { snap, offset, link } = useLiveSnapshot(stall, "stall", nonce, initial);
   const now = useServerNow(offset);
@@ -223,7 +230,7 @@ export function StallClient({ stall, initial = null }: { stall: string; initial?
             lines={lines}
             now={now}
             windowSeconds={snap.stall.windowSeconds}
-            busy={busy}
+            busy={hydrated ? busy : "hydrating"}
             onClaim={claim}
           />
           <p className="mt-3.5 text-[0.875rem] leading-snug text-ink-muted">
@@ -279,7 +286,7 @@ export function StallClient({ stall, initial = null }: { stall: string; initial?
                 lines={lines}
                 now={now}
                 windowSeconds={snap.stall.windowSeconds}
-                busy={busy}
+                busy={hydrated ? busy : "hydrating"}
                 onClaim={claim}
               />
             </div>
@@ -348,7 +355,7 @@ export function StallClient({ stall, initial = null }: { stall: string; initial?
         waitingPosition={waitingCopy ? lines.position(waitingCopy) : null}
         joined={!!me}
         handle={me?.handle ?? null}
-        busy={busy}
+        busy={hydrated ? busy : "hydrating"}
         note={note}
         pending={pending}
         nameRef={nameRef}
