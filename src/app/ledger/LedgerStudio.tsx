@@ -150,6 +150,7 @@ Hawker's rule: every hold ends one of two ways, paid through PayPal, or passed t
 - Counts and totals (by state, by item, by buyer, the latest paid copy): call ledger_totals. Its numbers are computed by code from the ledger rows.
 - To add a chart breaking the ledger down by buyer, item, variant, reader or entry method: call add_breakdown_chart. Code builds it from the real fields.
 - For any other dashboard change, or an analysis your tools can't answer: delegate to the lead agent with a clear, specific task. Only say a change was made if the lead's report shows it was; otherwise say it may not have applied.
+If who_owes_now returns no copies, say there are no open holds right now; never say invoices were paid or cleared unless the tool shows it.
 Never invent numbers or names. If a tool fails, say so plainly. Keep answers short.`;
 
 const GROUP_BY = { buyer: "Buyer", code: "Item", variant: "Variant", readBy: "Who read it", via: "How it was entered" } as const;
