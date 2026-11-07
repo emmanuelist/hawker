@@ -104,7 +104,7 @@ export function Copy({
           <div className="edge" data-expiring={expiring} role="presentation">
             <i style={{ transform: `scaleX(${frac})` }} />
           </div>
-          <div className="mt-1.5 flex items-baseline justify-between gap-3">
+          <div className="mt-1.5 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
             <p className="flex items-center gap-2">
               <span className="label text-ink">Holding</span>
               <Countdown ms={left} tone={expiring ? "expiring" : "ink"} size={size === "desk" ? "sm" : "md"} />
