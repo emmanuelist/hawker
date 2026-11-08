@@ -49,7 +49,7 @@ Seeded from the M2-close benchmark (internal/benchmarks/2026-11-08-191e7b8.md); 
 
 ### M4 · Submitted
 - [x] **Submission draft** (`internal/SUBMISSION.md`, gitignored): every Devpost field, the verbatim thesis, sponsor sections with permalinks pinned to 4f0d4ca (all 11 files resolve anonymously), claims C-17 … C-22. Custom form questions drafted from guesses: the user pastes the real ones.
-- [ ] Gallery images at 3:2, including a refusals-panel capture.
+- [x] Gallery images at 3:2, including a live refusals-panel capture (`internal/gallery/`, six; gitignored).
 - [ ] `benchmark` re-run for Demo quality and Evidence; RUNOFSHOW backup.
 - [ ] Submit on Devpost (the user's account), AG Grid selected; tag `submission`; preflight from a phone on cellular. Done when the Devpost entry shows submitted.
 
