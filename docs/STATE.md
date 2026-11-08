@@ -3,7 +3,7 @@ _Last verified: 2026-11-08 14:45 UTC at c9914eb (tag `submission`)_
 
 **Thesis:** Every hold ends one of two ways: paid through PayPal, or passed to the next buyer.
 **Milestone:** M0–M3 done · **M4 submitted** on Devpost 2026-11-08 (E-040) · **Deadline:** 2026-11-12 20:00 UTC · **Edit lock:** after the deadline, don't edit the repo, video or linked materials until after 21 December (update 47307)
-**Next action:** the user opens https://hawker-8q2t.onrender.com once on a phone on mobile data (the last preflight item). Then nothing on the demo path: keep the app, Neon, the PayPal sandbox app and the AG key (until 22 Dec) alive; restock with `npm run restock` if a size runs out.
+**Next action:** none required before the results. The demo store looks after itself (D-026); keep Render, Neon, the PayPal sandbox app and the AG key (until 22 Dec) alive. Optional: the user opens the live app once on mobile data.
 **Blocked on:** nothing.
 
 ## Works (verified this session)
@@ -21,7 +21,7 @@ _Last verified: 2026-11-08 14:45 UTC at c9914eb (tag `submission`)_
 | Desk: next-in-line, tear-off, stubs, questions pinned; laptop notice on phones | deployed | E-022, E-025, E-031 |
 | Last-second payment: 1.4 s before → Passed and PayPal refuses; 12 s before → Paid | deployed | E-027 |
 | Keep-warm on Render free | deployed | E-021 |
-| Seller restock: `npm run restock -- <code> <variant> <n>` adds units (paid units never come back, D-024); refuses bad input before connecting | run by the user: A4 blue +3; live stall reads “Blue 5 left” | E-039 |
+| Seller restock: `npm run restock -- <code> <variant> <n>` adds units (paid units never come back, D-024); refuses bad input before connecting | run by the user: A4 blue +3 (twice); now automatic for the demo store (D-026) | E-039, E-041 |
 
 ## Deployed
 | What | Environment | URL | Last checked |

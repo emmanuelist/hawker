@@ -110,7 +110,7 @@ flowchart TD
 - PAID shows 8–13 seconds after the buyer pays, because Hawker polls PayPal rather than trusting webhooks (sandbox webhooks weren't delivered in our testing).
 - One server process on Render's free plan, kept awake by a keep-warm request. Open deadlines live in memory and reload from the database on restart.
 - The models run on free tiers. Hawker's agent can hand work to Studio's built-in agents, but on these tiers it isn't reliable: one delegated widget rendered unconfigured.
-- Paid units never come back, so the demo store's stock shrinks as people pay.
+- Paid units never come back, so the demo store looks after itself: when the item on screen sells out, the item with the most left goes on screen, and when every item is sold, each size is restocked so three can be sold. Holds and payments are never touched.
 - The eval is 63 comments we labelled ourselves.
 - AG Studio runs on a trial licence key.
 - The live app's counters include our own test runs and break tests.

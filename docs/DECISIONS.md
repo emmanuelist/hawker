@@ -280,3 +280,8 @@ The rules require a public repo with an open-source license at submission. Pendi
 - Updating RUNOFSHOW.md for a live demo: judging is from the video (update 47306).
 - Potential Impact (judge-scored 3/5): only a real seller's words, quoted with permission, would move it; the user's call, never invented.
 
+## D-026 · The demo store looks after itself through judging · 2026-11-08 · accepted (the user can't check before 21-22 December)
+**Context:** Paid units never come back (D-024), so judges who pay shrink the demo store, and the rules forbid editing the repo after the deadline until after 21 December (update 47307). The user won't check in before then, so a sold-out item on screen would leave judges a dead stall.
+**Decision:** For stalls marked `is_demo`, after every payment and at startup: if the item on screen can sell nothing, the item with the most left goes on screen; if no item can sell anything, each size is restocked so three can be sold (stock only rises; Paid copies stay Paid). The desk refuses to put an item that can sell nothing on screen. Disclosed in the README limits.
+**Consequences:** No manual restock is needed during judging (`npm run restock` stays for sellers). A failure in the upkeep only logs; it never undoes a sale.
+
