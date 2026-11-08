@@ -253,3 +253,8 @@ The rules require a public repo with an open-source license at submission. Pendi
 - Changing what happens when PayPal is unreachable at expiry (the hold keeps Holding and retries rather than invent an ending): correct by design; stated as a README limit.
 - A PayPal mark on the Pay bar: PayPal's brand assets have their own usage rules; the button text names PayPal.
 **Consequences:** the remaining score is in M3: the video (Demo quality, Presentation, Stage 1) and the README proof with a public repo (Evidence, Stage 1).
+
+## D-022 · The narration voice's vendor is not named on public surfaces · 2026-11-08 · accepted (the user's call)
+**Context:** The demo video's narration is a synthetic voice from a third-party text-to-speech service, used only by internal scripts, never by the app. The rules ask entrants to name the AI tools used and how (dossier, rules §4). The README's "AI used, and how" named the service.
+**Decision:** The user chose not to name it. The README, `.env.example`, the claims table and the build docs no longer mention it; the voice settings moved to `internal/video/production/NARRATION.md` (gitignored). The README still names the AI in the product (Groq, Gemini, AG Studio's agent framework) and the build tool (Claude Code).
+**Consequences:** Earlier commits still contain the name (two commit messages and file contents); only a history rewrite would remove those, and that's the user's call before the repo goes public (D-009).

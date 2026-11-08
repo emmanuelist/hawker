@@ -4,7 +4,7 @@
 
 **Cut 4 (2026-11-08): 2:13.3**, 1920×1080, 25 fps, H.264 + AAC, narration at −16.4 LUFS integrated. File: `internal/video/hawker-demo-cut4-2026-11-08.mp4` (gitignored; production scripts in `internal/video/production/cut4/`, cut 3's in `cut3/`). Upload: YouTube, public (rules §4), then play it logged-out in a private window.
 
-Narration: ElevenLabs, voice Eric (`cjVigY5qzO86Huf0OWal`, `eleven_multilingual_v2`; verified against the live API 2026-11-08). Every value on screen is live from the deployed app and the PayPal sandbox (E-032, E-033). Labels carry the claim for muted viewers; every split scene carries "Counters include our own test runs and break tests."
+Narration: a synthetic voice (settings in `internal/video/production/NARRATION.md`, D-022). Every value on screen is live from the deployed app and the PayPal sandbox (E-032, E-033). Labels carry the claim for muted viewers; every split scene carries "Counters include our own test runs and break tests."
 
 ## The take (E-032) and the ledger re-shoot (E-033)
 One item's whole life, in one session on the deployed stall (show 5, "Sunday Live"), recorded on a desk (1280×800) and two phones (390×844) at once. Two buyers: **@amaka.lagos** (Pidgin) and **@jasmine.manila** (Taglish), both read by Groq. The only speed change is the 3:00 timer, shown 40× faster and labelled. PayPal's login screens are cut (the sandbox buyer's email never appears); on the checkout's review screen the ship-to line and the payment methods are blurred. The ledger appears twice, labelled "before she pays" (take 3, full frame) and "after she pays" (re-recorded as ledger4, so it shows the paid copy).

@@ -117,7 +117,7 @@ flowchart TD
 ## AI used, and how
 
 - **In the product:** Groq `qwen/qwen3.8-27b` reads the comments the regex path can't and answers the ledger agent's turns. Gemini `gemini-3.5-flash-lite` takes over on rate limits, errors, and turns too long for Groq's free tier. AG Studio's agent framework hosts the ledger agent.
-- **Building it:** Claude Code (Anthropic) wrote and reviewed code with the author. ElevenLabs generated the demo video's narration voice.
+- **Building it:** Claude Code (Anthropic) wrote and reviewed code with the author.
 
 ## Run it locally
 
