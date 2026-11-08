@@ -3,7 +3,7 @@ _Last verified: 2026-11-08 09:40 UTC at 0e1e0dd_
 
 **Thesis:** Every hold ends one of two ways: paid through PayPal, or passed to the next buyer.
 **Milestone:** M0, M1, **M2 done** (2026-11-08 03:18 UTC, E-026 … E-031) → **M3 · Proof surface** (freeze 2026-11-11 17:48 UTC) · **Deadline:** 2026-11-12 20:00 UTC (time left: the clock line)
-**Next action:** draft the Devpost submission (`internal/SUBMISSION.md`, M4) with line-level permalinks; then the benchmark re-run and the RUNOFSHOW backup (docs/PLAN.md).
+**Next action:** the user pastes the Devpost form's custom questions into the chat (the draft is `internal/SUBMISSION.md`); meanwhile gallery images at 3:2, then the benchmark re-run (docs/PLAN.md, M4).
 **Blocked on:** nothing.
 
 ## Works (verified this session)

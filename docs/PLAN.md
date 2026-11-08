@@ -47,6 +47,12 @@ Seeded from the M2-close benchmark (internal/benchmarks/2026-11-08-191e7b8.md); 
 - [x] **Repo public with MIT in About** (D-023, E-036): public 2026-11-08 on the user's go-ahead; the thesis as the description, the live app as the homepage, MIT detected. Done when `gh repo view` reads PUBLIC with the license.
 - [ ] `docs/RUNOFSHOW.md` (written) and a recorded backup (cut 1 serves); `benchmark` re-run for Demo quality and Evidence.
 
+### M4 · Submitted
+- [x] **Submission draft** (`internal/SUBMISSION.md`, gitignored): every Devpost field, the verbatim thesis, sponsor sections with permalinks pinned to 4f0d4ca (all 11 files resolve anonymously), claims C-17 … C-22. Custom form questions drafted from guesses: the user pastes the real ones.
+- [ ] Gallery images at 3:2, including a refusals-panel capture.
+- [ ] `benchmark` re-run for Demo quality and Evidence; RUNOFSHOW backup.
+- [ ] Submit on Devpost (the user's account), AG Grid selected; tag `submission`; preflight from a phone on cellular. Done when the Devpost entry shows submitted.
+
 ## Cut list
 Things deliberately not being built. Each entry links the DECISIONS entry that cut it.
 - TikTok / Facebook Live / Instagram comment ingest. These need platform approval; stated as a README limit. D-010
