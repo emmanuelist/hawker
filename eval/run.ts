@@ -2,6 +2,7 @@
 // pipeline — fast path first, then the model client in batches of 10. Scoring counts only
 // commerce-critical errors: wrong intent, or wrong item/variant/qty on a claim or cancel.
 // Usage: npm run eval            (reads GROQ_API_KEY / GEMINI_API_KEY from .env)
+//        npm run eval -- --fast-only   (the regex-only baseline: no model, no keys, no network)
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { fastParse } from "../src/lib/parse/fast";
 import { modelParse } from "../src/lib/parse/model";
@@ -21,6 +22,7 @@ const catalog: CatalogItem[] = [
 ];
 
 interface Case { onScreen: string; comment: string; intent: ParsedComment["intent"]; items: ParsedRef[] }
+const FAST_ONLY = process.argv.includes("--fast-only");
 const cases: Case[] = JSON.parse(readFileSync(new URL("./cases.json", import.meta.url), "utf8"));
 
 const key = (items: ParsedRef[]) =>
@@ -43,7 +45,8 @@ async function main() {
     else pending.push(i);
   });
   const providers: Record<string, number> = {};
-  for (let s = 0; s < pending.length; s += 10) {
+  if (FAST_ONLY) for (const i of pending) results.set(i, { source: "no fast-path match" });
+  for (let s = 0; s < (FAST_ONLY ? 0 : pending.length); s += 10) {
     const batch = pending.slice(s, s + 10).map((i) => ({ i, onScreen: cases[i].onScreen, comment: cases[i].comment }));
     try {
       const r = await modelParse(catalog, batch, `eval-${t0}-${s}`);
@@ -65,6 +68,7 @@ async function main() {
   const fastCount = [...results.values()].filter((r) => r.source === "fast").length;
   const summary = {
     at: new Date().toISOString(),
+    mode: FAST_ONLY ? "fast path only (regex baseline)" : "fast path, then the model client",
     cases: cases.length,
     commerceCriticalCorrect: ok,
     phantomClaims: phantom,
@@ -76,7 +80,7 @@ async function main() {
   console.log(JSON.stringify(summary, null, 1));
   if (misses.length) console.log(misses.join("\n"));
   mkdirSync(new URL("./results/", import.meta.url), { recursive: true });
-  writeFileSync(new URL(`./results/run-${summary.at.replace(/[:.]/g, "-")}.json`, import.meta.url), JSON.stringify({ summary, misses }, null, 1));
+  writeFileSync(new URL(`./results/run-${FAST_ONLY ? "fast-only-" : ""}${summary.at.replace(/[:.]/g, "-")}.json`, import.meta.url), JSON.stringify({ summary, misses }, null, 1));
   if (phantom > 0) process.exitCode = 1; // a phantom claim is a failure of the product's core rule
 }
 

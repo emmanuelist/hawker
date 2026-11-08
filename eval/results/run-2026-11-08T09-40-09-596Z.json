@@ -1,0 +1,16 @@
+{
+ "summary": {
+  "at": "2026-11-08T09:40:09.596Z",
+  "mode": "fast path, then the model client",
+  "cases": 63,
+  "commerceCriticalCorrect": 63,
+  "phantomClaims": 0,
+  "missedClaims": 0,
+  "fastPath": 25,
+  "modelBatches": {
+   "groq": 4
+  },
+  "seconds": 5
+ },
+ "misses": []
+}

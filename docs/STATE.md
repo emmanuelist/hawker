@@ -3,13 +3,13 @@ _Last verified: 2026-11-08 09:40 UTC at 0e1e0dd_
 
 **Thesis:** Every hold ends one of two ways: paid through PayPal, or passed to the next buyer.
 **Milestone:** M0, M1, **M2 done** (2026-11-08 03:18 UTC, E-026 … E-031) → **M3 · Proof surface** (freeze 2026-11-11 17:48 UTC) · **Deadline:** 2026-11-12 20:00 UTC (time left: the clock line)
-**Next action:** M3's README as the proof surface (docs/PLAN.md), with the video https://youtu.be/xT-LaMUCcXg above the fold.
+**Next action:** the user decides when the repo goes public with MIT in About (D-009); then the RUNOFSHOW backup and the benchmark re-run (docs/PLAN.md).
 **Blocked on:** nothing. The user decides when the repo goes public (D-009).
 
 ## Works (verified this session)
 | Capability | Verified by | Evidence |
 |---|---|---|
-| Gate | lint (0 warnings), typecheck, 102 tests, build at 71f0fc9; eval 63 cases, 0 phantom / 0 missed, 62/63 | E-007, E-032 |
+| Gate | lint (0 warnings), typecheck, 102 tests (also on a clean clone with no env), build; eval 63 / 63 (regex-only baseline 25 / 63, 18 claims missed), 0 phantom | E-007, E-035 |
 | **Video, public on YouTube** (https://youtu.be/xT-LaMUCcXg, cut 4, 2:13.3; played logged-out, E-034): one item's life on the deployed stall; Pidgin and Taglish read by Groq; pass to the next buyer; the ledger agent reading PayPal before she pays; PAID via PayPal; Hawker's widgets and the agent's chart after; 9 of 9 refusals; joy-miners source on the opening card. Fresh judges: cut 1 18, cut 2 19, cut 3 18 /25 | rendered from a real session (show 5) + a ledger re-shoot | E-032, E-033, E-034 |
 | Independent re-review | design 27/40 (was 25), measured audit no P0, benchmark 17/24; P1/P2 fixed or settled | E-031, D-021 |
 | Landing hero and trace show the AI reading one real copy end to end | deployed: first @joy.cebu911 “akin yung xl po” (E-031); since the film, No. 0045 @amaka.lagos “abeg I go take the XL” (Groq) → PASSED → @jasmine.manila | E-031, E-032 |
@@ -31,7 +31,7 @@ _Last verified: 2026-11-08 09:40 UTC at 0e1e0dd_
 | Database `hawker` in `neon-red-garden` (D-015), migrations 001–003; live show 5 “Sunday Live” | Neon (US East 1) | see CONTEXT.md | 2026-11-08 04:00 UTC |
 
 ## Broken or unverified
-- No README proof yet; repo private.
+- Repo private (D-009), so the README's CI badge and clone command only work once it's public.
 - Ledger agent delegation to Studio's lead agent works on the deployed ledger but is unreliable on free models (unconfigured KPI, then "busy"; T-26, E-033); not in the video.
 - On the deployed stall Groq once read the Taglish “sakin na lang yung L po” as a question (safe: no hold); the same phrase passed in the eval run after. Now an eval case.
 - Slow-4G LCP re-measured at 2.9–3.1 s (TTFB 0.7–1.1 s on Render free), above E-025's 2.4–2.8 s.
@@ -42,7 +42,7 @@ _Last verified: 2026-11-08 09:40 UTC at 0e1e0dd_
 - Why Groq failed on one deployed call (E-020): unknown without Render logs.
 
 ## Claims (docs/EVIDENCE.md)
-- C-1 … C-16 verified 2026-11-07/08; every factual sentence on `/`, the stall, the ledger and video cut 4 has a row.
+- C-1 … C-21 verified 2026-11-07/08; every factual sentence on `/`, the stall, the ledger, the video, its YouTube description and the README has a row.
 
 ## Design
 - World: Invoice Pad (D-012), pushed in D-016, reviewed and fixed in D-017; ledger booklet (D-019); refusals (D-020); M2-close fixes (E-031). Reviews run as two isolated sub-agents.
