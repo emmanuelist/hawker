@@ -31,7 +31,7 @@ _Last verified: 2026-11-08 09:40 UTC at 0e1e0dd_
 | Database `hawker` in `neon-red-garden` (D-015), migrations 001–003; live show 5 “Sunday Live” | Neon (US East 1) | see CONTEXT.md | 2026-11-08 04:00 UTC |
 
 ## Broken or unverified
-- No README proof yet; repo private. The video's thumbnail is YouTube's auto-picked frame (the custom one isn't showing yet).
+- No README proof yet; repo private.
 - Ledger agent delegation to Studio's lead agent works on the deployed ledger but is unreliable on free models (unconfigured KPI, then "busy"; T-26, E-033); not in the video.
 - On the deployed stall Groq once read the Taglish “sakin na lang yung L po” as a question (safe: no hold); the same phrase passed in the eval run after. Now an eval case.
 - Slow-4G LCP re-measured at 2.9–3.1 s (TTFB 0.7–1.1 s on Render free), above E-025's 2.4–2.8 s.

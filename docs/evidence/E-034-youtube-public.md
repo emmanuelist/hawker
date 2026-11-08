@@ -16,3 +16,5 @@ Watch page fetched with no cookies (player response):
 Playback in a fresh browser context (no cookies, consent rejected): `video.play()` muted → after 8 s currentTime 9.2 s, paused false, duration 133.321 s.
 
 Thumbnail at capture time: YouTube's auto-picked frame (the pass scene), not the custom `internal/video/hawker-thumbnail-2026-11-08.png`.
+
+Re-checked ~09:50 UTC: `maxresdefault.jpg` now serves the custom thumbnail (`internal/video/hawker-thumbnail-2026-11-08.png`: the thesis, the PAID and PASSED stamps, Jasmine's PAID copy).
