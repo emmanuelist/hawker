@@ -427,7 +427,8 @@ function ClaimTiles({
         const text = single ? (onScreen ? "mine" : `mine ${item.code}`) : `mine ${ref}${v.label}`;
         const key = `${item.code}:${v.label}`;
         const myHold = mine.find((h) => h.code === item.code && h.variant === v.label && (h.state === "Holding" || h.state === "Waiting"));
-        const kind = myHold ? (myHold.state === "Holding" ? "yours" : "inline") : v.available > 0 ? "claim" : "line";
+        // Every unit paid for: no line to join, because a Paid unit never comes back.
+        const kind = myHold ? (myHold.state === "Holding" ? "yours" : "inline") : v.sellable <= 0 ? "sold" : v.available > 0 ? "claim" : "line";
         const inFlight = busy === key;
         const yoursLeft = myHold?.deadlineAt && now ? new Date(myHold.deadlineAt).getTime() - now : windowSeconds * 1000;
         const action =
@@ -446,13 +447,15 @@ function ClaimTiles({
               type="button"
               className="tile h-full w-full"
               data-kind={kind}
-              disabled={kind === "yours" || kind === "inline" || busy !== null}
+              disabled={kind === "yours" || kind === "inline" || kind === "sold" || busy !== null}
               aria-label={
                 kind === "claim"
                   ? `Claim ${item.code} ${label}, ${v.available} left`
                   : kind === "line"
                     ? `Join the line for ${item.code} ${label}, sold out, ${v.waiting} waiting`
-                    : `${item.code} ${label}: ${action}`
+                    : kind === "sold"
+                      ? `${item.code} ${label}: sold, every one paid for`
+                      : `${item.code} ${label}: ${action}`
               }
               onClick={() => onClaim(text, key, onScreen ? label : `${item.code} ${label}`)}
             >
@@ -472,6 +475,7 @@ function ClaimTiles({
                     </>
                   ))}
                 {kind === "line" && !inFlight && `Sold out · join the line${v.waiting > 0 ? ` (${v.waiting})` : ""}`}
+                {kind === "sold" && "Sold · every one paid for"}
                 {inFlight && "Reading…"}
                 {kind === "yours" && "Yours, pay below"}
                 {kind === "inline" && action}
@@ -551,12 +555,14 @@ function BottomBar({
           <div role="alert" className="mb-3 flex items-center justify-between gap-3 bg-serial py-2 pr-2 pl-4 text-white">
             <p className="min-w-0 text-[0.9375rem] leading-snug">
               <span className="font-display font-extrabold">Copy {copyNo(passedNotice.serial)} passed.</span>{" "}
-              {passedNotice.endReason === "cancelled" ? "It was cancelled." : "Time ran out before payment."}
+              {passedNotice.endReason === "cancelled" ? "It was cancelled." : passedNotice.endReason === "sold" ? "Every one sold to buyers who paid before your turn." : "Time ran out before payment."}
             </p>
             <span className="flex shrink-0 items-center gap-1">
-              <button type="button" onClick={() => onClaimAgain(passedNotice)} disabled={busy !== null} className="h-10 bg-white px-3 font-display text-[0.9375rem] font-extrabold text-serial disabled:opacity-70">
-                Claim again
-              </button>
+              {passedNotice.endReason !== "sold" && (
+                <button type="button" onClick={() => onClaimAgain(passedNotice)} disabled={busy !== null} className="h-10 bg-white px-3 font-display text-[0.9375rem] font-extrabold text-serial disabled:opacity-70">
+                  Claim again
+                </button>
+              )}
               <button type="button" onClick={onDismissNotice} className="h-10 px-2 text-[0.875rem] underline" aria-label="Dismiss">
                 OK
               </button>

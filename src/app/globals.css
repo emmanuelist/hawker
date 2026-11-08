@@ -435,6 +435,13 @@ h3 {
 .tile[data-kind="inline"] {
   background: var(--copy-waiting);
 }
+/* Every unit paid for: printed, not pressable. */
+.tile[data-kind="sold"] {
+  background: transparent;
+  box-shadow: none;
+  border-style: dashed;
+  color: var(--ink-muted);
+}
 .tile:disabled {
   cursor: default;
 }

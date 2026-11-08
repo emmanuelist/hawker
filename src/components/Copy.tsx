@@ -180,7 +180,7 @@ export function Copy({
             Passed
             <span className="stamp-to">{hold.passedTo ? `→ @${hold.passedTo}` : "→ next buyer"}</span>
           </span>
-          <span className="text-right text-[0.75rem]">{hold.endReason === "cancelled" ? "Cancelled by the buyer" : "Time ran out"}</span>
+          <span className="text-right text-[0.75rem]">{hold.endReason === "cancelled" ? "Cancelled by the buyer" : hold.endReason === "sold" ? "Sold to a buyer who paid" : "Time ran out"}</span>
         </div>
       )}
     </article>

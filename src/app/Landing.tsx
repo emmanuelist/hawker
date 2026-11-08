@@ -40,16 +40,16 @@ export function Landing({ initial = null }: { initial?: Snapshot | null }) {
       <Nav />
 
       <main id="main">
-        <section aria-labelledby="claim" className="mx-auto grid max-w-[78rem] grid-cols-[minmax(0,1fr)] items-center gap-x-12 gap-y-10 px-5 pt-10 pb-4 sm:px-8 sm:pt-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,30rem)] lg:gap-14 xl:grid-cols-[minmax(0,1fr)_32rem] xl:gap-20">
+        <section aria-labelledby="claim" className="mx-auto grid max-w-[78rem] grid-cols-[minmax(0,1fr)] items-center gap-x-12 gap-y-6 px-5 pt-6 pb-4 sm:gap-y-10 sm:px-8 sm:pt-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,30rem)] lg:gap-14 xl:grid-cols-[minmax(0,1fr)_32rem] xl:gap-20">
           <div>
             <h1 id="claim" className="font-display text-[2.15rem] leading-[0.98] font-black tracking-[-0.035em] min-[360px]:text-[2.6rem] sm:text-[3.5rem] xl:text-[4.25rem]">
               Every hold ends one of two ways: <span className="text-stamp-paid">paid through PayPal</span>, or <span className="text-stamp-passed">passed to the next buyer</span>.
             </h1>
-            <p className="mt-6 max-w-[36rem] text-[1.0625rem] leading-relaxed text-ink-muted sm:text-[1.1875rem]">
+            <p className="mt-4 max-w-[36rem] text-[1rem] leading-relaxed text-ink-muted sm:mt-6 sm:text-[1.1875rem]">
               Hawker reads a live-sale chat in English, Pidgin or Taglish, turns each “mine” into a timed hold with its own PayPal invoice, and passes an unpaid hold to the
               next buyer in line.
             </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-6 flex flex-col gap-3 sm:mt-8 sm:flex-row">
               <Link href={`/s/${DEMO}`} className="flex min-h-13 items-center justify-center gap-2.5 bg-rail px-6 py-2 text-center font-display text-[1.0625rem] font-extrabold text-rail-ink hover:bg-rail-deep sm:whitespace-nowrap">
                 Claim on the demo stall
                 <ArrowRight />
@@ -59,7 +59,7 @@ export function Landing({ initial = null }: { initial?: Snapshot | null }) {
                 Watch the desk
               </Link>
             </div>
-            <p className="mt-4 text-[0.8125rem] text-ink-muted">PayPal sandbox: no real money moves. Ada&rsquo;s Closet is a demo store with the builder&rsquo;s own catalog.</p>
+            <p className="mt-3 text-[0.8125rem] text-ink-muted sm:mt-4">PayPal sandbox: no real money moves. Ada&rsquo;s Closet is a demo store with the builder&rsquo;s own catalog.</p>
           </div>
 
           <div className="lg:col-start-2 lg:row-span-2 lg:row-start-1">

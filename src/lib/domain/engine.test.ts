@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { centsToValue, decideClaim, decideEnding, nextInLine, resolveRef } from "./engine";
+import { centsToValue, decideClaim, decideEnding, nextInLine, resolveRef, strandedInLine } from "./engine";
 import type { CatalogItem } from "./types";
 
 const catalog: CatalogItem[] = [
@@ -40,19 +40,41 @@ describe("resolveRef", () => {
 
 describe("decideClaim", () => {
   test("holds when the whole quantity is available and nobody is waiting", () => {
-    expect(decideClaim({ available: 2, qty: 2, buyerAlreadyActiveOnVariant: false, waitingAhead: 0 })).toBe("hold");
+    expect(decideClaim({ available: 2, qty: 2, buyerAlreadyActiveOnVariant: false, waitingAhead: 0, sellable: 5 })).toBe("hold");
   });
   test("waits rather than holding part of a quantity", () => {
-    expect(decideClaim({ available: 1, qty: 2, buyerAlreadyActiveOnVariant: false, waitingAhead: 0 })).toBe("wait");
+    expect(decideClaim({ available: 1, qty: 2, buyerAlreadyActiveOnVariant: false, waitingAhead: 0, sellable: 5 })).toBe("wait");
   });
   test("a newcomer never jumps people already waiting, even if stock frees up", () => {
-    expect(decideClaim({ available: 1, qty: 1, buyerAlreadyActiveOnVariant: false, waitingAhead: 1 })).toBe("wait");
+    expect(decideClaim({ available: 1, qty: 1, buyerAlreadyActiveOnVariant: false, waitingAhead: 1, sellable: 5 })).toBe("wait");
   });
   test("a second claim by the same buyer on the same variant is a duplicate", () => {
-    expect(decideClaim({ available: 3, qty: 1, buyerAlreadyActiveOnVariant: true, waitingAhead: 0 })).toBe("duplicate");
+    expect(decideClaim({ available: 3, qty: 1, buyerAlreadyActiveOnVariant: true, waitingAhead: 0, sellable: 5 })).toBe("duplicate");
   });
-  test("sold out waits", () => {
-    expect(decideClaim({ available: 0, qty: 1, buyerAlreadyActiveOnVariant: false, waitingAhead: 0 })).toBe("wait");
+  test("held but not paid for waits: a held unit can still come back", () => {
+    expect(decideClaim({ available: 0, qty: 1, buyerAlreadyActiveOnVariant: false, waitingAhead: 0, sellable: 1 })).toBe("wait");
+  });
+  test("every unit paid for is sold, not a place in a line that can never move", () => {
+    expect(decideClaim({ available: 0, qty: 1, buyerAlreadyActiveOnVariant: false, waitingAhead: 0, sellable: 0 })).toBe("sold");
+  });
+  test("asking for more than can ever be sold is sold, even with stock free now", () => {
+    expect(decideClaim({ available: 1, qty: 2, buyerAlreadyActiveOnVariant: false, waitingAhead: 0, sellable: 1 })).toBe("sold");
+  });
+  test("a buyer already in line or holding is told so before anything else", () => {
+    expect(decideClaim({ available: 0, qty: 1, buyerAlreadyActiveOnVariant: true, waitingAhead: 0, sellable: 0 })).toBe("duplicate");
+  });
+});
+
+describe("strandedInLine", () => {
+  const line = [{ id: "a", qty: 1 }, { id: "b", qty: 2 }, { id: "c", qty: 1 }];
+  test("when the last unit is paid for, every place in line ends", () => {
+    expect(strandedInLine(line, 0).map((w) => w.id)).toEqual(["a", "b", "c"]);
+  });
+  test("only places asking for more than can still be sold end; the rest keep their turn", () => {
+    expect(strandedInLine(line, 1).map((w) => w.id)).toEqual(["b"]);
+  });
+  test("nobody ends while every request can still be met", () => {
+    expect(strandedInLine(line, 2)).toEqual([]);
   });
 });
 

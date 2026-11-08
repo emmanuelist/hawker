@@ -62,7 +62,7 @@ export async function getLedger(stallId: string): Promise<LedgerRow[]> {
   return rows.map((r) => {
     const cents = r.price_cents * r.qty;
     const ending =
-      r.state === "Paid" ? "Paid on PayPal" : r.state === "Passed" ? (r.passed_to ? `Passed → @${r.passed_to}` : "Passed → next buyer") : r.state;
+      r.state === "Paid" ? "Paid on PayPal" : r.state === "Passed" ? (r.end_reason === "sold" ? "Passed · sold to a buyer who paid" : r.passed_to ? `Passed → @${r.passed_to}` : "Passed → next buyer") : r.state;
     return {
       copy: copyNo(r.serial),
       serial: r.serial,

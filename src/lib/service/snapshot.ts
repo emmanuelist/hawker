@@ -22,7 +22,7 @@ export interface SnapshotHold {
   commentSeq: number;
   deadlineAt: string | null;
   endedAt: string | null;
-  endReason: "paid" | "expired" | "cancelled" | null;
+  endReason: "paid" | "expired" | "cancelled" | "sold" | null;
   invoiceId: string | null;
   payerLink: string | null;
   invoiceStatus: string | null;
@@ -54,7 +54,7 @@ export interface Snapshot {
   onScreen: string | null;
   /** Items shown earlier on this live (not the one on screen now), most recent first. */
   earlier: string[];
-  items: { code: string; name: string; priceCents: number; variants: { label: string; stock: number; available: number; holding: number; waiting: number }[] }[];
+  items: { code: string; name: string; priceCents: number; variants: { label: string; stock: number; available: number; holding: number; waiting: number; sellable: number }[] }[];
   counters: Record<HoldState, number>;
   /** The serial the next copy on this stall's pad will carry (copies are numbered per stall). */
   nextSerial: number;
@@ -75,9 +75,10 @@ export async function getSnapshot(stallId: string, buyerId: string | null = null
   if (!ctx) return null;
   const sql = db();
   const [usage, holds, showcase, lastPaid, lastPassed, comments, counts, me, shown] = await Promise.all([
-    sql<{ variant_id: number; used: number; holding: number; waiting: number }[]>`
+    sql<{ variant_id: number; used: number; paid: number; holding: number; waiting: number }[]>`
       select variant_id,
         coalesce(sum(qty) filter (where state in ('Holding', 'Paid')), 0)::int used,
+        coalesce(sum(qty) filter (where state = 'Paid'), 0)::int paid,
         coalesce(sum(qty) filter (where state = 'Holding'), 0)::int holding,
         count(*) filter (where state = 'Waiting')::int waiting
       from holds where stall_id = ${stallId} group by variant_id`,
@@ -92,7 +93,7 @@ export async function getSnapshot(stallId: string, buyerId: string | null = null
     holdRows(
       sql,
       stallId,
-      sql`and h.state in ('Paid', 'Passed') and c.parse_source in ('groq', 'gemini')`,
+      sql`and h.state in ('Paid', 'Passed') and h.invoice_id is not null and c.parse_source in ('groq', 'gemini')`,
       sql`(h.state = 'Passed' and h.passed_to_hold_id is not null and h.end_reason = 'expired') desc, h.ended_at desc`,
       1,
     ),
@@ -137,7 +138,7 @@ export async function getSnapshot(stallId: string, buyerId: string | null = null
       priceCents: i.priceCents,
       variants: i.variants.map((v) => {
         const u = use.get(v.id);
-        return { label: v.label, stock: v.stock, available: v.stock - (u?.used ?? 0), holding: u?.holding ?? 0, waiting: u?.waiting ?? 0 };
+        return { label: v.label, stock: v.stock, available: v.stock - (u?.used ?? 0), holding: u?.holding ?? 0, waiting: u?.waiting ?? 0, sellable: v.stock - (u?.paid ?? 0) };
       }),
     })),
     counters,

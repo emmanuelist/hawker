@@ -42,8 +42,12 @@ export function decideClaim(input: {
   qty: number;
   buyerAlreadyActiveOnVariant: boolean;
   waitingAhead: number;
-}): "hold" | "wait" | "duplicate" {
+  /** Units that can still be sold: stock minus units already Paid. Paid is final (D-020), so they never come back. */
+  sellable: number;
+}): "hold" | "wait" | "duplicate" | "sold" {
   if (input.buyerAlreadyActiveOnVariant) return "duplicate";
+  // A place in line for more than can ever be sold would wait forever, an ending that is neither Paid nor Passed.
+  if (input.qty > input.sellable) return "sold";
   // Arrival order is the rule: if anyone is already waiting, a newcomer queues behind them.
   if (input.waitingAhead > 0) return "wait";
   return input.qty <= input.available ? "hold" : "wait";
@@ -55,6 +59,14 @@ export function decideClaim(input: {
  */
 export function decideEnding(paypalStatus: string): "paid" | "pass" {
   return paypalStatus === "PAID" ? "paid" : "pass";
+}
+
+/**
+ * After a sale, the places in line that can never be served: each asks for more than can still be sold.
+ * They end Passed (reason "sold") rather than wait forever (the thesis: every copy ends Paid or Passed).
+ */
+export function strandedInLine<T extends { qty: number }>(waiting: T[], sellable: number): T[] {
+  return waiting.filter((w) => w.qty > sellable);
 }
 
 /** Strict FIFO: only the head of the line is promoted, and only if its whole quantity fits. */

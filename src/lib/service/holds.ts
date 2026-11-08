@@ -2,7 +2,7 @@
 // queue (runtime.serial), so holds are granted in chat-arrival order. PayPal is the authority for
 // payment (B1): an ending always re-reads the invoice, and PAID wins every race.
 import { db } from "../db";
-import { decideClaim, decideEnding, nextInLine, resolveRef } from "../domain/engine";
+import { decideClaim, decideEnding, nextInLine, resolveRef, strandedInLine } from "../domain/engine";
 import type { ClarifyReason, ParsedComment } from "../domain/types";
 import { ModelUnavailableError } from "../ai/client";
 import { fastParse } from "../parse/fast";
@@ -98,14 +98,15 @@ async function nextSerial(stallId: string): Promise<number> {
 }
 
 async function variantState(variantId: number, buyerId: string | null) {
-  const [r] = await db()<{ stock: number; used: number; waiting: number; mine: boolean | null }[]>`
+  const [r] = await db()<{ stock: number; used: number; paid: number; waiting: number; mine: boolean | null }[]>`
     select v.stock,
       coalesce(sum(h.qty) filter (where h.state in ('Holding', 'Paid')), 0)::int as used,
+      coalesce(sum(h.qty) filter (where h.state = 'Paid'), 0)::int as paid,
       count(h.id) filter (where h.state = 'Waiting')::int as waiting,
       bool_or(h.buyer_id = ${buyerId} and h.state in ('Waiting', 'Holding')) as mine
     from variants v left join holds h on h.variant_id = v.id
     where v.id = ${variantId} group by v.stock`;
-  return { available: r.stock - r.used, waiting: r.waiting, mine: !!r.mine };
+  return { available: r.stock - r.used, sellable: r.stock - r.paid, waiting: r.waiting, mine: !!r.mine };
 }
 
 function lineFor(ctx: StallContext, variantId: number) {
@@ -134,8 +135,9 @@ async function handleOf(buyerId: string): Promise<string> {
 async function claimOne(ctx: StallContext, buyerId: string, seq: number, variantId: number, qty: number): Promise<string> {
   const { name } = lineFor(ctx, variantId);
   const s = await variantState(variantId, buyerId);
-  const decision = decideClaim({ available: s.available, qty, buyerAlreadyActiveOnVariant: s.mine, waitingAhead: s.waiting });
+  const decision = decideClaim({ available: s.available, qty, buyerAlreadyActiveOnVariant: s.mine, waitingAhead: s.waiting, sellable: s.sellable });
   if (decision === "duplicate") return `You already have ${name}.`;
+  if (decision === "sold") return s.sellable <= 0 ? `${name} is sold: every one was paid for.` : `Only ${s.sellable} of ${name} can still be sold.`;
   const serialNo = await nextSerial(ctx.stall.id);
   if (decision === "wait") {
     const [h] = await db()<{ id: string }[]>`
@@ -175,6 +177,25 @@ async function markPaid(stallId: string, h: HoldRow, inv: InvoiceRead) {
   });
   rt.deadlines.delete(Number(h.id));
   await event(stallId, "hold.paid", Number(h.id), { serial: h.serial, invoice: inv.id, transaction: inv.transactionId });
+  await endStrandedInLine(stallId, h.variant_id);
+}
+
+/**
+ * A sale is final, so after one the places in line that ask for more than can still be sold would wait
+ * forever. They end Passed with the reason "sold" (migration 004). A failure here never undoes the sale.
+ */
+async function endStrandedInLine(stallId: string, variantId: number) {
+  try {
+    const s = await variantState(variantId, null);
+    const waiting = await db()<{ id: string; qty: number; serial: number }[]>`
+      select id, qty, serial from holds where variant_id = ${variantId} and state = 'Waiting'`;
+    for (const w of strandedInLine(waiting, s.sellable)) {
+      const done = await db()`update holds set state = 'Passed', end_reason = 'sold', ended_at = now() where id = ${w.id} and state = 'Waiting'`;
+      if (done.count) await event(stallId, "hold.passed", Number(w.id), { serial: w.serial, reason: "sold" });
+    }
+  } catch (e) {
+    console.error(JSON.stringify({ scope: "sold", stallId, variantId, error: (e as Error).message.slice(0, 200) }));
+  }
 }
 
 /** Promote the head of the line for a variant, if its whole quantity now fits. Returns the new holder's hold id. */
