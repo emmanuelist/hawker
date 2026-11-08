@@ -240,3 +240,16 @@ The rules require a public repo with an open-source license at submission. Pendi
 **Consequences:**
 - Until 003 is applied, the panel honestly shows 7 of 9 refused ("end twice" accepted, "erase" refused by the foreign key), so it isn't deployed before the migration.
 - PayPal probes are three sandbox API calls each; attempts are limited to 30 a minute per visitor and 1,500 a day.
+
+## D-021 · M2 close: benchmark "not doing" list, settled · 2026-11-08 · accepted
+**Context:** The M2-close benchmark (`internal/benchmarks/2026-11-08-191e7b8.md`, 17/24) and the independent design review (27/40, E-031) proposed more than the deadline allows. The benchmark keeps at most five fixes; the rest are recorded here so later passes don't propose them again.
+**Decision — not doing:**
+- A measured advantage against the incumbent (a seller reading the chat by hand): no honest measurement before the deadline; the README states the eval and its regex-only baseline instead.
+- Rewriting or hiding test-buyer handles (`@race.619`, `@handoff.a950`, `@bench.141`) in the demo data: they're real holds (rule 1). The film is shot from a fresh session with natural handles (M3).
+- The ledger at 1024 px scrolling sideways under Studio's panels: Studio's own minimum canvas width; the ledger is a desktop surface.
+- Ellipsis on long items and comments in the ledger grid: AG Grid sizes columns by plain text (T-28).
+- Locking the ledger in view mode, or collapsing its assistant panel by default: edit mode and the agent are what the AG Studio prize rewards.
+- Other sponsor prizes (Render Workflows, Bryntum, Channel3, APIMatic): one sponsor prize at most (rules §8); AG Grid is the target.
+- Changing what happens when PayPal is unreachable at expiry (the hold keeps Holding and retries rather than invent an ending): correct by design; stated as a README limit.
+- A PayPal mark on the Pay bar: PayPal's brand assets have their own usage rules; the button text names PayPal.
+**Consequences:** the remaining score is in M3: the video (Demo quality, Presentation, Stage 1) and the README proof with a public repo (Evidence, Stage 1).

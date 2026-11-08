@@ -7,7 +7,7 @@ Deadline source: https://paypalaihackathon.devpost.com/rules §1 ("Thursday Nov 
 |---|---|---|---|---|---|
 | M0 | Rigged | 10% | D-001 recorded; riskiest dependencies spiked with evidence; hello-world deployed to production on Render, `/api/health` reachable from a phone on cellular | 2026-11-07 22:06 UTC | **done** 2026-11-07 09:47 UTC (E-008, E-009) |
 | M1 | Walking skeleton | 40% | On the deployed app, one real comment typed on the stall page travels every layer: parsed (fast path or a real model call) → hold persisted in the database → shareable PayPal sandbox invoice created → the buyer's copy on the stall and the hold on the desk, both live | 2026-11-09 13:24 UTC | **done** 2026-11-07 12:48 UTC (E-016, E-020, E-021) |
-| M2 | Core claim | 65% | The thesis end to end with real data: one hold ends `Paid` (buyer pays, status re-read from PayPal) and one ends `Passed` (timer expires → invoice cancelled → next buyer holds with a new invoice), both visible in the hold ledger; seller board in AG Studio | 2026-11-10 22:09 UTC | |
+| M2 | Core claim | 65% | The thesis end to end with real data: one hold ends `Paid` (buyer pays, status re-read from PayPal) and one ends `Passed` (timer expires → invoice cancelled → next buyer holds with a new invoice), both visible in the hold ledger; seller board in AG Studio | 2026-11-10 22:09 UTC | **done** 2026-11-08 03:18 UTC (E-026 … E-031) |
 | M3 | Proof surface | freeze | README proof section; parsing eval committed and re-runnable; every claim has a verified row; demo video recorded; `benchmark` run | 2026-11-11 17:48 UTC | |
 | M4 | Submitted | deadline − buffer | Devpost form submitted with the verbatim thesis; YouTube video public, < 3 min; repo public with license in About; preflight passed from a phone on cellular | 2026-11-12 06:54 UTC | |
 
@@ -37,10 +37,15 @@ Deadline source: https://paypalaihackathon.devpost.com/rules §1 ("Thursday Nov 
 - [x] **Last-second payment through the UI (B1 in the browser)** (E-027): a buyer pays in the final seconds of a hold. Done when a deployed run ends PAID (not Passed) with the B1 path visible, or, if payment lands after the cancel, PayPal refuses it and the copy ends Passed; never both. Evidence: timings, invoice reads, desk capture.
 - [x] **Every way out, refused** (refusals panel; E-029, D-020: also migration 003, an ended hold is final): a judge can try each forbidden ending against the real system and see the real refusal: PayPal won't cancel a paid invoice (`CANNOT_CANCEL_PAID_INVOICE`) or cancel twice (`INVOICE_CANCELED_ALREADY`); the database won't end a hold twice, move Paid → Passed, or hold without an invoice (trigger and constraint names); a passed invoice can't be paid. Probes run in rolled-back transactions and are rate-limited. Done when each probe runs on click on the deployed app and shows its live code and time. Evidence: captures.
 - [x] Several real sandbox payments, so Paid isn't 1 against 12+ Passed before the film (D-017): Paid 11 · Passed 25 (E-030)
-- [ ] M2 close: independent re-review by two isolated agents (D-017) for an after-score; `benchmark`
+- [x] M2 close: independent re-review by two isolated agents (D-017) for an after-score; `benchmark` — 27/40 (was 25), benchmark 17/24, P1/P2 fixed or settled (E-031, D-021)
 
 ### M3 · Proof surface
-- [ ] Placeholder
+Seeded from the M2-close benchmark (internal/benchmarks/2026-11-08-191e7b8.md); each needs claims-table rows before it's published.
+- [ ] **Film session:** a fresh session on the demo stall with natural buyer handles: a Pidgin and a Taglish claim read by the model, a real sandbox payment → PAID, a pass where time runs out → next buyer, and the refusals panel. Done when the run's copies are in the ledger and captured.
+- [ ] **Video** (< 3 min, YouTube public): claim on screen by 0:10; one continuous take of claim → hold → pay → PAID and pass → next buyer; the refusals panel as the beat; ElevenLabs narration (voice in CONTEXT). Done when it plays logged-out in a private window.
+- [ ] **README as the proof surface:** thesis, live link, video, "Try to break it" link, the eval with its regex-only baseline, the limits (sandbox only, Render free, a hold can outlive its timer while PayPal is unreachable). Done when every factual sentence has a verified claims row.
+- [ ] **Repo public with MIT in About** (D-009), on the user's go-ahead. Done when `gh repo view` reads PUBLIC with the license.
+- [ ] `docs/RUNOFSHOW.md` and a recorded backup; `benchmark` re-run for Demo quality and Evidence.
 
 ## Cut list
 Things deliberately not being built. Each entry links the DECISIONS entry that cut it.
