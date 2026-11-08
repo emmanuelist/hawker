@@ -3,7 +3,7 @@ _Last verified: 2026-11-08 09:40 UTC at 0e1e0dd_
 
 **Thesis:** Every hold ends one of two ways: paid through PayPal, or passed to the next buyer.
 **Milestone:** M0, M1, **M2 done** (2026-11-08 03:18 UTC, E-026 … E-031) → **M3 · Proof surface** (freeze 2026-11-11 17:48 UTC) · **Deadline:** 2026-11-12 20:00 UTC (time left: the clock line)
-**Next action:** the user runs `npm run db:migrate` (migration 004, D-024); then the end-to-end sold check on the deployed stall; then submit on Devpost (`internal/SUBMISSION.md`, `internal/gallery/`) before the freeze (2026-11-11 17:48 UTC).
+**Next action:** the user submits on Devpost (`internal/SUBMISSION.md`, `internal/gallery/`, AG Grid + Render as sponsor tools) before the freeze (2026-11-11 17:48 UTC); then tag `submission` and run preflight from a phone on cellular.
 **Blocked on:** nothing.
 
 ## Works (verified this session)
@@ -28,7 +28,7 @@ _Last verified: 2026-11-08 09:40 UTC at 0e1e0dd_
 | Repo (**public**, MIT, D-023) | GitHub | https://github.com/emmanuelist/hawker | 2026-11-08 10:20 UTC (anonymous clone ok; web page pending GitHub's incident) |
 | Demo video (public) | YouTube | https://youtu.be/xT-LaMUCcXg | 2026-11-08 09:35 UTC |
 | Web service `hawker` (free plan, D-011), AG Studio trial key set (T-27); Hawker icon (0e1e0dd) | Render (Oregon) | https://hawker-8q2t.onrender.com · `/` · `/s/ada` · `/desk` · `/ledger` | 2026-11-08 09:22 UTC at 0e1e0dd |
-| Database `hawker` in `neon-red-garden` (D-015), migrations 001–003; live show 5 “Sunday Live” | Neon (US East 1) | see CONTEXT.md | 2026-11-08 04:00 UTC |
+| Database `hawker` in `neon-red-garden` (D-015), migrations 001–004; live show 5 “Sunday Live”, A4 on screen | Neon (US East 1) | see CONTEXT.md | 2026-11-08 14:10 UTC |
 
 ## Broken or unverified
 - The repo page logged out: not yet seen (GitHub returned 503 to all unauthenticated web requests during an incident, E-036).

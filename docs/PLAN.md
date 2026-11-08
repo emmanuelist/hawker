@@ -51,7 +51,7 @@ Seeded from the M2-close benchmark (internal/benchmarks/2026-11-08-191e7b8.md); 
 - [x] **Submission draft** (`internal/SUBMISSION.md`, gitignored): every Devpost field, the verbatim thesis, sponsor sections with permalinks pinned to 4f0d4ca (all 11 files resolve anonymously), claims C-17 … C-22. Custom form questions drafted from guesses: the user pastes the real ones.
 - [x] Gallery images at 3:2, including a live refusals-panel capture (`internal/gallery/`, six; gitignored).
 - [x] `benchmark` re-run (20/24, `internal/benchmarks/2026-11-08-861a995.md`, D-025): fixes taken: sold means sold (D-024, E-037) and the phone first screen.
-- [ ] Migration 004 applied by the user (`npm run db:migrate`); then the end-to-end sold check on the deployed stall (a waiter's place ends Passed, reason `sold`, after the holder pays); then move the on-screen item to one with stock.
+- [x] Migration 004 applied by the user; end-to-end sold check passed on the deployed stall (E-038); A4 Headwrap on screen (4 units).
 - [ ] Submit on Devpost (the user's account), AG Grid selected; tag `submission`; preflight from a phone on cellular. Done when the Devpost entry shows submitted.
 
 ## Cut list

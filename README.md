@@ -96,7 +96,7 @@ flowchart TD
 ```
 
 - **Reading.** The regex fast path ([src/lib/parse/fast.ts](src/lib/parse/fast.ts)) runs first. Anything it can't read goes to one model client ([src/lib/ai/client.ts](src/lib/ai/client.ts)) with a timeout, retries, failover from Groq `qwen/qwen3.8-27b` to Gemini `gemini-3.5-flash-lite`, and a log line per call. The model only proposes a parse.
-- **Deciding.** Plain code ([src/lib/domain/engine.ts](src/lib/domain/engine.ts)) commits holds in the order comments arrived, checks item codes and variants against the catalog, and answers anything unknown with a clarifying reply. The model never decides who gets an item.
+- **Deciding.** Plain code ([src/lib/domain/engine.ts](src/lib/domain/engine.ts)) commits holds in the order comments arrived, checks item codes and variants against the catalog, and answers anything unknown with a clarifying reply. The model never decides who gets an item. A size whose units are all paid for is sold: there's no line to join, and anyone still waiting when the last one is paid for ends Passed, told why.
 - **Settling.** Each hold gets its own PayPal invoice with `allow_partial_payment: false` ([src/lib/paypal/client.ts](src/lib/paypal/client.ts)). Payment truth is a status read: open invoices are re-read every 8 seconds. At the deadline, Hawker re-reads the invoice: PAID is never passed, and anything else is cancelled at PayPal and offered to the next buyer with a new invoice ([`endHolding`](src/lib/service/holds.ts#L208)).
 - **Guarding.** A Postgres trigger makes an ended hold final ([db/migrations/003_ended_is_final.sql](db/migrations/003_ended_is_final.sql)). The only later write it allows is linking a passed hold to the next buyer's, once.
 - **Watching.** The stall, desk, landing and ledger update live over server-sent events.
@@ -110,6 +110,7 @@ flowchart TD
 - PAID shows 8–13 seconds after the buyer pays, because Hawker polls PayPal rather than trusting webhooks (sandbox webhooks weren't delivered in our testing).
 - One server process on Render's free plan, kept awake by a keep-warm request. Open deadlines live in memory and reload from the database on restart.
 - The models run on free tiers. Hawker's agent can hand work to Studio's built-in agents, but on these tiers it isn't reliable: one delegated widget rendered unconfigured.
+- Paid units never come back, so the demo store's stock shrinks as people pay.
 - The eval is 63 comments we labelled ourselves.
 - AG Studio runs on a trial licence key.
 - The live app's counters include our own test runs and break tests.
