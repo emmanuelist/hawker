@@ -1,16 +1,16 @@
 # State
-_Last verified: 2026-11-08 10:00 UTC at 71f0fc9 (docs since)_
+_Last verified: 2026-11-08 09:40 UTC at 0e1e0dd_
 
 **Thesis:** Every hold ends one of two ways: paid through PayPal, or passed to the next buyer.
 **Milestone:** M0, M1, **M2 done** (2026-11-08 03:18 UTC, E-026 … E-031) → **M3 · Proof surface** (freeze 2026-11-11 17:48 UTC) · **Deadline:** 2026-11-12 20:00 UTC (time left: the clock line)
-**Next action:** the user reviews video cut 4 (`internal/video/hawker-demo-cut4-2026-11-08.mp4`, 2:13.3) and uploads it to YouTube as public; then M3's README proof (docs/PLAN.md).
+**Next action:** M3's README as the proof surface (docs/PLAN.md), with the video https://youtu.be/xT-LaMUCcXg above the fold.
 **Blocked on:** nothing. The user decides when the repo goes public (D-009).
 
 ## Works (verified this session)
 | Capability | Verified by | Evidence |
 |---|---|---|
 | Gate | lint (0 warnings), typecheck, 102 tests, build at 71f0fc9; eval 63 cases, 0 phantom / 0 missed, 62/63 | E-007, E-032 |
-| **Video cut 4** (2:13.3): one item's life on the deployed stall; Pidgin and Taglish read by Groq; pass to the next buyer; the ledger agent reading PayPal before she pays; PAID via PayPal; Hawker's widgets and the agent's chart after; 9 of 9 refusals; joy-miners source on the opening card. Fresh judges: cut 1 18, cut 2 19, cut 3 18 /25 | rendered from a real session (show 5) + a ledger re-shoot | E-032, E-033 |
+| **Video, public on YouTube** (https://youtu.be/xT-LaMUCcXg, cut 4, 2:13.3; played logged-out, E-034): one item's life on the deployed stall; Pidgin and Taglish read by Groq; pass to the next buyer; the ledger agent reading PayPal before she pays; PAID via PayPal; Hawker's widgets and the agent's chart after; 9 of 9 refusals; joy-miners source on the opening card. Fresh judges: cut 1 18, cut 2 19, cut 3 18 /25 | rendered from a real session (show 5) + a ledger re-shoot | E-032, E-033, E-034 |
 | Independent re-review | design 27/40 (was 25), measured audit no P0, benchmark 17/24; P1/P2 fixed or settled | E-031, D-021 |
 | Landing hero and trace show the AI reading one real copy end to end | deployed: first @joy.cebu911 “akin yung xl po” (E-031); since the film, No. 0045 @amaka.lagos “abeg I go take the XL” (Groq) → PASSED → @jasmine.manila | E-031, E-032 |
 | **Every way out, refused** (landing `#refusals`): 9 live attempts; migration 003 makes an ended hold final | deployed: 9 of 9 refused in 11.2 s; hand-off still works under the guard | E-029 |
@@ -25,12 +25,13 @@ _Last verified: 2026-11-08 10:00 UTC at 71f0fc9 (docs since)_
 ## Deployed
 | What | Environment | URL | Last checked |
 |---|---|---|---|
-| Repo (private, D-009) | GitHub | https://github.com/emmanuelist/hawker | 2026-11-08 03:15 UTC |
-| Web service `hawker` (free plan, D-011), AG Studio trial key set (T-27) | Render (Oregon) | https://hawker-8q2t.onrender.com · `/` · `/s/ada` · `/desk` · `/ledger` | 2026-11-08 04:00 UTC at 71f0fc9 |
+| Repo (private, D-009) | GitHub | https://github.com/emmanuelist/hawker | 2026-11-08 09:40 UTC |
+| Demo video (public) | YouTube | https://youtu.be/xT-LaMUCcXg | 2026-11-08 09:35 UTC |
+| Web service `hawker` (free plan, D-011), AG Studio trial key set (T-27); Hawker icon (0e1e0dd) | Render (Oregon) | https://hawker-8q2t.onrender.com · `/` · `/s/ada` · `/desk` · `/ledger` | 2026-11-08 09:22 UTC at 0e1e0dd |
 | Database `hawker` in `neon-red-garden` (D-015), migrations 001–003; live show 5 “Sunday Live” | Neon (US East 1) | see CONTEXT.md | 2026-11-08 04:00 UTC |
 
 ## Broken or unverified
-- Video cut 4 exists but isn't uploaded (the user's YouTube account); no README proof yet; repo private.
+- No README proof yet; repo private. The video's thumbnail is YouTube's auto-picked frame (the custom one isn't showing yet).
 - Ledger agent delegation to Studio's lead agent works on the deployed ledger but is unreliable on free models (unconfigured KPI, then "busy"; T-26, E-033); not in the video.
 - On the deployed stall Groq once read the Taglish “sakin na lang yung L po” as a question (safe: no hold); the same phrase passed in the eval run after. Now an eval case.
 - Slow-4G LCP re-measured at 2.9–3.1 s (TTFB 0.7–1.1 s on Render free), above E-025's 2.4–2.8 s.
