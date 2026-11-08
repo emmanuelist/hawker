@@ -28,6 +28,7 @@ _Last verified: 2026-11-08 14:45 UTC at c9914eb (tag `submission`)_
 |---|---|---|---|
 | Repo (**public**, MIT, D-023) | GitHub | https://github.com/emmanuelist/hawker | 2026-11-08 10:20 UTC (anonymous clone ok; web page pending GitHub's incident) |
 | Demo video (public) | YouTube | https://youtu.be/xT-LaMUCcXg | 2026-11-08 09:35 UTC |
+| Devpost project page | Devpost | https://devpost.com/software/hawker (from the user) | unverified: automated fetches get 403 (bot protection), 2026-11-08 |
 | Web service `hawker` (free plan, D-011), AG Studio trial key set (T-27); Hawker icon (0e1e0dd) | Render (Oregon) | https://hawker-8q2t.onrender.com · `/` · `/s/ada` · `/desk` · `/ledger` | 2026-11-08 09:22 UTC at 0e1e0dd |
 | Database `hawker` in `neon-red-garden` (D-015), migrations 001–004; live show 5 “Sunday Live”, A4 on screen | Neon (US East 1) | see CONTEXT.md | 2026-11-08 14:10 UTC |
 
