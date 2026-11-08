@@ -89,8 +89,6 @@ export async function getSnapshot(stallId: string, buyerId: string | null = null
       sql`coalesce(h.ended_at, h.deadline_at, h.waiting_since) desc`,
       120,
     ),
-    holdRows(sql, stallId, sql`and h.state = 'Paid'`, sql`h.ended_at desc`, 1),
-    holdRows(sql, stallId, sql`and h.state = 'Passed' and h.invoice_id is not null`, sql`h.ended_at desc`, 1),
     holdRows(
       sql,
       stallId,
@@ -98,6 +96,9 @@ export async function getSnapshot(stallId: string, buyerId: string | null = null
       sql`(h.state = 'Passed' and h.passed_to_hold_id is not null and h.end_reason = 'expired') desc, h.ended_at desc`,
       1,
     ),
+    // Same row type as the queries around them: keep this order in step with the destructuring above.
+    holdRows(sql, stallId, sql`and h.state = 'Paid'`, sql`h.ended_at desc`, 1),
+    holdRows(sql, stallId, sql`and h.state = 'Passed' and h.invoice_id is not null`, sql`h.ended_at desc`, 1),
     sql<{ seq: string; handle: string; buyer_id: string; text: string; intent: string | null; outcome: string | null; parse_source: string | null; parse_ms: number | null; via: "typed" | "tap"; received_at: Date }[]>`
       select c.seq, b.handle, c.buyer_id, c.text, c.intent, c.outcome, c.parse_source, c.parse_ms, c.via, c.received_at
       from comments c join buyers b on b.id = c.buyer_id
@@ -143,7 +144,11 @@ export async function getSnapshot(stallId: string, buyerId: string | null = null
     nextSerial: top + 1,
     holds: holds.map(toHold),
     showcase: showcase[0] ? toHold(showcase[0]) : null,
-    latest: { paid: lastPaid[0] ? toHold(lastPaid[0]) : null, passed: lastPassed[0] ? toHold(lastPassed[0]) : null },
+    // Guarded by state: a reordered query can then only show nothing, never the wrong ending.
+    latest: {
+      paid: lastPaid[0]?.state === "Paid" ? toHold(lastPaid[0]) : null,
+      passed: lastPassed[0]?.state === "Passed" ? toHold(lastPassed[0]) : null,
+    },
     comments: comments.map((c) => ({
       seq: Number(c.seq),
       handle: c.handle,
