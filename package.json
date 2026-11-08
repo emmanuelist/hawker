@@ -14,6 +14,7 @@
     "invoice:read": "tsx scripts/read-invoice.mts",
     "db:migrate": "tsx scripts/migrate.ts",
     "db:seed": "tsx scripts/seed.ts",
+    "show:new": "tsx scripts/new-show.ts",
     "e2e:service": "tsx scripts/e2e-service.ts"
   },
   "dependencies": {

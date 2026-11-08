@@ -62,6 +62,9 @@ export interface Snapshot {
   /** The latest ended copy a model read (not the regex), preferring one that ran out of time and
    *  passed to a real next buyer: the landing's replay and trace, so they show the AI reading. */
   showcase: SnapshotHold | null;
+  /** The latest Paid and the latest Passed copy on the stall, of any show: the landing's two endings
+   *  stay real when nothing has happened for hours (the pad's stubs are this show's only). */
+  latest: { paid: SnapshotHold | null; passed: SnapshotHold | null };
   comments: SnapshotComment[];
   reader: { lastSource: string | null; degraded: boolean };
   me: { buyerId: string; handle: string } | null;
@@ -71,14 +74,23 @@ export async function getSnapshot(stallId: string, buyerId: string | null = null
   const ctx = await loadStall(stallId);
   if (!ctx) return null;
   const sql = db();
-  const [usage, holds, showcase, comments, counts, me, shown] = await Promise.all([
+  const [usage, holds, showcase, lastPaid, lastPassed, comments, counts, me, shown] = await Promise.all([
     sql<{ variant_id: number; used: number; holding: number; waiting: number }[]>`
       select variant_id,
         coalesce(sum(qty) filter (where state in ('Holding', 'Paid')), 0)::int used,
         coalesce(sum(qty) filter (where state = 'Holding'), 0)::int holding,
         count(*) filter (where state = 'Waiting')::int waiting
       from holds where stall_id = ${stallId} group by variant_id`,
-    holdRows(sql, stallId, sql`and (h.state in ('Waiting', 'Holding') or h.ended_at > now() - interval '6 hours' or h.buyer_id = ${buyerId})`, sql`coalesce(h.ended_at, h.deadline_at, h.waiting_since) desc`, 120),
+    // Open copies, this show's endings from the last 6 hours, and the viewer's own copies.
+    holdRows(
+      sql,
+      stallId,
+      sql`and (h.state in ('Waiting', 'Holding') or (h.show_id = ${ctx.show.id} and h.ended_at > now() - interval '6 hours') or h.buyer_id = ${buyerId})`,
+      sql`coalesce(h.ended_at, h.deadline_at, h.waiting_since) desc`,
+      120,
+    ),
+    holdRows(sql, stallId, sql`and h.state = 'Paid'`, sql`h.ended_at desc`, 1),
+    holdRows(sql, stallId, sql`and h.state = 'Passed' and h.invoice_id is not null`, sql`h.ended_at desc`, 1),
     holdRows(
       sql,
       stallId,
@@ -131,6 +143,7 @@ export async function getSnapshot(stallId: string, buyerId: string | null = null
     nextSerial: top + 1,
     holds: holds.map(toHold),
     showcase: showcase[0] ? toHold(showcase[0]) : null,
+    latest: { paid: lastPaid[0] ? toHold(lastPaid[0]) : null, passed: lastPassed[0] ? toHold(lastPassed[0]) : null },
     comments: comments.map((c) => ({
       seq: Number(c.seq),
       handle: c.handle,
@@ -151,7 +164,8 @@ export async function getSnapshot(stallId: string, buyerId: string | null = null
 /** The stall view never exposes other buyers' invoice links or IDs. */
 export function forBuyer(s: Snapshot, buyerId: string | null): Snapshot {
   const scrub = (h: SnapshotHold): SnapshotHold => (h.buyerId === buyerId ? h : { ...h, buyerId: "", payerLink: null, invoiceId: null, transactionId: null });
-  return { ...s, holds: s.holds.map(scrub), showcase: s.showcase ? scrub(s.showcase) : null };
+  const opt = (h: SnapshotHold | null) => (h ? scrub(h) : null);
+  return { ...s, holds: s.holds.map(scrub), showcase: opt(s.showcase), latest: { paid: opt(s.latest.paid), passed: opt(s.latest.passed) } };
 }
 
 interface HoldRow {

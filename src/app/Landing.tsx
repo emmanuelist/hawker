@@ -27,8 +27,10 @@ export function Landing({ initial = null }: { initial?: Snapshot | null }) {
     setPrevTop(top);
   }
 
-  const paid = snap?.holds.filter((h) => h.state === "Paid") ?? [];
-  const passed = snap?.holds.filter((h) => h.state === "Passed") ?? [];
+  // This show's endings, or else the stall's latest of each: the page never goes blank on a quiet day.
+  const orLatest = (list: SnapshotHold[], latest: SnapshotHold | null | undefined) => (list.length || !latest ? list : [latest]);
+  const paid = orLatest(snap?.holds.filter((h) => h.state === "Paid") ?? [], snap?.latest.paid);
+  const passed = orLatest(snap?.holds.filter((h) => h.state === "Passed") ?? [], snap?.latest.passed);
 
   return (
     <div className="min-h-dvh overflow-x-clip">
