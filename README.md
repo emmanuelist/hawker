@@ -77,7 +77,7 @@ The test suite needs no keys and no network:
 ```bash
 git clone https://github.com/emmanuelist/hawker && cd hawker
 npm ci
-npm test   # 102 tests
+npm test   # 108 tests
 ```
 
 ## How it works
