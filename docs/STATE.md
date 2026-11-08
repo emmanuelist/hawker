@@ -21,7 +21,7 @@ _Last verified: 2026-11-08 09:40 UTC at 0e1e0dd_
 | Desk: next-in-line, tear-off, stubs, questions pinned; laptop notice on phones | deployed | E-022, E-025, E-031 |
 | Last-second payment: 1.4 s before → Passed and PayPal refuses; 12 s before → Paid | deployed | E-027 |
 | Keep-warm on Render free | deployed | E-021 |
-| Seller restock: `npm run restock -- <code> <variant> <n>` adds units (paid units never come back, D-024); refuses bad input before connecting | script, not yet run | — |
+| Seller restock: `npm run restock -- <code> <variant> <n>` adds units (paid units never come back, D-024); refuses bad input before connecting | run by the user: A4 blue +3; live stall reads “Blue 5 left” | E-039 |
 
 ## Deployed
 | What | Environment | URL | Last checked |
