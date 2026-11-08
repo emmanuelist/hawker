@@ -15,6 +15,7 @@
     "db:migrate": "tsx scripts/migrate.ts",
     "db:seed": "tsx scripts/seed.ts",
     "show:new": "tsx scripts/new-show.ts",
+    "restock": "tsx scripts/restock.ts",
     "e2e:service": "tsx scripts/e2e-service.ts"
   },
   "dependencies": {
