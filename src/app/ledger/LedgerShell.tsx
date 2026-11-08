@@ -95,10 +95,10 @@ export function LedgerShell({ stall }: { stall: string }) {
         <Link href="/" className="font-display text-lg font-black tracking-[0.16em] uppercase">
           Hawker
         </Link>
-        <h1 className="text-[0.9375rem] font-semibold">
-          {snap?.stall.name ?? "Ada's Closet"} · the hold ledger
-          <span className="ml-2 text-[0.8125rem] font-normal text-rail-muted">AG Studio · every row is a real hold</span>
-        </h1>
+        <div className="flex flex-wrap items-baseline gap-x-2">
+          <h1 className="text-[0.9375rem] font-semibold">{snap?.stall.name ?? "Ada's Closet"} · the hold ledger</h1>
+          <p className="text-[0.8125rem] text-rail-muted">AG Studio · every row is a real hold</p>
+        </div>
         <p className="flex items-center gap-2 text-[0.8125rem] text-rail-muted">
           <span className={`inline-block size-2 rounded-full ${link === "live" ? "bg-[#7ee2a1]" : "bg-[#ffb4b4]"}`} aria-hidden="true" />
           {linkLabel(link)}

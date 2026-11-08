@@ -103,9 +103,9 @@
   padding: 0.18em 0.45em 0.12em;
   border: 1px solid color-mix(in oklab, var(--print) 55%, transparent);
   font-family: var(--font-franklin), sans-serif;
-  font-size: 0.625rem;
+  font-size: 0.6875rem;
   font-weight: 800;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
   line-height: 1.2;
   text-transform: uppercase;
   color: var(--print);
@@ -124,7 +124,7 @@
   white-space: nowrap;
 }
 .hawker-ledger .lg-stamp {
-  font-size: 0.625rem;
+  font-size: 0.6875rem;
   rotate: -4deg;
   padding: 0.2em 0.45em 0.14em;
 }
@@ -537,6 +537,18 @@
 }
 .hawker-ledger .ag-studio-ai-assistant-input {
   border-radius: 0;
+}
+/* Studio's own Send blue (#2196f3, 2.59:1) and placeholder grey (3.2:1) fail on the board: print them in ink. */
+.hawker-ledger .ag-studio-ai-assistant-send-button {
+  color: var(--print);
+  font-weight: 700;
+}
+.hawker-ledger .ag-studio-ai-assistant-send-button:disabled {
+  color: var(--ink-muted);
+}
+.hawker-ledger .ag-studio-ai-assistant-textarea::placeholder {
+  color: var(--ink-muted);
+  opacity: 1;
 }
 
 /* a receipt slip, torn from the till along its perforated top */

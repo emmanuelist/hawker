@@ -32,9 +32,12 @@ export function Landing({ initial = null }: { initial?: Snapshot | null }) {
 
   return (
     <div className="min-h-dvh overflow-x-clip">
+      <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:bg-paid focus:px-4 focus:py-3 focus:font-semibold">
+        Skip to the page
+      </a>
       <Nav />
 
-      <main>
+      <main id="main">
         <section aria-labelledby="claim" className="mx-auto grid max-w-[78rem] grid-cols-[minmax(0,1fr)] items-center gap-x-12 gap-y-10 px-5 pt-10 pb-4 sm:px-8 sm:pt-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,30rem)] lg:gap-14 xl:grid-cols-[minmax(0,1fr)_32rem] xl:gap-20">
           <div>
             <h1 id="claim" className="font-display text-[2.15rem] leading-[0.98] font-black tracking-[-0.035em] min-[360px]:text-[2.6rem] sm:text-[3.5rem] xl:text-[4.25rem]">
@@ -295,7 +298,7 @@ function Instrument({
             {minsAgo !== null ? `, which ended ${ago(minsAgo)}` : ""}. Live copies show here as they happen.
           </span>
           {replay.landed && (
-            <button type="button" onClick={replay.again} className="shrink-0 font-semibold text-print underline">
+            <button type="button" onClick={replay.again} className="-my-3 min-h-11 shrink-0 px-1 font-semibold text-print underline">
               Replay
             </button>
           )}
