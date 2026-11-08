@@ -64,8 +64,10 @@ npm run eval                  # the full pipeline (needs GROQ_API_KEY and GEMINI
 ### Verify without trusting this README
 
 ```bash
-curl -s https://hawker-8q2t.onrender.com/api/health            # the deployed commit
-curl -s https://hawker-8q2t.onrender.com/api/stalls/ada/ledger # every hold, its PayPal invoice and transaction
+# The commit the deployed app is running
+curl -s https://hawker-8q2t.onrender.com/api/health
+# Every hold on the demo stall, with its PayPal invoice and, once paid, its transaction
+curl -s https://hawker-8q2t.onrender.com/api/stalls/ada/ledger
 ```
 
 Then claim something on the [stall](https://hawker-8q2t.onrender.com/s/ada) from your phone and watch it land on the [desk](https://hawker-8q2t.onrender.com/desk), or press “Try all 9” on the [landing](https://hawker-8q2t.onrender.com/#refusals).
@@ -81,15 +83,16 @@ npm test   # 102 tests
 ## How it works
 
 ```mermaid
-flowchart LR
-  C["Comment on the stall"] --> F["Regex fast path"]
-  F -- "no match" --> M["Model client<br/>Groq, then Gemini"]
-  F --> E["Engine: catalog check,<br/>arrival order"]
+flowchart TD
+  C["A comment on the stall"] --> F["Regex fast path"]
+  F -- "no match" --> M["Model client: Groq, then Gemini"]
+  F -- "match" --> E["Engine: catalog check, arrival order"]
   M -- "a parse proposal" --> E
-  E --> H["Hold + its own<br/>PayPal invoice"]
-  H -- "status read every 8 s" --> P{"PayPal says"}
+  E --> H["A hold with its own PayPal invoice"]
+  H -- "status read every 8 s" --> P{"What PayPal says"}
   P -- "PAID" --> PAID["Paid"]
-  P -- "deadline, not paid" --> X["Cancel at PayPal"] --> PASSED["Passed → next buyer,<br/>with a new invoice"]
+  P -- "deadline, not paid" --> X["Cancel the invoice at PayPal"]
+  X --> PASSED["Passed to the next buyer, with a new invoice"]
 ```
 
 - **Reading.** The regex fast path ([src/lib/parse/fast.ts](src/lib/parse/fast.ts)) runs first. Anything it can't read goes to one model client ([src/lib/ai/client.ts](src/lib/ai/client.ts)) with a timeout, retries, failover from Groq `qwen/qwen3.8-27b` to Gemini `gemini-3.5-flash-lite`, and a log line per call. The model only proposes a parse.
