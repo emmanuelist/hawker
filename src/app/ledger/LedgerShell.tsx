@@ -13,8 +13,40 @@ import { diffRows, markFresh } from "./live";
 
 const LedgerStudio = dynamic(() => import("./LedgerStudio"), {
   ssr: false,
-  loading: () => <p className="p-6 text-ink-muted">Opening the ledger…</p>,
+  loading: () => <Opening what="Opening AG Studio…" />,
 });
+
+/** While AG Studio loads (a large bundle on a cold visit), the stall's live counts are already known. */
+function Opening({ what, counters }: { what: string; counters?: { Paid: number; Passed: number; Holding: number } }) {
+  return (
+    <div className="flex h-full items-center justify-center p-6" role="status">
+      <div className="grid justify-items-center gap-4 text-center">
+        {counters && (
+          <p className="flex items-center gap-5 text-[0.9375rem]">
+            <span className="flex items-center gap-2">
+              <span className="stamp text-[0.875rem]" data-kind="paid">
+                Paid
+              </span>
+              <span className="font-mono text-xl font-bold num">{counters.Paid}</span>
+            </span>
+            <span className="flex items-center gap-2">
+              <span className="stamp text-[0.875rem]" data-kind="passed">
+                Passed
+              </span>
+              <span className="font-mono text-xl font-bold num">{counters.Passed}</span>
+            </span>
+            {counters.Holding > 0 && (
+              <span className="text-ink-muted">
+                <span className="font-mono font-bold text-ink num">{counters.Holding}</span> holding
+              </span>
+            )}
+          </p>
+        )}
+        <p className="text-ink-muted">{what}</p>
+      </div>
+    </div>
+  );
+}
 
 export function LedgerShell({ stall }: { stall: string }) {
   const { snap, link } = useLiveSnapshot(stall, "desk");
@@ -100,7 +132,7 @@ export function LedgerShell({ stall }: { stall: string }) {
         ) : rows ? (
           <LedgerStudio stall={stall} rows={rows} skewMs={skewMs} />
         ) : (
-          <p className="p-6 text-ink-muted">Reading the ledger…</p>
+          <Opening what="Reading every copy on the ledger…" counters={snap?.counters} />
         )}
       </main>
     </div>

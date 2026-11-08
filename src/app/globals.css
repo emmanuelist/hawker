@@ -269,14 +269,18 @@ h3 {
 .stamp[data-kind="passed"] {
   color: var(--stamp-passed);
 }
-/* The stamp's sub-line: who the copy passed to. Its own line, so a long handle never spills the copy. */
+/* The stamp's sub-line: who the copy passed to. One line, never broken mid-handle; a very long
+   handle ends in an ellipsis rather than spilling the copy (the full handle is on the copy's fields). */
 .stamp-to {
   display: block;
+  max-width: 11em;
   margin-top: 0.3em;
+  overflow: hidden;
   font-size: 0.72em;
   letter-spacing: 0.03em;
+  text-overflow: ellipsis;
   text-transform: none;
-  overflow-wrap: anywhere;
+  white-space: nowrap;
 }
 
 /* A stamp lands only when it lands live: two frames, no easing, and the copy takes the impression. */

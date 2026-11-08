@@ -147,6 +147,7 @@ function AttemptRow({ a, row, busy, onTry }: { a: Attempt; row: Row; busy: boole
 /** The refuser's reply, printed out under the attempt. */
 function Reply({ r }: { r: ProbeResult }) {
   const who = r.by === "PayPal" ? "PayPal" : "the database";
+  const newCopy = r.probe === "third-state" || r.probe === "no-invoice";
   // Paying happens in PayPal's own checkout, so that row reports PayPal's live read, not an attempt.
   const verdict =
     r.outcome === "refused" ? (r.probe === "pay-passed-late" ? "Closed at PayPal" : `Refused by ${who}`) : r.outcome === "accepted" ? `Accepted by ${who}` : "Couldn't confirm a refusal";
@@ -164,8 +165,20 @@ function Reply({ r }: { r: ProbeResult }) {
       <p className="refusal-code">{r.code}</p>
       <p className="refusal-message">{r.message}</p>
       <p className="mt-2 text-[0.8125rem] text-ink-muted [overflow-wrap:anywhere]">
-        {r.copy && <span className="font-mono font-bold text-serial">{r.copy}</span>}
-        {r.invoiceId && <span className="font-mono"> · {r.invoiceId}</span>}
+        {newCopy ? (
+          // An insert attempt: a brand-new copy built from this copy's buyer and item.
+          r.copy && (
+            <>
+              a new copy for the buyer and item of <span className="font-mono font-bold text-serial">{r.copy}</span>
+            </>
+          )
+        ) : (
+          <>
+            {r.copy && <span className="font-mono font-bold text-serial">{r.copy}</span>}
+            {r.holdId !== undefined && <span> (hold {r.holdId} in the database)</span>}
+            {r.invoiceId && <span className="font-mono"> · {r.invoiceId}</span>}
+          </>
+        )}
         {r.by === "PayPal" && r.before && (
           <span>
             {" "}

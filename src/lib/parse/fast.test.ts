@@ -31,6 +31,9 @@ describe("fastParse claims", () => {
     ["akin yung a1 m po", A3, { code: "A1", variant: "M", qty: 1 }],
     ["akin yung black", A3, { code: "A3", variant: "black", qty: 1 }],
     ["akin ung gold po", A3, { code: "A3", variant: "gold", qty: 1 }],
+    // One-tap claims post the catalog's own spelling (a lowercase l reads as I in the chat)
+    ["mine L", A1, { code: "A1", variant: "L", qty: 1 }],
+    ["mine A3 black", A1, { code: "A3", variant: "black", qty: 1 }],
   ])("%s", (text, onScreen, ref) => {
     expect(fastParse(text, onScreen, catalog)).toEqual({ intent: "claim", items: [ref] });
   });
@@ -100,6 +103,7 @@ describe("fastParse reads a named cancel", () => {
     ["cancel my gold", A3, { code: "A3", variant: "gold", qty: null }],
     ["cancel my red", A3, { code: "A3", variant: "red", qty: null }], // was deferred to the model before named cancels
     ["cancel a1", A3, { code: "A1", variant: null, qty: null }],
+    ["cancel A1 L", A3, { code: "A1", variant: "L", qty: null }], // the Release button, in the catalog's spelling
   ])("%s", (text, onScreen, ref) => {
     expect(fastParse(text, onScreen, catalog)).toEqual({ intent: "cancel", items: [ref] });
   });

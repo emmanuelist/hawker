@@ -29,8 +29,6 @@ export function Landing({ initial = null }: { initial?: Snapshot | null }) {
 
   const paid = snap?.holds.filter((h) => h.state === "Paid") ?? [];
   const passed = snap?.holds.filter((h) => h.state === "Passed") ?? [];
-  // The hero quotes the latest claim, not any comment: claims are short and on topic.
-  const latestComment = snap?.comments.find((c) => c.intent === "claim") ?? null;
 
   return (
     <div className="min-h-dvh overflow-x-clip">
@@ -51,7 +49,8 @@ export function Landing({ initial = null }: { initial?: Snapshot | null }) {
                 Claim on the demo stall
                 <ArrowRight />
               </Link>
-              <Link href="/desk" className="flex min-h-13 items-center justify-center border border-ink px-6 py-2 text-center font-display text-[1.0625rem] font-extrabold hover:bg-paid sm:whitespace-nowrap">
+              {/* The desk needs a laptop screen, so a phone gets the stall as its one action. */}
+              <Link href="/desk" className="hidden min-h-13 items-center justify-center border border-ink px-6 py-2 text-center font-display text-[1.0625rem] font-extrabold hover:bg-paid sm:flex sm:whitespace-nowrap">
                 Watch the desk
               </Link>
             </div>
@@ -59,7 +58,7 @@ export function Landing({ initial = null }: { initial?: Snapshot | null }) {
           </div>
 
           <div className="lg:col-start-2 lg:row-span-2 lg:row-start-1">
-            <Instrument snap={snap} now={now} top={top} freshId={freshId} latestComment={latestComment} paid={paid} passed={passed} link={link} />
+            <Instrument snap={snap} now={now} top={top} freshId={freshId} paid={paid} passed={passed} link={link} />
           </div>
 
           <div className="lg:col-start-1 lg:row-start-2 lg:self-start">
@@ -106,8 +105,31 @@ function pickTop(snap: Snapshot | null): SnapshotHold | null {
   if (!snap) return null;
   const holding = snap.holds.filter((h) => h.state === "Holding").sort((a, b) => (a.deadlineAt ?? "").localeCompare(b.deadlineAt ?? ""));
   if (holding[0]) return holding[0];
+  // Nothing live: replay the latest copy a model read (the AI at work), else the latest ending.
+  if (snap.showcase) return snap.showcase;
   const ended = snap.holds.filter((h) => h.state === "Paid" || h.state === "Passed").sort((a, b) => (b.endedAt ?? "").localeCompare(a.endedAt ?? ""));
   return ended.find((h) => h.state === "Passed" && h.passedTo) ?? ended.find((h) => h.state === "Paid") ?? ended[0] ?? null;
+}
+
+/** "just now", "12 min ago", "3 h ago", "2 days ago": how long ago the replayed copy ended. */
+function ago(mins: number): string {
+  if (mins === 0) return "just now";
+  if (mins < 90) return `${mins} min ago`;
+  const h = Math.round(mins / 60);
+  return h < 36 ? `${h} h ago` : `${Math.round(h / 24)} days ago`;
+}
+
+/** What Hawker understood from the comment, in the catalog's words: "A3 · black" or "A2 · M × 2". */
+function understood(h: SnapshotHold): string {
+  return `${h.code}${h.singleVariant ? "" : ` · ${h.variant}`}${h.qty > 1 ? ` × ${h.qty}` : ""}`;
+}
+
+/** The reader in plain words: the regex fast path, or the model that read it. */
+function readerName(source: string): string {
+  if (source === "groq") return "read by the model (Groq Qwen)";
+  if (source === "gemini") return "read by the model (Gemini)";
+  if (source === "fast") return "fast path, no model needed";
+  return SOURCE[source] ?? source;
 }
 
 const REPLAY_MS = 2800;
@@ -168,6 +190,9 @@ function Nav() {
           <Link href="/desk" className="hidden min-h-11 items-center hover:underline sm:inline-flex">
             Desk
           </Link>
+          <Link href="/ledger" className="hidden min-h-11 items-center hover:underline sm:inline-flex">
+            Ledger
+          </Link>
           <Link href={`/s/${DEMO}`} className="flex h-11 items-center bg-ink px-4 font-display font-extrabold text-white hover:bg-black">
             Demo stall
           </Link>
@@ -182,7 +207,6 @@ function Instrument({
   now,
   top,
   freshId,
-  latestComment,
   paid,
   passed,
   link,
@@ -191,7 +215,6 @@ function Instrument({
   now: number;
   top: SnapshotHold | null;
   freshId: number | null;
-  latestComment: Snapshot["comments"][number] | null;
   paid: SnapshotHold[];
   passed: SnapshotHold[];
   link: string;
@@ -207,17 +230,19 @@ function Instrument({
     <figure aria-label="The demo stall, live" className="m-0">
       <div className="flex items-start gap-4">
         <span className="print shrink-0 pt-1">Chat in</span>
-        {latestComment ? (
+        {/* Always the comment that made the copy below, so the chain from chat to copy is one copy. */}
+        {top ? (
           <p className="min-w-0 text-[0.9375rem] leading-snug">
-            <span className="font-semibold">@{latestComment.handle}</span>{" "}
-            <span className="text-[1.0625rem] font-medium [overflow-wrap:anywhere]">“{latestComment.text}”</span>
+            <span className="font-semibold">@{top.handle}</span>{" "}
+            <span className="text-[1.0625rem] font-medium [overflow-wrap:anywhere]">“{top.said}”</span>
+            {top.saidVia === "tap" && <span className="print ml-1.5 text-ink-muted">tapped</span>}
             <span className="mt-0.5 block text-[0.8125rem] text-ink-muted">
-              <span className="print">Read · {latestComment.intent ?? "…"}</span>
-              {latestComment.source && (
+              <span className="print">Read</span> {understood(top)}
+              {top.readBy && (
                 <>
-                  {" "}
-                  {SOURCE[latestComment.source] ?? latestComment.source}
-                  {latestComment.ms ? ` · ${(latestComment.ms / 1000).toFixed(1)} s` : ""}
+                  {" · "}
+                  {readerName(top.readBy)}
+                  {top.readMs ? `, ${(top.readMs / 1000).toFixed(1)} s` : ""}
                 </>
               )}
             </span>
@@ -267,7 +292,7 @@ function Instrument({
         <p className="mt-3 mb-1 flex items-baseline justify-between gap-3 text-[0.8125rem] text-ink-muted">
           <span>
             Replay of copy {copyNo(top.serial)}
-            {minsAgo !== null ? `, which ended ${minsAgo === 0 ? "just now" : `${minsAgo} min ago`}` : ""}. Live copies show here as they happen.
+            {minsAgo !== null ? `, which ended ${ago(minsAgo)}` : ""}. Live copies show here as they happen.
           </span>
           {replay.landed && (
             <button type="button" onClick={replay.again} className="shrink-0 font-semibold text-print underline">
@@ -333,9 +358,9 @@ function ArrowRight() {
 }
 
 function Trace({ snap }: { snap: Snapshot | null }) {
-  // The most recent hold that has ended, traced back to the comment that made it.
-  const h = snap?.holds.filter((x) => x.state === "Paid" || x.state === "Passed").sort((a, b) => (b.endedAt ?? "").localeCompare(a.endedAt ?? ""))[0] ?? null;
-  const c = h && snap ? (snap.comments.find((x) => x.seq === h.commentSeq) ?? null) : null;
+  // The latest copy a model read, traced from the comment to its ending; else the latest ending.
+  const latest = snap?.holds.filter((x) => x.state === "Paid" || x.state === "Passed").sort((a, b) => (b.endedAt ?? "").localeCompare(a.endedAt ?? ""))[0] ?? null;
+  const h = snap?.showcase ?? latest;
   const what = h ? (h.singleVariant ? `${h.code} ${h.itemName}` : `${h.code} ${h.itemName} — ${h.variant}`) : "";
   return (
     <section id="how" aria-labelledby="how-title" className="mt-20 border-y border-rule bg-board-deep/60 sm:mt-28">
@@ -346,7 +371,8 @@ function Trace({ snap }: { snap: Snapshot | null }) {
         <p className="mt-3 max-w-[40rem] text-[1.0625rem] leading-relaxed text-ink-muted">
           {h ? (
             <>
-              Traced from the demo stall: copy <span className="font-mono font-bold text-serial">{copyNo(h.serial)}</span>, the most recent copy to end.
+              Traced from the demo stall: copy <span className="font-mono font-bold text-serial">{copyNo(h.serial)}</span>,{" "}
+              {snap?.showcase && h.id === snap.showcase.id ? "the latest copy a model read." : "the most recent copy to end."}
             </>
           ) : (
             "Traced live from the demo stall once a copy has ended."
@@ -367,9 +393,10 @@ function Trace({ snap }: { snap: Snapshot | null }) {
           <Beat title="A model reads what they meant. Code decides who holds it" n={2}>
             {h ? (
               <>
-                <p className="print">Read · {c?.intent ?? "claim"}</p>
+                <p className="print">Understood</p>
+                <p className="mt-1 font-mono text-lg font-bold">{understood(h)}</p>
                 <p className="mt-1 text-[0.9375rem]">
-                  {c?.source ? `${SOURCE[c.source] ?? c.source}${c.ms ? `, ${(c.ms / 1000).toFixed(1)} s` : ""}` : "Read on arrival"}
+                  {h.readBy ? `${readerName(h.readBy)}${h.readMs ? `, ${(h.readMs / 1000).toFixed(1)} s` : ""}` : "Read on arrival"}
                 </p>
                 <p className="mt-2 text-[0.9375rem] leading-snug text-ink-muted">Checked against the catalog, then granted in the order comments arrived.</p>
               </>

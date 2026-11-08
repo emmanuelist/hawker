@@ -74,6 +74,10 @@ const theme = studioTheme.withParams({
 
 const ledgerField = (id: string, aggregation?: "sum" | "count") => ({ id: `ledger.${id}`, ...(aggregation ? { aggregation } : {}) });
 const title = (text: string) => ({ format: { title: { enabled: true, text } } });
+// Paid and Passed are never told apart by colour alone (PRODUCT.md): every endings chart names its series.
+const chart = (text: string) => ({
+  format: { title: { enabled: true, text }, style: { theme: { common: { legend: { enabled: true, position: "bottom" } } } } },
+});
 
 // Field names and formats for the ledger table (format ids from api/agFormats.d.ts).
 const FIELDS: AgFieldDefinition[] = [
@@ -135,7 +139,7 @@ const initialState = {
         },
         byItem: {
           type: "column-chart-stacked",
-          ...title("Endings by item"),
+          ...chart("Endings by item"),
           dataMapping: { categoryKey: [ledgerField("code")], valueKey: [ledgerField("paid", "sum"), ledgerField("passed", "sum")] },
         },
         ledger: {
@@ -224,7 +228,7 @@ function breakdownTool(getApi: () => AgStudioApi | null): AgAiTool {
             ? p
             : {
                 ...p,
-                widgets: { ...p.widgets, [id]: { type: "column-chart-stacked", dataMapping: { categoryKey: [ledgerField(groupBy)], valueKey }, ...title(what) } },
+                widgets: { ...p.widgets, [id]: { type: "column-chart-stacked", dataMapping: { categoryKey: [ledgerField(groupBy)], valueKey }, ...chart(what) } },
                 widgetLayout: { ...p.widgetLayout, [id]: { xTrack: 0, yTrack: bottom, xSpan: 24, ySpan: 16 } },
                 selection: { type: "widget", id },
               },

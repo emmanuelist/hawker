@@ -2,6 +2,7 @@
 // The helper's board (direction contract: .impeccable/surfaces/src-app-desk-page-tsx.md). The centre is
 // the pad: open copies by time left, each naming who is next in line. When a copy ends, its stamp lands
 // where the helper was looking, then it tears off (Passed) or is filed (Paid) into the stubs below.
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { ChatLine, SOURCE } from "@/components/ChatLine";
 import { Copy, lineInfo, shortId } from "@/components/Copy";
@@ -126,11 +127,19 @@ export function DeskClient({ stall }: { stall: string }) {
   const first = serials.length ? Math.min(...serials) : null;
 
   return (
-    <div className="grid h-dvh grid-cols-[minmax(0,1fr)] grid-rows-[auto_1fr_auto] overflow-hidden">
+    <div className="grid h-dvh grid-cols-[minmax(0,1fr)] grid-rows-[auto_auto_1fr_auto] overflow-hidden lg:grid-rows-[auto_1fr_auto]">
       <h1 className="sr-only">
         {snap.stall.name} · {snap.show.title} · the desk
       </h1>
       <Rail snap={snap} link={link} sound={sound} />
+      {/* Three columns need a laptop; on a phone, say so and point to where a phone belongs. */}
+      <p className="border-b border-rule bg-holding px-5 py-3 text-[0.9375rem] leading-snug text-holding-ink lg:hidden">
+        The desk is laid out for a laptop screen. On a phone,{" "}
+        <Link href={`/s/${snap.stall.id}`} className="font-semibold text-ink underline">
+          claim on the demo stall
+        </Link>{" "}
+        and watch it here later on a bigger screen.
+      </p>
 
       <main className="grid min-h-0 grid-cols-[19rem_minmax(0,1fr)_22rem] max-[1180px]:grid-cols-[17rem_minmax(0,1fr)_19rem]">
         <section aria-labelledby="onscreen" className="min-h-0 overflow-y-auto border-r border-rule px-5 py-5">
@@ -325,7 +334,9 @@ function Rail({ snap, link, sound }: { snap: Snapshot; link: LinkState; sound: R
   const reader = snap.reader.degraded ? "Fast path only (AI unavailable)" : snap.reader.lastSource ? `Fast path + ${SOURCE[snap.reader.lastSource] ?? snap.reader.lastSource}` : "Fast path + Groq / Gemini";
   return (
     <header className="flex flex-wrap items-center gap-x-6 gap-y-2 bg-rail px-5 py-3 text-rail-ink">
-      <p className="font-display text-lg font-black tracking-[0.16em] uppercase">Hawker</p>
+      <Link href="/" className="font-display text-lg font-black tracking-[0.16em] uppercase">
+        Hawker
+      </Link>
       <p className="text-[0.9375rem] font-semibold">
         {snap.stall.name} · {snap.show.title}
         {snap.stall.isDemo && <span className="ml-2 text-[0.8125rem] font-normal text-rail-muted">demo store · public desk</span>}
@@ -358,6 +369,14 @@ function Rail({ snap, link, sound }: { snap: Snapshot; link: LinkState; sound: R
           <SpeakerIcon on={sound.enabled} />
           Sound {sound.enabled ? "on" : "off"}
         </button>
+        <nav aria-label="Hawker" className="flex items-center gap-4 text-[0.875rem]">
+          <Link href="/ledger" className="underline">
+            Ledger
+          </Link>
+          <Link href={`/s/${snap.stall.id}`} className="underline">
+            Stall
+          </Link>
+        </nav>
       </div>
     </header>
   );

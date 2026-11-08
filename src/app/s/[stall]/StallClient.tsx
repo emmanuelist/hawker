@@ -174,13 +174,13 @@ export function StallClient({ stall, initial = null }: { stall: string; initial?
 
   function release(h: SnapshotHold) {
     setReleased(new Set([...released, h.id]));
-    const text = h.singleVariant ? `cancel ${h.code.toLowerCase()}` : `cancel ${h.code.toLowerCase()} ${h.variant.toLowerCase()}`;
+    const text = h.singleVariant ? `cancel ${h.code}` : `cancel ${h.code} ${h.variant}`;
     void send(text, "tap", `release:${h.id}`);
   }
 
   function claimAgain(h: SnapshotHold) {
     setPassedNotice(null);
-    const text = h.singleVariant ? `mine ${h.code.toLowerCase()}` : `mine ${h.code.toLowerCase()} ${h.variant.toLowerCase()}`;
+    const text = h.singleVariant ? `mine ${h.code}` : `mine ${h.code} ${h.variant}`;
     void send(text, "tap", `${h.code}:${h.variant}`);
   }
 
@@ -422,8 +422,9 @@ function ClaimTiles({
     <ul className="mt-4 grid grid-cols-[repeat(auto-fit,minmax(5.25rem,1fr))] gap-2.5" aria-label={`Claim ${item.code}`}>
       {item.variants.map((v) => {
         const label = single ? item.name : v.label;
-        const ref = onScreen ? "" : `${item.code.toLowerCase()} `;
-        const text = single ? (onScreen ? "mine" : `mine ${item.code.toLowerCase()}`) : `mine ${ref}${v.label.toLowerCase()}`;
+        // The catalog's own spelling ("mine L", "mine A3 black"): in the chat a lowercase l reads as I.
+        const ref = onScreen ? "" : `${item.code} `;
+        const text = single ? (onScreen ? "mine" : `mine ${item.code}`) : `mine ${ref}${v.label}`;
         const key = `${item.code}:${v.label}`;
         const myHold = mine.find((h) => h.code === item.code && h.variant === v.label && (h.state === "Holding" || h.state === "Waiting"));
         const kind = myHold ? (myHold.state === "Holding" ? "yours" : "inline") : v.available > 0 ? "claim" : "line";

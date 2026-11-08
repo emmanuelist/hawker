@@ -3,6 +3,7 @@
 // (letterhead, field labels) is carbon blue; what's filled in is ink. Its tint is its state, its
 // countdown edge is the exact time left, and its ending is a stamp: PAID (read from PayPal) or
 // PASSED → the next buyer. Under a Holding copy sit the blue copies of the buyers waiting behind it.
+import { useState } from "react";
 import type { SnapshotHold } from "@/lib/service/snapshot";
 import { Countdown } from "./Countdown";
 import { copyNo, money } from "./live";
@@ -156,13 +157,7 @@ export function Copy({
         </p>
       )}
 
-      {onRelease && (hold.state === "Holding" || hold.state === "Waiting") && (
-        <p className="mt-3 text-right">
-          <button type="button" onClick={onRelease} disabled={releasing} className="text-[0.875rem] text-ink-muted underline hover:text-ink disabled:no-underline">
-            {releasing ? "Releasing…" : hold.state === "Holding" ? "Release this copy" : "Leave the line"}
-          </button>
-        </p>
-      )}
+      {onRelease && (hold.state === "Holding" || hold.state === "Waiting") && <ReleaseControl hold={hold} onRelease={onRelease} releasing={!!releasing} />}
 
       {hold.state === "Paid" && (
         <div className="mt-4 flex items-end justify-between gap-3">
@@ -222,4 +217,36 @@ export function lineInfo(holds: SnapshotHold[]) {
       return i >= 0 ? i + 1 : null;
     },
   };
+}
+
+/** Releasing ends the hold for good (it passes to the next buyer), so it asks once, inline, with
+ *  both answers as full-size targets. Keeping the copy is the first, easier choice. */
+function ReleaseControl({ hold, onRelease, releasing }: { hold: SnapshotHold; onRelease: () => void; releasing: boolean }) {
+  const [asking, setAsking] = useState(false);
+  const what = hold.state === "Holding" ? "Release this copy" : "Leave the line";
+  if (releasing) return <p className="mt-3 flex min-h-11 items-center justify-end text-[0.875rem] text-ink-muted">Releasing…</p>;
+  if (!asking) {
+    return (
+      <p className="mt-3 flex justify-end">
+        <button type="button" onClick={() => setAsking(true)} className="min-h-11 px-1 text-[0.875rem] text-ink-muted underline underline-offset-4 hover:text-ink">
+          {what}
+        </button>
+      </p>
+    );
+  }
+  return (
+    <div className="mt-3 border-t border-ink/15 pt-3" role="group" aria-label={`${what}?`}>
+      <p className="text-[0.875rem] leading-snug">
+        {hold.state === "Holding" ? `Release ${copyNo(hold.serial)}? It passes to the next buyer and can't be taken back.` : `Leave the line for ${copyNo(hold.serial)}?`}
+      </p>
+      <div className="mt-2 flex justify-end gap-2">
+        <button type="button" onClick={() => setAsking(false)} autoFocus className="min-h-11 border border-ink/25 bg-paid px-4 font-display text-[0.9375rem] font-extrabold">
+          Keep it
+        </button>
+        <button type="button" onClick={onRelease} className="min-h-11 px-4 font-display text-[0.9375rem] font-extrabold text-serial underline underline-offset-4">
+          {hold.state === "Holding" ? "Release" : "Leave"}
+        </button>
+      </div>
+    </div>
+  );
 }

@@ -1,0 +1,18 @@
+{
+ "summary": {
+  "at": "2026-11-07T19:33:08.380Z",
+  "cases": 60,
+  "commerceCriticalCorrect": 59,
+  "phantomClaims": 0,
+  "missedClaims": 0,
+  "fastPath": 25,
+  "modelBatches": {
+   "groq": 3,
+   "gemini": 1
+  },
+  "seconds": 6.4
+ },
+ "misses": [
+  "#8 [fast] \"cancel my red\" gold=cancel [[\"A3\",\"red\",null]] got=cancel [[\"A3\",\"red\",1]]"
+ ]
+}

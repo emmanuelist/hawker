@@ -22,6 +22,8 @@ export interface ProbeResult {
   /** The refuser's message, verbatim. */
   message: string;
   copy: string | null;
+  /** The database's own id for that copy, which its error messages use ("hold 24"). */
+  holdId?: number;
   invoiceId: string | null;
   /** PayPal's status read before and after the attempt. */
   before?: string;
@@ -101,7 +103,7 @@ async function databaseProbe(stallId: string, probe: ProbeId): Promise<Omit<Prob
   const t = await latest(stallId, p.on);
   if (!t) return { ...base, outcome: "error", code: "no_target", message: "The stall has no copy with that ending yet.", copy: null, invoiceId: null };
   const r = await rolledBack((tx) => p.write(tx, t));
-  const where = { copy: copyNo(t.serial), invoiceId: t.invoice_id };
+  const where = { copy: copyNo(t.serial), holdId: Number(t.id), invoiceId: t.invoice_id };
   if (r.kind === "accepted") return { ...base, ...where, outcome: "accepted", code: "accepted", message: "The database accepted the write. It was rolled back." };
   const code = guardName(r.error);
   return { ...base, ...where, outcome: code === p.expect ? "refused" : "error", code, message: r.error.message };
