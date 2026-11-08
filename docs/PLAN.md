@@ -41,11 +41,11 @@ Deadline source: https://paypalaihackathon.devpost.com/rules §1 ("Thursday Nov 
 
 ### M3 · Proof surface
 Seeded from the M2-close benchmark (internal/benchmarks/2026-11-08-191e7b8.md); each needs claims-table rows before it's published.
-- [ ] **Film session:** a fresh session on the demo stall with natural buyer handles: a Pidgin and a Taglish claim read by the model, a real sandbox payment → PAID, a pass where time runs out → next buyer, and the refusals panel. Done when the run's copies are in the ledger and captured.
-- [ ] **Video** (< 3 min, YouTube public): claim on screen by 0:10; one continuous take of claim → hold → pay → PAID and pass → next buyer; the refusals panel as the beat; ElevenLabs narration (voice in CONTEXT). Done when it plays logged-out in a private window.
+- [x] **Film session** (E-032: take 3, show 5; No. 0045 Passed → @jasmine.manila, No. 0046 Paid): a fresh session on the demo stall with natural buyer handles: a Pidgin and a Taglish claim read by the model, a real sandbox payment → PAID, a pass where time runs out → next buyer, and the refusals panel. Done when the run's copies are in the ledger and captured.
+- [ ] **Video** (< 3 min, YouTube public): cut 1 rendered, 2:04.5 (E-032, `internal/video/`); **the upload is the user's** (their YouTube account). claim on screen by 0:10; one continuous take of claim → hold → pay → PAID and pass → next buyer; the refusals panel as the beat; ElevenLabs narration (voice in CONTEXT). Done when it plays logged-out in a private window.
 - [ ] **README as the proof surface:** thesis, live link, video, "Try to break it" link, the eval with its regex-only baseline, the limits (sandbox only, Render free, a hold can outlive its timer while PayPal is unreachable). Done when every factual sentence has a verified claims row.
 - [ ] **Repo public with MIT in About** (D-009), on the user's go-ahead. Done when `gh repo view` reads PUBLIC with the license.
-- [ ] `docs/RUNOFSHOW.md` and a recorded backup; `benchmark` re-run for Demo quality and Evidence.
+- [ ] `docs/RUNOFSHOW.md` (written) and a recorded backup (cut 1 serves); `benchmark` re-run for Demo quality and Evidence.
 
 ## Cut list
 Things deliberately not being built. Each entry links the DECISIONS entry that cut it.
