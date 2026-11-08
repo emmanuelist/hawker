@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { centsToValue, decideClaim, decideEnding, nextInLine, resolveRef, strandedInLine } from "./engine";
+import { centsToValue, decideClaim, decideEnding, keepStocked, nextInLine, resolveRef, strandedInLine } from "./engine";
 import type { CatalogItem } from "./types";
 
 const catalog: CatalogItem[] = [
@@ -108,3 +108,20 @@ describe("centsToValue", () => {
     expect(() => centsToValue(-1)).toThrow();
   });
 });
+
+describe("keepStocked", () => {
+  const items = [{ code: "A1", sellable: 3 }, { code: "A2", sellable: 0 }, { code: "A4", sellable: 7 }, { code: "A6", sellable: 7 }];
+  test("leaves the item on screen alone while it can still sell", () => {
+    expect(keepStocked(items, "A1")).toEqual({ kind: "none" });
+  });
+  test("a sold-out item on screen gives way to the item with the most left, first in the catalog on a tie", () => {
+    expect(keepStocked(items, "A2")).toEqual({ kind: "move", code: "A4" });
+  });
+  test("nothing on screen counts as sold out", () => {
+    expect(keepStocked(items, null)).toEqual({ kind: "move", code: "A4" });
+  });
+  test("when nothing anywhere can sell, it restocks rather than leave a dead stall", () => {
+    expect(keepStocked([{ code: "A1", sellable: 0 }, { code: "A2", sellable: 0 }], "A1")).toEqual({ kind: "restock" });
+  });
+});
+

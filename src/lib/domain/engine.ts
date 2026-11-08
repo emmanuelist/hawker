@@ -69,6 +69,21 @@ export function strandedInLine<T extends { qty: number }>(waiting: T[], sellable
   return waiting.filter((w) => w.qty > sellable);
 }
 
+/**
+ * The demo store looks after itself between visits (D-026): an item counts by the units it can still sell
+ * (stock minus Paid; a held unit can still come back). If the item on screen can sell nothing, the item
+ * with the most left goes on screen (catalog order breaks a tie); if no item can sell anything, restock.
+ */
+export function keepStocked(
+  items: { code: string; sellable: number }[],
+  onScreen: string | null,
+): { kind: "none" } | { kind: "move"; code: string } | { kind: "restock" } {
+  const current = items.find((i) => i.code === onScreen);
+  if (current && current.sellable > 0) return { kind: "none" };
+  const best = items.reduce<{ code: string; sellable: number } | null>((b, i) => (i.sellable > (b?.sellable ?? 0) ? i : b), null);
+  return best ? { kind: "move", code: best.code } : { kind: "restock" };
+}
+
 /** Strict FIFO: only the head of the line is promoted, and only if its whole quantity fits. */
 export function nextInLine<T extends { qty: number; seq: number }>(waiting: T[], available: number): T | null {
   if (waiting.length === 0) return null;

@@ -3,6 +3,7 @@
 // payment (B1): an ending always re-reads the invoice, and PAID wins every race.
 import { db } from "../db";
 import { decideClaim, decideEnding, nextInLine, resolveRef, strandedInLine } from "../domain/engine";
+import { keepDemoStocked } from "./demo";
 import type { ClarifyReason, ParsedComment } from "../domain/types";
 import { ModelUnavailableError } from "../ai/client";
 import { fastParse } from "../parse/fast";
@@ -178,6 +179,7 @@ async function markPaid(stallId: string, h: HoldRow, inv: InvoiceRead) {
   rt.deadlines.delete(Number(h.id));
   await event(stallId, "hold.paid", Number(h.id), { serial: h.serial, invoice: inv.id, transaction: inv.transactionId });
   await endStrandedInLine(stallId, h.variant_id);
+  await keepDemoStocked(stallId);
 }
 
 /**

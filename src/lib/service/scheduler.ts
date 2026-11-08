@@ -2,6 +2,7 @@
 // while holds are open (D-014): deadlines live in memory, PayPal is polled only for open holds, and
 // the keep-warm request hits /api/health, which never queries the database (D-011).
 import { db } from "../db";
+import { keepDemoStocked } from "./demo";
 import { endHolding, pollPayments } from "./holds";
 import { rt, serial } from "./runtime";
 
@@ -48,6 +49,15 @@ export async function startScheduler() {
     await loadOpenHolds();
   } catch (e) {
     console.error(JSON.stringify({ scope: "scheduler", error: (e as Error).message.slice(0, 200) }));
+  }
+  // A demo store left sold out (or restarted mid-judging) gets an item with stock back on screen (D-026).
+  if (process.env.DATABASE_URL) {
+    try {
+      const demos = await db()<{ id: string }[]>`select id from stalls where is_demo`;
+      for (const d of demos) await keepDemoStocked(d.id);
+    } catch (e) {
+      console.error(JSON.stringify({ scope: "scheduler", error: (e as Error).message.slice(0, 200) }));
+    }
   }
   setInterval(tick, 1000).unref();
   setInterval(poll, 8000).unref();
