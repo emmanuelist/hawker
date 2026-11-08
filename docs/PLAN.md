@@ -52,7 +52,7 @@ Seeded from the M2-close benchmark (internal/benchmarks/2026-11-08-191e7b8.md); 
 - [x] Gallery images at 3:2, including a live refusals-panel capture (`internal/gallery/`, six; gitignored).
 - [x] `benchmark` re-run (20/24, `internal/benchmarks/2026-11-08-861a995.md`, D-025): fixes taken: sold means sold (D-024, E-037) and the phone first screen.
 - [x] Migration 004 applied by the user; end-to-end sold check passed on the deployed stall (E-038); A4 Headwrap on screen (4 units).
-- [ ] Submit on Devpost (the user's account), AG Grid selected; tag `submission`; preflight from a phone on cellular. Done when the Devpost entry shows submitted.
+- [x] Submitted on Devpost (the user, 2026-11-08), AG Grid and Render as sponsor tools; tag `submission` → c9914eb; preflight clean (E-040). Left: the user opens the live app once on a phone on mobile data.
 
 ## Cut list
 Things deliberately not being built. Each entry links the DECISIONS entry that cut it.

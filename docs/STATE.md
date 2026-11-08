@@ -1,9 +1,9 @@
 # State
-_Last verified: 2026-11-08 09:40 UTC at 0e1e0dd_
+_Last verified: 2026-11-08 14:45 UTC at c9914eb (tag `submission`)_
 
 **Thesis:** Every hold ends one of two ways: paid through PayPal, or passed to the next buyer.
-**Milestone:** M0, M1, **M2 done** (2026-11-08 03:18 UTC, E-026 … E-031) → **M3 · Proof surface** (freeze 2026-11-11 17:48 UTC) · **Deadline:** 2026-11-12 20:00 UTC (time left: the clock line)
-**Next action:** the user submits on Devpost (`internal/SUBMISSION.md`, `internal/gallery/`, AG Grid + Render as sponsor tools) before the freeze (2026-11-11 17:48 UTC); then tag `submission` and run preflight from a phone on cellular.
+**Milestone:** M0–M3 done · **M4 submitted** on Devpost 2026-11-08 (E-040) · **Deadline:** 2026-11-12 20:00 UTC · **Edit lock:** after the deadline, don't edit the repo, video or linked materials until after 21 December (update 47307)
+**Next action:** the user opens https://hawker-8q2t.onrender.com once on a phone on mobile data (the last preflight item). Then nothing on the demo path: keep the app, Neon, the PayPal sandbox app and the AG key (until 22 Dec) alive; restock with `npm run restock` if a size runs out.
 **Blocked on:** nothing.
 
 ## Works (verified this session)
