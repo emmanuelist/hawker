@@ -263,3 +263,20 @@ The rules require a public repo with an open-source license at submission. Pendi
 **Context:** D-009 kept the repo private until the user decided. The submission needs a public repo with its license visible, and the README's CI badge and clone command need it. The git history keeps earlier mentions that D-022 removed from current files; the user chose to leave history as it is, since a rewrite would change every commit ID the evidence cites.
 **Decision:** Public on 2026-11-08 at the user's go-ahead, after a secret scan of the full history (clean). About: the verbatim thesis, the live app, MIT, topics paypal, ag-grid, live-selling, nextjs, hackathon.
 **Consequences:** Anything committed from now on is public at once; `internal/` stays gitignored (strategy, research, video production). Check the rules before pushing after the deadline (the repo may be judged as it stood then).
+
+## D-024 · Sold means sold: a place in line never waits forever · 2026-11-08 · accepted (benchmark 861a995, the user's go-ahead)
+**Context:** The pre-submission benchmark broke the thesis on the live stall: every unit of A2 L and XL was Paid, yet both tiles offered "Sold out · join the line". A Paid unit never comes back (D-020), so a Waiting copy there could never be promoted and never ended: neither Paid nor Passed. It also blocked `npm run show:new`.
+**Decision:** A claim that asks for more than stock minus Paid units is "sold": the buyer gets a plain reply and no copy is created, and the tile reads "Sold · every one paid for". After every payment, places in line asking for more than can still be sold end Passed with the reason `sold` (migration 004; only a copy that never held the item, with no invoice, may end sold). The vocabulary stays Waiting → Holding → Paid | Passed.
+**Consequences:** Every copy ends Paid or Passed, including a place in line. Paid units never return, so the demo store's stock shrinks as judges pay; the on-screen item is moved to one with stock when an item sells out.
+
+## D-025 · Pre-submission benchmark: "not doing", settled · 2026-11-08 · accepted
+**Context:** Benchmark `internal/benchmarks/2026-11-08-861a995.md`: 20/24 (was 17). Fixes taken: sold means sold (D-024) and the landing's phone first screen.
+**Decision — not doing:**
+- Re-verifying the both-models-down on-screen state: rare path, low judge visibility.
+- Filming or claiming agent delegation: unreliable on free tiers (E-033, T-26); stated as a README limit.
+- Hiding test-run handles in the ledger: real holds (rule 1, D-021); disclosed.
+- A structural-differentiation claim against CommentSold: no true sentence makes it impossible for them.
+- A Render-specific feature for the Render prize: one sponsor prize at most (rules §8); AG Grid is the target.
+- Updating RUNOFSHOW.md for a live demo: judging is from the video (update 47306).
+- Potential Impact (judge-scored 3/5): only a real seller's words, quoted with permission, would move it; the user's call, never invented.
+

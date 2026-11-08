@@ -3,7 +3,7 @@ _Last verified: 2026-11-08 09:40 UTC at 0e1e0dd_
 
 **Thesis:** Every hold ends one of two ways: paid through PayPal, or passed to the next buyer.
 **Milestone:** M0, M1, **M2 done** (2026-11-08 03:18 UTC, E-026 … E-031) → **M3 · Proof surface** (freeze 2026-11-11 17:48 UTC) · **Deadline:** 2026-11-12 20:00 UTC (time left: the clock line)
-**Next action:** the user fills the Devpost entry from `internal/SUBMISSION.md` and uploads `internal/gallery/` (six 3:2 images); then the benchmark re-run before the freeze (2026-11-11 17:48 UTC), then submit (docs/PLAN.md, M4).
+**Next action:** the user runs `npm run db:migrate` (migration 004, D-024); then the end-to-end sold check on the deployed stall; then submit on Devpost (`internal/SUBMISSION.md`, `internal/gallery/`) before the freeze (2026-11-11 17:48 UTC).
 **Blocked on:** nothing.
 
 ## Works (verified this session)
@@ -11,7 +11,7 @@ _Last verified: 2026-11-08 09:40 UTC at 0e1e0dd_
 |---|---|---|
 | Gate | lint (0 warnings), typecheck, 102 tests (also on a clean clone with no env), build; eval 63 / 63 (regex-only baseline 25 / 63, 18 claims missed), 0 phantom | E-007, E-035 |
 | **Video, public on YouTube** (https://youtu.be/xT-LaMUCcXg, cut 4, 2:13.3; played logged-out, E-034): one item's life on the deployed stall; Pidgin and Taglish read by Groq; pass to the next buyer; the ledger agent reading PayPal before she pays; PAID via PayPal; Hawker's widgets and the agent's chart after; 9 of 9 refusals; joy-miners source on the opening card. Fresh judges: cut 1 18, cut 2 19, cut 3 18 /25 | rendered from a real session (show 5) + a ledger re-shoot | E-032, E-033, E-034 |
-| Independent re-review | design 27/40 (was 25), measured audit no P0, benchmark 17/24; P1/P2 fixed or settled | E-031, D-021 |
+| Independent re-review | design 27/40 (was 25), measured audit no P0; benchmark 17/24 → **20/24** pre-submission (D-025); sold means sold deployed (D-024) | E-031, E-037 |
 | Landing hero and trace show the AI reading one real copy end to end | deployed: first @joy.cebu911 “akin yung xl po” (E-031); since the film, No. 0045 @amaka.lagos “abeg I go take the XL” (Groq) → PASSED → @jasmine.manila | E-031, E-032 |
 | **Every way out, refused** (landing `#refusals`): 9 live attempts; migration 003 makes an ended hold final | deployed: 9 of 9 refused in 11.2 s; hand-off still works under the guard | E-029 |
 | Ledger as a sales booklet (`/ledger`, D-019), linked from the landing and desk; legends on endings charts; contrast fixed | deployed | E-028, E-031 |
