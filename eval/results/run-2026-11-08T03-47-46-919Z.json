@@ -1,0 +1,18 @@
+{
+ "summary": {
+  "at": "2026-11-08T03:47:46.919Z",
+  "cases": 63,
+  "commerceCriticalCorrect": 62,
+  "phantomClaims": 0,
+  "missedClaims": 0,
+  "fastPath": 25,
+  "modelBatches": {
+   "groq": 3,
+   "gemini": 1
+  },
+  "seconds": 6.2
+ },
+ "misses": [
+  "#38 [gemini] \"na wa, price too high\" gold=other [] got=question []"
+ ]
+}

@@ -608,5 +608,41 @@
     "qty": 1
    }
   ]
+ },
+ {
+  "onScreen": "A2",
+  "comment": "sakin na lang yung L po",
+  "intent": "claim",
+  "items": [
+   {
+    "code": "A2",
+    "variant": "L",
+    "qty": 1
+   }
+  ]
+ },
+ {
+  "onScreen": "A2",
+  "comment": "akin na lang yung L please",
+  "intent": "claim",
+  "items": [
+   {
+    "code": "A2",
+    "variant": "L",
+    "qty": 1
+   }
+  ]
+ },
+ {
+  "onScreen": "A2",
+  "comment": "abeg I go take the L",
+  "intent": "claim",
+  "items": [
+   {
+    "code": "A2",
+    "variant": "L",
+    "qty": 1
+   }
+  ]
  }
 ]
